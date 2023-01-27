@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_patient"
+        android:icon="@drawable/ic_baseline_account_circle_24"
+        android:title="@string/title_patient" />
+
+    <item
+        android:id="@+id/navigation_add_sense"
+        android:icon="@drawable/ic_baseline_accessibility_new_24"
+        android:title="@string/title_add_sense" />
+
+    <item
+        android:id="@+id/navigation_settings"
+        android:icon="@drawable/ic_baseline_app_settings_alt_24"
+        android:title="@string/title_settings" />
+
+</menu>

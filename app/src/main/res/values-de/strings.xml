@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SMaRT</string>
+    <string name="back_view">Rückansicht</string>
+    <string name="front_view">Vorderansicht</string>
+    <string name="brush_erase">Löschen</string>
+    <string name="brush_line">Linie</string>
+    <string name="brush_region">Region</string>
+    <string name="select_condition">Beginn der Aufzeichnung</string>
+    <string name="title_patient">Patient</string>
+    <string name="title_add_sense">Sinnesbewertung hinzufügen</string>
+    <string name="title_settings">Einstellungen</string>
+    <string name="description_of_measurement_procedure">Beschreibung des Messverfahrens</string>
+    <string name="add_record">Eintrag hinzufügen</string>
+    <string name="complete_recording">Zeichnung beended</string>
+    <string name="new_record">Neuer Begriff</string>
+    <string name="patient_name">Patient name</string>
+    <string name="add_new_patient">Add New Patient</string>
+    <string name="records">Records:</string>
+    <string name="sensation">Empfindung</string>
+    <string name="demo_recording">30.11.2022 14:45 Record 1</string>
+    <string name="image_button">Körperansicht wechseln</string>
+    <string name="button_sensations_toolkit">Empfindungen zeigen</string>
+    <string name="select_tag">⇚ Bitte wählen Sie zunächst einen/mehrere Begriff(e) für die Empfindung aus</string>
+    <string name="switch_bodyview">Körperansicht wechseln</string>
+    <string name="to_drawing">Zur Zeichnung</string>
+    <string name="to_tags">Zur den Begriffen</string>
+    <string name="select_intensity">⟰ Bitte wählen Sie zunächst eine Intensität auf der Skala aus ⟰</string>
+
+    <!-- List of sensation types -->
+    <string name="sensation_type_1">Ausstrahlend</string>
+    <string name="sensation_type_2">Brennend</string>
+    <string name="sensation_type_3">Drückend</string>
+    <string name="sensation_type_4">Dumpf</string>
+    <string name="sensation_type_5">Einschießend</string>
+    <string name="sensation_type_6">Elektrisch</string>
+    <string name="sensation_type_7">Empfindlich</string>
+    <string name="sensation_type_8">Heiß</string>
+    <string name="sensation_type_9">Kalt</string>
+    <string name="sensation_type_10">Krampfend</string>
+    <string name="sensation_type_11">Kribbelnd</string>
+    <string name="sensation_type_12">Piksend</string>
+    <string name="sensation_type_13">Pochend</string>
+    <string name="sensation_type_14">Schwer</string>
+    <string name="sensation_type_15">Stechend</string>
+    <string name="sensation_type_16">Taub</string>
+    <string name="sensation_type_17">Ziehend</string>
+    <string-array name="sensation_types">
+        <item>@string/sensation_type_1</item>
+        <item>@string/sensation_type_2</item>
+        <item>@string/sensation_type_3</item>
+        <item>@string/sensation_type_4</item>
+        <item>@string/sensation_type_5</item>
+        <item>@string/sensation_type_6</item>
+        <item>@string/sensation_type_7</item>
+        <item>@string/sensation_type_8</item>
+        <item>@string/sensation_type_9</item>
+        <item>@string/sensation_type_10</item>
+        <item>@string/sensation_type_11</item>
+        <item>@string/sensation_type_12</item>
+        <item>@string/sensation_type_13</item>
+        <item>@string/sensation_type_14</item>
+        <item>@string/sensation_type_15</item>
+        <item>@string/sensation_type_16</item>
+        <item>@string/sensation_type_17</item>
+    </string-array>
+</resources>

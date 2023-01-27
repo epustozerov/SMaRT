@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <array name="brushes_list">
+        <item>@array/brush_region</item>
+        <item>@array/brush_line</item>
+        <item>@array/brush_erase</item>
+    </array>
+
+    <array name="brush_region">
+        <item name="title">@string/brush_region</item>
+        <item name="icon">@drawable/icon_fill</item>
+        <item name="draw_by_move">1</item>
+        <item name="thickness">2</item>
+        <item name="type">fill</item>
+        <item name="fill_style">FILL</item>
+    </array>
+
+    <array name="brush_line">
+        <item name="title">@string/brush_line</item>
+        <item name="icon">@drawable/icon_stroke</item>
+        <item name="draw_by_move">1</item>
+        <item name="thickness">10</item>
+        <item name="type">stroke</item>
+        <item name="fill_style">STROKE</item>
+    </array>
+
+    <array name="brush_erase">
+        <item name="title">@string/brush_erase</item>
+        <item name="icon">@drawable/icon_erase</item>
+        <item name="draw_by_move">1</item>
+        <item name="thickness">15</item>
+        <item name="type">erase</item>
+        <item name="fill_style">STROKE</item>
+    </array>
+
+</resources>
