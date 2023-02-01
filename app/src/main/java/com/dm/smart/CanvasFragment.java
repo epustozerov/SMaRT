@@ -17,7 +17,6 @@ import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,10 +43,13 @@ import java.util.List;
 
 public class CanvasFragment extends Fragment {
 
-    public final SparseArray<Bitmap> snapshotsFront = new SparseArray<>();
-    public final SparseArray<Bitmap> snapshotsBack = new SparseArray<>();
     private final List<String> sortedChoices = new ArrayList<>();
-    private final ArrayList<String> sensation = new ArrayList<>();
+    private final ArrayList<String> selectedSensations = new ArrayList<>();
+    public BodyDrawingView bodyViewFront;
+    public BodyDrawingView bodyViewBack;
+    public int color;
+    Bitmap snapshotFront = null;
+    Bitmap snapshotBack = null;
     private BodyDrawingView currentBodyView;
     private BodyDrawingView hiddenBodyView;
     private Brush currentBrush;
@@ -55,22 +57,23 @@ public class CanvasFragment extends Fragment {
     private int currentIntensity;
     private boolean current_state_front;
     private boolean tagsVisible = true;
-    private int tabIndex;
-    private int color;
     private int dampenedColor;
     private View mCanvas = null;
     private int currentBrushId, eraserId, lastBrushId;
     private int mLongAnimationDuration;
 
+    public CanvasFragment(Bundle b) {
+        color = b.getInt("color");
+        dampenedColor = dampen(color);
+    }
+
+    public CanvasFragment() {
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initBrushes();
-        Bundle b = getArguments();
-        assert b != null;
-        tabIndex = b.getInt("tabIndex");
-        color = b.getInt("color");
-        dampenedColor = dampen(color);
     }
 
     @SuppressLint({"ClickableViewAccessibility", "UseCompatLoadingForDrawables"})
@@ -86,18 +89,17 @@ public class CanvasFragment extends Fragment {
         final LinearLayout tagContainerSensations = mCanvas.findViewById(R.id.drawn_sensations);
 
         // Init body figures for drawing
-        BodyDrawingView bodyViewFront = mCanvas.findViewById(R.id.drawing_view_front);
-        bodyViewFront.setSensationIndex(tabIndex);
+        bodyViewFront = mCanvas.findViewById(R.id.drawing_view_front);
         bodyViewFront.setBGImage(setBodyImage("androgyn_front", false));
         bodyViewFront.setMaskImage(setBodyImage("androgyn_front_mask", false));
         bodyViewFront.setColor(color);
-        bodyViewFront.setSnapshots(snapshotsFront);
-        BodyDrawingView bodyViewBack = mCanvas.findViewById(R.id.drawing_view_back);
-        bodyViewBack.setSensationIndex(tabIndex);
+        bodyViewFront.setSnapshot(snapshotFront);
+
+        bodyViewBack = mCanvas.findViewById(R.id.drawing_view_back);
         bodyViewBack.setBGImage(setBodyImage("androgyn_back", false));
         bodyViewBack.setMaskImage(setBodyImage("androgyn_back_mask", false));
         bodyViewBack.setColor(color);
-        bodyViewBack.setSnapshots(snapshotsBack);
+        bodyViewBack.setSnapshot(snapshotBack);
 
         // Init gray overlay
         final LinearLayout viewA = mCanvas.findViewById(R.id.viewA);
@@ -105,7 +107,7 @@ public class CanvasFragment extends Fragment {
         grayOverlay.setClickable(true);
         grayOverlay.setAlpha(.618f);
 
-        // Open or close the sensation tab
+        // Open or close the sensation tab (on the left)
         final Button buttonSensationsTool = mCanvas.findViewById(R.id.button_sensations_tool);
         buttonSensationsTool.setOnClickListener(v -> {
             AnimatorSet animSet = new AnimatorSet();
@@ -201,7 +203,7 @@ public class CanvasFragment extends Fragment {
                     });
         });
 
-        // Init the list of sensations to select in the side panel
+        // Init the list of sensations to select in the top panel
         LinearLayout.LayoutParams lp =
                 new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -211,16 +213,16 @@ public class CanvasFragment extends Fragment {
 
         // Create buttons with sensations in the side panel
         View.OnClickListener choiceClickListener = v -> {
-            if (sensation.size() == 0) {
+            if (selectedSensations.size() == 0) {
                 ((LinearLayout) mCanvas.findViewById(R.id.drawn_sensations)).removeAllViews();
             }
             int bid = ((ViewGroup) v.getParent()).indexOfChild(v);
             String seletected_sensation_type =
                     Arrays.asList(getResources().getStringArray(R.array.sensation_types)).get(bid);
-            if (sensation.contains(seletected_sensation_type)) {
-                sensation.remove(seletected_sensation_type);
+            if (selectedSensations.contains(seletected_sensation_type)) {
+                selectedSensations.remove(seletected_sensation_type);
             } else {
-                sensation.add(seletected_sensation_type);
+                selectedSensations.add(seletected_sensation_type);
             }
             int index = sortedChoices.indexOf(seletected_sensation_type);
             if (index < 0) {
@@ -262,7 +264,6 @@ public class CanvasFragment extends Fragment {
 
         // Tool buttons
         final List<ImageButton> toolsBtns = new ArrayList<>();
-
         @SuppressLint("ClickableViewAccessibility") View.OnTouchListener keepSelectedListener = (v, event) -> {
             int brushId = ((ViewGroup) v.getParent()).indexOfChild(v);
             for (ImageButton imageButton : toolsBtns) {
@@ -425,5 +426,4 @@ public class CanvasFragment extends Fragment {
         public Brush() {
         }
     }
-
 }

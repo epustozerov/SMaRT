@@ -25,7 +25,8 @@
     <string name="demo_recording">30.11.2022 14:45 Record 1\n30.11.2022 15:56 Record 2\n01.12.2022 09:50 Record 3\n01.12.2022 11:35 Record 4\n01.12.2022 17:45 Record 5</string>
     <string name="sensation">Sensation</string>
     <string name="select_intensity">⟰ Please first select an intensity on the scale</string>
-
+    <string name="dialog_drawing_completed">"Did you really draw <b>all Symptoms</b>?"</string>
+    <string name="dialog_drawing_confirmed">"Finish Drawing"</string>
     <!-- List of sensation types -->
     <string name="sensation_type_1">Burning</string>
     <string name="sensation_type_2">Cold</string>

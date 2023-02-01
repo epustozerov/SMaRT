@@ -53,7 +53,19 @@
 
     </androidx.appcompat.widget.Toolbar>
 
-    <!--suppress DeprecatedClassUsageInspection -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+    <!--
     <androidx.fragment.app.FragmentTabHost
         android:id="@android:id/tabhost"
         android:layout_width="match_parent"
@@ -95,4 +107,5 @@
         </LinearLayout>
 
     </androidx.fragment.app.FragmentTabHost>
+    -->
 </LinearLayout>

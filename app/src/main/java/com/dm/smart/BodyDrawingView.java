@@ -15,7 +15,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.SparseArray;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -36,6 +35,7 @@ public class BodyDrawingView extends View {
     private final ScaleGestureDetector mScaleDetector;
     private final Rect mBGRect = new Rect();
     private final Paint snapshotPaint = new Paint();
+    public Bitmap snapshot = null;
     Canvas drawImageCanvas;
     private Point mBGSizeZoomed;
     private Rect mBGZoomedRect;
@@ -46,8 +46,6 @@ public class BodyDrawingView extends View {
     private Paint freshPaint = null;
     private Bitmap backgroundImage = null;
     private Bitmap maskImage = null;
-    private SparseArray<Bitmap> snapshots = null;
-    private int sensationIndex;
     private int color = -1;
     private int intensity = -1;
     private CanvasFragment.Brush brush = null;
@@ -150,14 +148,8 @@ public class BodyDrawingView extends View {
             canvas.drawBitmap(backgroundImage, mBGRect, mBGZoomedRect, null);
         }
 
-        // Draw previous sensations snapshots
-        if (snapshots != null) {
-            for (int i = 0; i < sensationIndex; i++) {
-                Bitmap snapshot = snapshots.get(i);
-                if (snapshot != null) {
-                    canvas.drawBitmap(snapshot, mBGRect, mBGZoomedRect, snapshotPaint);
-                }
-            }
+        if (snapshot != null) {
+            canvas.drawBitmap(snapshot, mBGRect, mBGZoomedRect, snapshotPaint);
         }
 
         // draw freshSnapshot and path currently being drawn
@@ -197,7 +189,8 @@ public class BodyDrawingView extends View {
         if (maskImage != null) {
             drawImageCanvas.drawBitmap(maskImage, 0, 0, maskPaint);
         }
-        snapshots.put(sensationIndex, freshSnapshot);
+        // snapshots.put(sensationIndex, freshSnapshot);
+        snapshot = freshSnapshot;
     }
 
     public void setBGImage(Bitmap backgroundImage) {
@@ -208,12 +201,8 @@ public class BodyDrawingView extends View {
         this.maskImage = maskImage;
     }
 
-    public void setSnapshots(SparseArray<Bitmap> snapshots) {
-        this.snapshots = snapshots;
-    }
-
-    public void setSensationIndex(int index) {
-        this.sensationIndex = index;
+    public void setSnapshot(Bitmap snapshot) {
+        this.snapshot = snapshot;
     }
 
     public void setColor(int color) {
