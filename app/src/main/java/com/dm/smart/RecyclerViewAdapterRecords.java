@@ -1,8 +1,6 @@
 package com.dm.smart;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.graphics.Typeface;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -11,29 +9,31 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.dm.smart.items.Subject;
+import com.dm.smart.items.Record;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-public class RecyclerViewAdapterPatients extends RecyclerView.Adapter<RecyclerViewAdapterPatients.ViewHolder> {
+public class RecyclerViewAdapterRecords extends RecyclerView.Adapter<RecyclerViewAdapterRecords.ViewHolder> {
 
-    static final int PATIENT_DELETE = Menu.FIRST;
-    private final List<Subject> mSubjects;
+    static final int RECORD_SHOW_IMAGE = Menu.FIRST + 1;
+    static final int RECORD_SHOW_FOLDER = Menu.FIRST + 2;
+    static final int RECORD_DELETE = Menu.FIRST + 3;
+    private final List<Record> mRecords;
     private final LayoutInflater mInflater;
     private final Context mContext;
-    public int selectedPatientPosition = 0;
+    public int selectedRecordPosition = 0;
     private ItemClickListener mClickListener;
 
+
     // data is passed into the constructor
-    RecyclerViewAdapterPatients(Context context, List<Subject> data) {
+    RecyclerViewAdapterRecords(Context context, List<Record> data) {
         this.mInflater = LayoutInflater.from(context);
-        this.mSubjects = data;
+        this.mRecords = data;
         this.mContext = context;
     }
 
@@ -48,21 +48,20 @@ public class RecyclerViewAdapterPatients extends RecyclerView.Adapter<RecyclerVi
     // binds the data to the TextView in each row
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Subject subject = mSubjects.get(position);
-        holder.myTextView.setText(String.format("%s", subject.getName()));
-        if (selectedPatientPosition == position) {
-            holder.myTextView.setTextColor(ContextCompat.getColor(mContext, R.color.purple_500));
-            holder.myTextView.setTypeface(null, Typeface.BOLD);
-        } else {
-            holder.myTextView.setTextColor(ContextCompat.getColor(mContext, R.color.gray));
-            holder.myTextView.setTypeface(null, Typeface.NORMAL);
-        }
+        Record record = mRecords.get(position);
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(record.getTimestamp());
+        SimpleDateFormat formatter =
+                new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
+        String dateString = formatter.format(cal.getTime());
+        holder.myTextView.setText(String.format("%s id: %s (patient: %s)", dateString, record.getId(),
+                record.getPatientId()));
     }
 
     // total number of rows
     @Override
     public int getItemCount() {
-        return mSubjects.size();
+        return mRecords.size();
     }
 
     // allows clicks events to be caught
@@ -71,14 +70,14 @@ public class RecyclerViewAdapterPatients extends RecyclerView.Adapter<RecyclerVi
         this.mClickListener = itemClickListener;
     }
 
-    public Subject getItem(int position) {
-        return mSubjects.get(position);
+    public Record getItem(int position) {
+        return mRecords.get(position);
     }
 
 
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
-        void onItemClick(int position);
+        void onItemClick(View view, int position);
     }
 
     // stores and recycles views as they are scrolled off screen
@@ -97,34 +96,26 @@ public class RecyclerViewAdapterPatients extends RecyclerView.Adapter<RecyclerVi
 
         @Override
         public void onClick(View view) {
-            if (mClickListener != null) {
-                mClickListener.onItemClick(getAdapterPosition());
-                DBAdapter DBAdapter = new DBAdapter(mContext);
-                DBAdapter.open();
-                Cursor cursorSinglePatient =
-                        DBAdapter.getPatientById(mSubjects.get(getAdapterPosition()).getId());
-                cursorSinglePatient.moveToFirst();
-                MainActivity.currentlySelectedSubject = SubjectFragment.extractPatientFromTheDB(cursorSinglePatient);
-                cursorSinglePatient.close();
-                DBAdapter.close();
-            }
+            if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
         }
 
         @Override
         public void onCreateContextMenu(ContextMenu contextMenu, View view,
                                         ContextMenu.ContextMenuInfo contextMenuInfo) {
-            selectedPatientPosition = getAdapterPosition();
-            String patient_name = mSubjects.get(selectedPatientPosition).getName();
-            String patient_gender = mSubjects.get(selectedPatientPosition).getGender();
+            selectedRecordPosition = getAdapterPosition();
+            int record_id = mRecords.get(selectedRecordPosition).getId();
             Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(mSubjects.get(selectedPatientPosition).getTimestamp());
+            cal.setTimeInMillis(mRecords.get(selectedRecordPosition).getTimestamp());
             SimpleDateFormat formatter =
                     new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
             String dateString = formatter.format(cal.getTime());
-            contextMenu.setHeaderTitle(patient_name + ", " + patient_gender +
-                    ",\n created: " + dateString);
-            contextMenu.add(0, PATIENT_DELETE, Menu.NONE,
-                    mContext.getString(R.string.menu_remove_patient));
+            contextMenu.setHeaderTitle("Record: " + record_id + ",\n created: " + dateString);
+            contextMenu.add(0, RECORD_SHOW_IMAGE, Menu.NONE,
+                    mContext.getString(R.string.menu_show_image));
+            contextMenu.add(1, RECORD_SHOW_FOLDER, Menu.NONE,
+                    mContext.getString(R.string.menu_show_record_folder));
+            contextMenu.add(2, RECORD_DELETE, Menu.NONE,
+                    mContext.getString(R.string.menu_remove_record));
         }
     }
 }

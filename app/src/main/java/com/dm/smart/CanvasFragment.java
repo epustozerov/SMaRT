@@ -48,8 +48,6 @@ public class CanvasFragment extends Fragment {
     public BodyDrawingView bodyViewFront;
     public BodyDrawingView bodyViewBack;
     public int color;
-    Bitmap snapshotFront = null;
-    Bitmap snapshotBack = null;
     private BodyDrawingView currentBodyView;
     private BodyDrawingView hiddenBodyView;
     private Brush currentBrush;
@@ -90,16 +88,16 @@ public class CanvasFragment extends Fragment {
 
         // Init body figures for drawing
         bodyViewFront = mCanvas.findViewById(R.id.drawing_view_front);
-        bodyViewFront.setBGImage(setBodyImage("androgyn_front", false));
-        bodyViewFront.setMaskImage(setBodyImage("androgyn_front_mask", false));
+        bodyViewFront.setBGImage(setBodyImage("body_neutral_front", false));
+        bodyViewFront.setMaskImage(setBodyImage("body_neutral_front_mask", false));
         bodyViewFront.setColor(color);
-        bodyViewFront.setSnapshot(snapshotFront);
+        // bodyViewFront.setSnapshot(null);
 
         bodyViewBack = mCanvas.findViewById(R.id.drawing_view_back);
-        bodyViewBack.setBGImage(setBodyImage("androgyn_back", false));
-        bodyViewBack.setMaskImage(setBodyImage("androgyn_back_mask", false));
+        bodyViewBack.setBGImage(setBodyImage("body_neutral_back", false));
+        bodyViewBack.setMaskImage(setBodyImage("body_neutral_mask", false));
         bodyViewBack.setColor(color);
-        bodyViewBack.setSnapshot(snapshotBack);
+        // bodyViewBack.setSnapshot(null);
 
         // Init gray overlay
         final LinearLayout viewA = mCanvas.findViewById(R.id.viewA);
@@ -145,7 +143,8 @@ public class CanvasFragment extends Fragment {
                     return;
                 }
                 buttonSensationsTool.setText(getResources().getString(R.string.to_tags));
-                ObjectAnimator animX = ObjectAnimator.ofFloat(viewA, "x", buttonSensationsTool.getWidth() - viewA.getWidth());
+                ObjectAnimator animX = ObjectAnimator.ofFloat(viewA, "x",
+                        buttonSensationsTool.getWidth() - viewA.getWidth());
                 ObjectAnimator animAlpha = ObjectAnimator.ofFloat(grayOverlay, "alpha", 0f);
                 animSet.playTogether(animX, animAlpha);
                 grayOverlay.setClickable(false);
@@ -159,16 +158,16 @@ public class CanvasFragment extends Fragment {
         mLongAnimationDuration = getResources().getInteger(android.R.integer.config_longAnimTime);
         final ImageButton btnSwitchBody = mCanvas.findViewById(R.id.button_switch_bodyview);
         final TextView textViewSwitchBody = mCanvas.findViewById(R.id.textview_switch_bodyview);
-        btnSwitchBody.setImageBitmap(setBodyImage("androgyn_back_mask", true));
+        btnSwitchBody.setImageBitmap(setBodyImage("body_neutral_back_mask", true));
         btnSwitchBody.setScaleType(ImageView.ScaleType.FIT_CENTER);
         textViewSwitchBody.setText(getResources().getString(R.string.back_view));
         btnSwitchBody.setOnClickListener(v -> {
             if (current_state_front) {
-                btnSwitchBody.setImageBitmap(setBodyImage("androgyn_back_mask", true));
+                btnSwitchBody.setImageBitmap(setBodyImage("body_neutral_back_mask", true));
                 textViewSwitchBody.setText(getResources().getString(R.string.back_view));
                 current_state_front = false;
             } else {
-                btnSwitchBody.setImageBitmap(setBodyImage("androgyn_front_mask", true));
+                btnSwitchBody.setImageBitmap(setBodyImage("body_neutral_front_mask", true));
                 textViewSwitchBody.setText(getResources().getString(R.string.front_view));
                 current_state_front = true;
             }

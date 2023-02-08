@@ -6,8 +6,8 @@
 
     <fragment
         android:id="@+id/navigation_patient"
-        android:name="com.dm.smart.PatientFragment"
-        android:label="@string/title_patient"
+        android:name="com.dm.smart.SubjectFragment"
+        android:label="@string/title_subject"
         tools:layout="@layout/fragment_patient" />
 
     <fragment

@@ -22,7 +22,8 @@ public class CustomDrawable extends Drawable {
     private final int mTextHeight;
     private final boolean mIsMultiline;
 
-    public CustomDrawable(Drawable base, ComboSeekBar slider, List<ComboSeekBar.Dot> dots, int color, int textSize, boolean isMultiline) {
+    public CustomDrawable(Drawable base, ComboSeekBar slider, List<ComboSeekBar.Dot> dots, int color, int textSize,
+                          boolean isMultiline) {
         mIsMultiline = isMultiline;
         mySlider = slider;
         myBase = base;
@@ -61,7 +62,8 @@ public class CustomDrawable extends Drawable {
     }
 
     protected float toPix(int size) {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, size, mySlider.getContext().getResources().getDisplayMetrics());
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, size,
+                mySlider.getContext().getResources().getDisplayMetrics());
     }
 
     @Override

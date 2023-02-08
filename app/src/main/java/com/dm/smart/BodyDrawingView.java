@@ -201,10 +201,6 @@ public class BodyDrawingView extends View {
         this.maskImage = maskImage;
     }
 
-    public void setSnapshot(Bitmap snapshot) {
-        this.snapshot = snapshot;
-    }
-
     public void setColor(int color) {
         this.color = color;
     }
@@ -351,7 +347,8 @@ public class BodyDrawingView extends View {
                 freshPaint = new Paint(brush.paint);
                 freshPaint.setStyle(Paint.Style.STROKE);
                 freshPaint.setStrokeWidth(mZoomingScale * brush.thickness);
-                freshPaint.setColor(brush.type.equals("erase") ? Color.WHITE : getIntensityWeightedColor(color, intensity));
+                freshPaint.setColor(brush.type.equals("erase") ? Color.WHITE
+                        : getIntensityWeightedColor(color, intensity));
 
             } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
                 // Get all points from event.getHistoricalX/Y for a smoother draw;

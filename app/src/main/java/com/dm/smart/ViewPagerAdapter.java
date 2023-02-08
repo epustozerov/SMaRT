@@ -13,15 +13,13 @@ import java.util.ArrayList;
 
 public class ViewPagerAdapter extends FragmentStateAdapter {
 
-    public ArrayList<Bundle> bundles = new ArrayList<>();
-    public ArrayList<Integer> fragmentIds = new ArrayList<>();
-    FragmentManager fragmentManager;
-    Lifecycle lifecycle;
+    public final ArrayList<Bundle> bundles = new ArrayList<>();
+    public final ArrayList<Integer> fragmentIds = new ArrayList<>();
+    final FragmentManager fragmentManager;
 
     public ViewPagerAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {
         super(fragmentManager, lifecycle);
         this.fragmentManager = fragmentManager;
-        this.lifecycle = lifecycle;
     }
 
 
@@ -42,6 +40,5 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
     public void add(Bundle b) {
         bundles.add(b);
     }
-
 
 }

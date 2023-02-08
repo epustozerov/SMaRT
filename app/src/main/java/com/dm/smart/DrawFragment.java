@@ -1,6 +1,7 @@
 package com.dm.smart;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
@@ -28,11 +29,13 @@ import androidx.lifecycle.LifecycleObserver;
 import androidx.navigation.Navigation;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.dm.smart.items.Record;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,8 +54,7 @@ public class DrawFragment extends Fragment {
         return Color.HSVToColor(hsv);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    @Nullable
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
@@ -73,6 +75,7 @@ public class DrawFragment extends Fragment {
             @NonNull
             @Override
             public State getCurrentState() {
+                //noinspection ConstantConditions
                 return null;
             }
         };
@@ -90,7 +93,6 @@ public class DrawFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewPagerAdapter = new ViewPagerAdapter(getParentFragmentManager(), lifecycle);
-        // viewPagerAdapter.setHasStableIds(true);
         viewPager = view.findViewById(R.id.view_pager);
         viewPager.setUserInputEnabled(false);
         viewPager.setOffscreenPageLimit(10);
@@ -102,10 +104,12 @@ public class DrawFragment extends Fragment {
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             TextView tab_new_sensation = new TextView(getActivity());
             tab_new_sensation.setTextColor(Color.BLACK);
-            tab_new_sensation.setText(String.format("%s %s", getResources().getString(R.string.sensation), position + 1));
+            tab_new_sensation.setText(String.format("%s %s",
+                    getResources().getString(R.string.sensation), position + 1));
             tab_new_sensation.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f);
             tab_new_sensation.setTypeface(Typeface.DEFAULT_BOLD);
-            Drawable d = ResourcesCompat.getDrawable(requireActivity().getResources(), R.drawable.tab_indicator, null);
+            Drawable d = ResourcesCompat.getDrawable(requireActivity().getResources(),
+                    R.drawable.tab_indicator, null);
             int color = colors.get(position % colors.size());
             assert d != null;
             d.setColorFilter(dampen(color), PorterDuff.Mode.SRC_ATOP);
@@ -126,14 +130,12 @@ public class DrawFragment extends Fragment {
         viewPager.setCurrentItem(newPageIndex);
     }
 
-
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void showDrawingDoneDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         builder.setMessage(getResources().getString(R.string.dialog_drawing_completed)).
                 setPositiveButton(getResources().getString(R.string.dialog_drawing_confirmed),
                         (dialog, id) -> {
-                            // safe all the stuff
-                            // erase all the images
                             storeData();
                             Navigation.findNavController(requireActivity(),
                                             R.id.nav_host_fragment_activity_main).
@@ -143,13 +145,52 @@ public class DrawFragment extends Fragment {
         dialog.show();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     void storeData() {
+
+        // Create a new record in the database
+        DBAdapter DBAdapter = new DBAdapter(requireActivity());
+        DBAdapter.open();
+        int patient_id = MainActivity.currentlySelectedSubject.getId();
+        String patient_name = MainActivity.currentlySelectedSubject.getName();
+        Record record = new Record(patient_id);
+        long record_id = DBAdapter.insertRecord(record);
+        DBAdapter.close();
+
+        // Create a new folder for the record
+        File directory = new File(
+                String.valueOf(Paths.get(String.valueOf(Environment.getExternalStoragePublicDirectory(
+                                Environment.DIRECTORY_DOCUMENTS)), "SMaRT",
+                        patient_id + " " + patient_name, String.valueOf(record_id))));
+        if (!directory.exists()) //noinspection ResultOfMethodCallIgnored
+            directory.mkdirs();
+
+        // Save all the images
         int createdWindows = viewPagerAdapter.getItemCount();
-        for (int i = 0; i < createdWindows; i++) {
-            CanvasFragment cf = (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
-            assert cf != null;
-            DrawFragment.SaveSnapshotTask.doInBackground(cf.bodyViewFront.snapshot, i + "_f.png");
-            DrawFragment.SaveSnapshotTask.doInBackground(cf.bodyViewBack.snapshot, i + "_b.png");
+        if (createdWindows > 0) {
+            // Merge images into one
+            CanvasFragment cf_base =
+                    (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + 0);
+            assert cf_base != null;
+            Bitmap merged = Bitmap.createBitmap(cf_base.bodyViewFront.snapshot.getWidth(),
+                    cf_base.bodyViewFront.snapshot.getHeight(), cf_base.bodyViewFront.snapshot.getConfig());
+            Canvas canvasMergedFront = new Canvas(merged);
+            Canvas canvasMergedBack = new Canvas(merged);
+            for (int i = 0; i < createdWindows; i++) {
+                CanvasFragment cf =
+                        (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
+                assert cf != null;
+                SaveSnapshotTask.doInBackground(
+                        cf.bodyViewFront.snapshot, directory, i + "_f.png");
+                SaveSnapshotTask.doInBackground(
+                        cf.bodyViewBack.snapshot, directory, i + "_b.png");
+                if (cf.bodyViewFront.snapshot != null)
+                    canvasMergedFront.drawBitmap(cf.bodyViewFront.snapshot, 0f, 0f, null);
+                if (cf.bodyViewBack.snapshot != null)
+                    canvasMergedBack.drawBitmap(cf.bodyViewBack.snapshot, 0f, 0f, null);
+            }
+            SaveSnapshotTask.doInBackground(merged, directory, "f_merged.png");
+            SaveSnapshotTask.doInBackground(merged, directory, "b_merged.png");
         }
     }
 
@@ -158,14 +199,10 @@ public class DrawFragment extends Fragment {
         super.onSaveInstanceState(outState);
     }
 
+    @SuppressWarnings("deprecation")
     abstract static class SaveSnapshotTask extends AsyncTask<Bitmap, String, Void> {
-        protected static void doInBackground(Bitmap figure, String name) {
-            File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "SMaRT");
-            if (!directory.exists()) {
-                boolean mkdirs = directory.mkdirs();
-                Log.i("DIRECTORY", String.valueOf(mkdirs));
-            }
-            File photo = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/SMaRT", name);
+        protected static void doInBackground(Bitmap figure, File directory, String name) {
+            File photo = new File(directory, name);
             try {
                 FileOutputStream fos = new FileOutputStream(photo.getPath());
                 if (figure != null) {
