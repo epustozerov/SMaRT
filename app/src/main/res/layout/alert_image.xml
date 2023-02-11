@@ -6,10 +6,20 @@
     android:padding="20dp">
 
     <ImageView
-        android:id="@+id/merged_image"
+        android:id="@+id/image_view_body"
         android:layout_margin="4dp"
         android:layout_width="wrap_content"
         android:layout_height="800sp"
         android:contentDescription="@string/dialog_image" />
+
+    <TextView
+        android:id="@+id/text_view_sensations"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/image_view_body"
+        android:layout_margin="4dp"
+        android:text=""
+        android:singleLine="false"
+        android:textSize="20sp" />
 
 </RelativeLayout>

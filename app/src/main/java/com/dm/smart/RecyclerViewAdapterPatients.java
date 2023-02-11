@@ -115,13 +115,14 @@ public class RecyclerViewAdapterPatients extends RecyclerView.Adapter<RecyclerVi
                                         ContextMenu.ContextMenuInfo contextMenuInfo) {
             selectedPatientPosition = getAdapterPosition();
             String patient_name = mSubjects.get(selectedPatientPosition).getName();
-            String patient_gender = mSubjects.get(selectedPatientPosition).getGender();
+            int patient_gender = mSubjects.get(selectedPatientPosition).getGender();
+            String string_gender = mContext.getResources().getStringArray(R.array.genders)[patient_gender];
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(mSubjects.get(selectedPatientPosition).getTimestamp());
             SimpleDateFormat formatter =
                     new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
             String dateString = formatter.format(cal.getTime());
-            contextMenu.setHeaderTitle(patient_name + ", " + patient_gender +
+            contextMenu.setHeaderTitle(patient_name + ", " + string_gender +
                     ",\n created: " + dateString);
             contextMenu.add(0, PATIENT_DELETE, Menu.NONE,
                     mContext.getString(R.string.menu_remove_patient));

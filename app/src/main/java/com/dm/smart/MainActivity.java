@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         // check if table patients is empty
         Cursor cursor = db.getAllPatients();
         if (cursor.getCount() == 0) {
-            Subject defaultSubject = new Subject("Default Patient", "Neutral");
+            Subject defaultSubject = new Subject("Default Patient", 0);
             db.insertPatient(defaultSubject);
             currentlySelectedSubject = defaultSubject;
         } else {

@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 
 public class DrawFragment extends Fragment {
 
-    ViewPagerAdapter viewPagerAdapter;
+    public static ViewPagerAdapter viewPagerAdapter;
     ViewPager2 viewPager;
     List<Integer> colors;
     Lifecycle lifecycle;
@@ -153,7 +153,21 @@ public class DrawFragment extends Fragment {
         DBAdapter.open();
         int patient_id = MainActivity.currentlySelectedSubject.getId();
         String patient_name = MainActivity.currentlySelectedSubject.getName();
-        Record record = new Record(patient_id);
+        int createdWindows = viewPagerAdapter.getItemCount();
+        StringBuilder sensations = new StringBuilder();
+        for (int i = 0; i < createdWindows; i++) {
+            CanvasFragment cf =
+                    (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
+            assert cf != null;
+            for (int j = 0; j < cf.selectedSensations.size(); j++) {
+                sensations.append(cf.selectedSensations.get(j));
+                if (j < cf.selectedSensations.size() - 1)
+                    sensations.append(", ");
+            }
+            sensations.append("; ");
+        }
+
+        Record record = new Record(patient_id, sensations.toString());
         long record_id = DBAdapter.insertRecord(record);
         DBAdapter.close();
 
@@ -166,7 +180,6 @@ public class DrawFragment extends Fragment {
             directory.mkdirs();
 
         // Save all the images
-        int createdWindows = viewPagerAdapter.getItemCount();
         if (createdWindows > 0) {
             // Merge images into one
             CanvasFragment cf_base =
@@ -180,17 +193,21 @@ public class DrawFragment extends Fragment {
                 CanvasFragment cf =
                         (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
                 assert cf != null;
+                StringBuilder file_name_sensations = new StringBuilder();
+                for (int j = 0; j < cf.selectedSensations.size(); j++) {
+                    file_name_sensations.append(cf.selectedSensations.get(j)).append("_");
+                }
                 SaveSnapshotTask.doInBackground(
-                        cf.bodyViewFront.snapshot, directory, i + "_f.png");
+                        cf.bodyViewFront.snapshot, directory, i + "_" + file_name_sensations + "f.png");
                 SaveSnapshotTask.doInBackground(
-                        cf.bodyViewBack.snapshot, directory, i + "_b.png");
+                        cf.bodyViewBack.snapshot, directory, i + "_" + file_name_sensations + "b.png");
                 if (cf.bodyViewFront.snapshot != null)
                     canvasMergedFront.drawBitmap(cf.bodyViewFront.snapshot, 0f, 0f, null);
                 if (cf.bodyViewBack.snapshot != null)
                     canvasMergedBack.drawBitmap(cf.bodyViewBack.snapshot, 0f, 0f, null);
             }
-            SaveSnapshotTask.doInBackground(merged, directory, "f_merged.png");
-            SaveSnapshotTask.doInBackground(merged, directory, "b_merged.png");
+            SaveSnapshotTask.doInBackground(merged, directory, "merged_f.png");
+            SaveSnapshotTask.doInBackground(merged, directory, "merged_b.png");
         }
     }
 

@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -26,6 +27,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -38,8 +40,12 @@ import com.dm.smart.items.Record;
 import com.dm.smart.items.Subject;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class SubjectFragment extends Fragment {
 
@@ -54,8 +60,8 @@ public class SubjectFragment extends Fragment {
         @SuppressLint("Range") String name =
                 cursor.getString(cursor.
                         getColumnIndex(com.dm.smart.DBAdapter.SUBJECT_NAME));
-        @SuppressLint("Range") String gender =
-                cursor.getString(cursor.
+        @SuppressLint("Range") int gender =
+                cursor.getInt(cursor.
                         getColumnIndex(DBAdapter.SUBJECT_GENDER));
         @SuppressLint("Range") long timestamp = cursor.getLong(cursor.
                 getColumnIndex(DBAdapter.SUBJECT_TIMESTAMP));
@@ -114,7 +120,7 @@ public class SubjectFragment extends Fragment {
             DBAdapter.open();
             Subject new_subject =
                     new Subject(edittext_patient_name.getText().toString(),
-                            spinner.getSelectedItem().toString());
+                            (int) spinner.getSelectedItemId());
             DBAdapter.insertPatient(new_subject);
             DBAdapter.close();
             edittext_patient_name.setText("");
@@ -164,9 +170,11 @@ public class SubjectFragment extends Fragment {
                         getColumnIndex(DBAdapter.RECORD_ID));
                 @SuppressLint("Range") int patient_id = cursorRecords.getInt(cursorRecords.
                         getColumnIndex(DBAdapter.RECORD_PATIENT_ID));
+                @SuppressLint("Range") String sensations = cursorRecords.getString(cursorRecords.
+                        getColumnIndex(DBAdapter.RECORD_SENSATIONS));
                 @SuppressLint("Range") long timestamp = cursorRecords.getLong(cursorRecords.
                         getColumnIndex(DBAdapter.RECORD_TIMESTAMP));
-                records.add(0, new Record(id, patient_id, timestamp));
+                records.add(0, new Record(id, patient_id, sensations, timestamp));
             } while (cursorRecords.moveToNext());
         adapter_records.notifyDataSetChanged();
         cursorRecords.close();
@@ -186,7 +194,11 @@ public class SubjectFragment extends Fragment {
             openFolder();
             return true;
         } else if (item.getItemId() == RECORD_SHOW_IMAGE) {
-            showMergedImageDialog();
+            try {
+                showMergedImageDialog();
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
             return true;
         }
         return false;
@@ -263,32 +275,43 @@ public class SubjectFragment extends Fragment {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("UseCompatLoadingForDrawables")
-    public void showMergedImageDialog() {
+    public void showMergedImageDialog() throws NoSuchFieldException, IllegalAccessException {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         @SuppressLint("InflateParams") View alertView =
                 getLayoutInflater().inflate(R.layout.alert_image, null);
-        ImageView imageMerged = alertView.findViewById(R.id.merged_image);
-        imageMerged.setImageDrawable(requireContext().getDrawable(R.drawable.body_neutral_front));
-
+        ImageView imageMerged = alertView.findViewById(R.id.image_view_body);
         Record selectedRecord =
                 adapter_records.getItem(adapter_records.selectedRecordPosition);
         DBAdapter DBAdapter = new DBAdapter(requireActivity());
         DBAdapter.open();
-        Cursor cursorSinglePatient =
+        Cursor cursorSingleSubject =
                 DBAdapter.getPatientById(selectedRecord.getPatientId());
-        cursorSinglePatient.moveToFirst();
-        Subject selected_subject = extractPatientFromTheDB(cursorSinglePatient);
-        cursorSinglePatient.close();
-        DBAdapter.close();
+        cursorSingleSubject.moveToFirst();
+        Subject selected_subject = extractPatientFromTheDB(cursorSingleSubject);
+        cursorSingleSubject.close();
         Uri uri = Uri.parse(String.valueOf(Paths.get(String.valueOf(
                         Environment.getExternalStoragePublicDirectory(
                                 Environment.DIRECTORY_DOCUMENTS)), "SMaRT",
                 selectedRecord.getPatientId() + " " + selected_subject.getName(),
-                String.valueOf(selectedRecord.getId()), "f_merged.png")));
+                String.valueOf(selectedRecord.getId()), "merged_f.png")));
         File imgFile = new File(String.valueOf(uri));
+        int gender = selected_subject.getGender();
+        String resouceId = "neutral";
+        switch (gender) {
+            case 0:
+                resouceId = "neutral";
+                break;
+            case 1:
+                resouceId = "female";
+                break;
+            case 2:
+                resouceId = "male";
+        }
+        Field idField = R.drawable.class.getDeclaredField("body_" + resouceId + "_front");
+        imageMerged.setImageDrawable(requireContext().getDrawable(idField.getInt(idField)));
         if (imgFile.exists()) {
             Bitmap background = BitmapFactory.decodeResource(getResources(),
-                    R.drawable.body_neutral_front);
+                    idField.getInt(idField));
             Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
             Bitmap mutableBackground = background.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvas = new Canvas(mutableBackground);
@@ -297,6 +320,18 @@ public class SubjectFragment extends Fragment {
             imageMerged.setImageBitmap(mutableBackground);
         }
 
+        // Write the colored list of sensations to the text view
+        List<Integer> colors = Arrays.stream(requireActivity().getResources().
+                getIntArray(R.array.colors_symptoms)).boxed().collect(Collectors.toList());
+        TextView text_view_sensations = alertView.findViewById(R.id.text_view_sensations);
+        String text_sensations = selectedRecord.getSensations();
+        ArrayList<String> list_sensations = new ArrayList<>(Arrays.asList(text_sensations.split(";")));
+        StringBuilder text_sensations_colored = new StringBuilder();
+        for (int i = 0; i < list_sensations.size(); i++) {
+            list_sensations.set(i, "<font color=" + colors.get(i) + ">" + list_sensations.get(i) + "</font>");
+            text_sensations_colored.append(list_sensations.get(i)).append("<br/>");
+        }
+        text_view_sensations.setText(Html.fromHtml(text_sensations_colored.toString()));
         builder.setView(alertView);
         AlertDialog dialog = builder.create();
         dialog.show();

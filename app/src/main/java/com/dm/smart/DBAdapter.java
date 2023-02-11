@@ -21,7 +21,7 @@ public class DBAdapter {
     public static final String SUBJECT_TIMESTAMP = "timestamp";
     public static final String RECORD_ID = "id";
     public static final String RECORD_PATIENT_ID = "patient_id";
-    public static final String RECORD_SENSES = "senses";
+    public static final String RECORD_SENSATIONS = "sensations";
     public static final String RECORD_DELETED = "deleted";
     public static final String RECORD_TIMESTAMP = "timestamp";
     private static final String DATABASE_NAME = "smart.db";
@@ -85,7 +85,7 @@ public class DBAdapter {
 
     Cursor getRecordsSinglePatient(long patient_id) {
         return db.query(DATABASE_TABLE_RECORDS,
-                new String[]{RECORD_ID, RECORD_PATIENT_ID, RECORD_TIMESTAMP},
+                new String[]{RECORD_ID, RECORD_PATIENT_ID, RECORD_SENSATIONS, RECORD_TIMESTAMP},
                 (RECORD_PATIENT_ID + "='" + patient_id + "'") +
                         " AND " + (RECORD_DELETED + "='" + 0 + "'"),
                 null, null, null, RECORD_ID);
@@ -104,6 +104,7 @@ public class DBAdapter {
     public long insertRecord(Record new_record) {
         ContentValues cv_new_record = new ContentValues();
         cv_new_record.put(RECORD_PATIENT_ID, new_record.getPatientId());
+        cv_new_record.put(RECORD_SENSATIONS, new_record.getSensations());
         cv_new_record.put(RECORD_DELETED, 0);
         long timestamp = new Date().getTime();
         cv_new_record.put(SUBJECT_TIMESTAMP, timestamp);
@@ -115,12 +116,12 @@ public class DBAdapter {
         private static final String DATABASE_CREATE_1 = "create table "
                 + DATABASE_TABLE_PATIENTS + " (" + SUBJECT_ID
                 + " integer primary key autoincrement, " + SUBJECT_NAME
-                + " string, " + SUBJECT_GENDER + " string, " + SUBJECT_DELETED + " integer, "
+                + " string, " + SUBJECT_GENDER + " integer, " + SUBJECT_DELETED + " integer, "
                 + SUBJECT_TIMESTAMP + " long);";
 
         private static final String DATABASE_CREATE_2 = "create table " + DATABASE_TABLE_RECORDS +
                 " (" + RECORD_ID + " integer primary key autoincrement, " + RECORD_PATIENT_ID +
-                " integer, " + RECORD_SENSES + " string, " + RECORD_DELETED + " integer, " +
+                " integer, " + RECORD_SENSATIONS + " string, " + RECORD_DELETED + " integer, " +
                 RECORD_TIMESTAMP + " long);";
 
         DBOpenHelper(Context context) {
