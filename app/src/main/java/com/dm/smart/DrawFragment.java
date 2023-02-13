@@ -42,8 +42,9 @@ import java.util.stream.Collectors;
 
 public class DrawFragment extends Fragment {
 
-    public static ViewPagerAdapter viewPagerAdapter;
     ViewPager2 viewPager;
+
+    ViewPagerAdapter viewPagerAdapter;
     List<Integer> colors;
     Lifecycle lifecycle;
 
@@ -59,17 +60,15 @@ public class DrawFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-
+        super.onCreate(savedInstanceState);
 
         lifecycle = new Lifecycle() {
             @Override
             public void addObserver(@NonNull LifecycleObserver observer) {
-
             }
 
             @Override
             public void removeObserver(@NonNull LifecycleObserver observer) {
-
             }
 
             @NonNull
@@ -92,10 +91,12 @@ public class DrawFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        viewPagerAdapter = new ViewPagerAdapter(getParentFragmentManager(), lifecycle);
+        super.onViewCreated(view, savedInstanceState);
+
         viewPager = view.findViewById(R.id.view_pager);
         viewPager.setUserInputEnabled(false);
         viewPager.setOffscreenPageLimit(10);
+        viewPagerAdapter = new ViewPagerAdapter(this);
         viewPager.setAdapter(viewPagerAdapter);
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
         tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
@@ -214,6 +215,13 @@ public class DrawFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onPause() {
+        Log.e("DEBUG", "OnPause of HomeFragment");
+        super.onPause();
+        viewPager.setAdapter(null);
     }
 
     @SuppressWarnings("deprecation")

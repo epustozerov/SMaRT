@@ -22,6 +22,15 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
         this.fragmentManager = fragmentManager;
     }
 
+    public ViewPagerAdapter(@NonNull Fragment fragment) {
+        super(fragment);
+        this.fragmentManager = fragment.getChildFragmentManager();
+    }
+
+    public ViewPagerAdapter(MainActivity mainActivity) {
+        super(mainActivity);
+        this.fragmentManager = mainActivity.getSupportFragmentManager();
+    }
 
     @NonNull
     @Override
