@@ -29,7 +29,6 @@ import java.util.List;
 
 public class BodyDrawingView extends View {
 
-    final Paint maskPaint = new Paint();
     private final List<Step> steps = new ArrayList<>();
     private final GestureDetector mGestureDetector;
     private final ScaleGestureDetector mScaleDetector;
@@ -110,9 +109,6 @@ public class BodyDrawingView extends View {
                 return true;
             }
         });
-
-        maskPaint.setAntiAlias(false);
-        maskPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
     }
 
     private static int getIntensityWeightedColor(int intColor, int intensity) {
@@ -162,34 +158,30 @@ public class BodyDrawingView extends View {
     }
 
     // After lifting the pen this method draws the step to the snapshot
-    // and clips everything drawn outside the body away
     private void drawStep(Step step) {
-
         if (freshSnapshot == null) {
             freshSnapshot = Bitmap.createBitmap(mBGRect.width(), mBGRect.height(),
                     Bitmap.Config.ARGB_8888);
-            freshSnapshot.setDensity(Bitmap.DENSITY_NONE);
+            drawImageCanvas = new Canvas(freshSnapshot);
         }
-        drawImageCanvas = new Canvas(freshSnapshot);
+        Bitmap currentSnapshot = Bitmap.createBitmap(mBGRect.width(), mBGRect.height(),
+                Bitmap.Config.ARGB_8888);
+        Canvas tempCanvas = new Canvas(currentSnapshot);
         Paint paint = new Paint(step.brush.paint);
         paint.setStrokeWidth(step.brush.thickness);
-
         if (step.brush.type.equals("erase")) {
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+            drawImageCanvas.drawPath(step.path, paint);
         } else {
             paint.setColor(getIntensityWeightedColor(color, intensity));
-            paint.setXfermode(null);
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_ATOP));
+            tempCanvas.drawPath(step.path, paint);
+            if (!step.brush.title.equals(getResources().getString(R.string.brush_out))) {
+                paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
+                tempCanvas.drawBitmap(maskImage, 0, 0, paint);
+            }
         }
-        if (step.path != null) {
-            drawImageCanvas.drawPath(step.path, paint);
-        }
-        if (step.point != null) {
-            drawImageCanvas.drawPoint(step.point.x, step.point.y, paint);
-        }
-        if (maskImage != null) {
-            drawImageCanvas.drawBitmap(maskImage, 0, 0, maskPaint);
-        }
-        // snapshots.put(sensationIndex, freshSnapshot);
+        drawImageCanvas.drawBitmap(currentSnapshot, 0, 0, null);
         snapshot = freshSnapshot;
     }
 
@@ -379,7 +371,7 @@ public class BodyDrawingView extends View {
                 Step step = new Step();
                 step.brush = brush;
                 step.point = new PointF(pts[0], pts[1]);
-                drawStep(step);
+                // drawStep(step);
             }
         }
         invalidate();

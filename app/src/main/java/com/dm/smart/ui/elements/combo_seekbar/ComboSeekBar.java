@@ -34,8 +34,6 @@ public class ComboSeekBar extends AppCompatSeekBar {
 
         setBackground(null);
         setSplitTrack(false);
-
-
     }
 
     public ComboSeekBar(Context context, AttributeSet attrs) {

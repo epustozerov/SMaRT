@@ -1,5 +1,8 @@
 package com.dm.smart;
 
+import static com.dm.smart.MainActivity.viewPagerAdapter;
+
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -7,7 +10,6 @@ import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -20,7 +22,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
@@ -44,7 +45,6 @@ public class DrawFragment extends Fragment {
 
     ViewPager2 viewPager;
 
-    ViewPagerAdapter viewPagerAdapter;
     List<Integer> colors;
     Lifecycle lifecycle;
 
@@ -55,7 +55,6 @@ public class DrawFragment extends Fragment {
         return Color.HSVToColor(hsv);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
@@ -93,10 +92,29 @@ public class DrawFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+//        if (viewPagerAdapter == null) {
+//            viewPagerAdapter = new ViewPagerAdapter(getChildFragmentManager(), lifecycle);
+//        }
+
         viewPager = view.findViewById(R.id.view_pager);
         viewPager.setUserInputEnabled(false);
         viewPager.setOffscreenPageLimit(10);
-        viewPagerAdapter = new ViewPagerAdapter(this);
+        for (int i = 0; i < viewPagerAdapter.fragmentManager.getFragments().size(); i++) {
+            Fragment f = viewPagerAdapter.fragmentManager.getFragments().get(i);
+            if (f != null) {
+                Log.e("FRAGMENTS", "Current tag:" + f.getTag() + ", iteration: " + i);
+            }
+        }
+        Log.e("VIEPAGERADAPTER", "tabs" + viewPagerAdapter.getItemCount());
+        viewPager.setAdapter(null);
+        for (int i = 0; i < viewPagerAdapter.fragmentManager.getFragments().size(); i++) {
+            Fragment f = viewPagerAdapter.fragmentManager.getFragments().get(i);
+            if (f != null) {
+                Log.e("FRAGMENTS", "Current tag:" + f.getTag() + ", iteration: " + i);
+            }
+        }
+        Log.e("VIEPAGERADAPTER", "tabs" + viewPagerAdapter.getItemCount());
+
         viewPager.setAdapter(viewPagerAdapter);
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
         tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
@@ -131,7 +149,6 @@ public class DrawFragment extends Fragment {
         viewPager.setCurrentItem(newPageIndex);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void showDrawingDoneDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         builder.setMessage(getResources().getString(R.string.dialog_drawing_completed)).
@@ -146,7 +163,6 @@ public class DrawFragment extends Fragment {
         dialog.show();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     void storeData() {
 
         // Create a new record in the database
@@ -219,10 +235,90 @@ public class DrawFragment extends Fragment {
 
     @Override
     public void onPause() {
-        Log.e("DEBUG", "OnPause of HomeFragment");
+        Log.e("DEBUG", "OnPause of DrawFragment");
+
+        for (int i = 0; i < viewPagerAdapter.fragmentManager.getFragments().size(); i++) {
+            Fragment f = viewPagerAdapter.fragmentManager.getFragments().get(i);
+            if (f != null) {
+                Log.e("FRAGMENTS", "Current tag:" + f.getTag() + ", iteration: " + i);
+            }
+        }
+        Log.e("DEBUG", "OnPause of DrawFragment before I detach all CanvasFragments");
+        if (viewPagerAdapter.getItemCount() > 0) {
+            for (int i = 0; i < viewPagerAdapter.getItemCount(); i++) {
+                CanvasFragment cf =
+                        (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
+                assert cf != null;
+                viewPagerAdapter.fragmentManager.beginTransaction().detach(cf).commit();
+            }
+        }
+        // getChildFragmentManager().beginTransaction().detach(this).commit();
+        Log.e("DEBUG", "OnPause of DrawFragment before super");
         super.onPause();
-        viewPager.setAdapter(null);
+        Log.e("DEBUG", "OnPause of DrawFragment after super");
     }
+
+    @Override
+    public void onDestroy() {
+        Log.e("DEBUG", "OnDestroy of DrawFragment");
+        super.onDestroy();
+    }
+
+    @Override
+    public void onDestroyView() {
+        Log.e("DEBUG", "OnDestroyView of DrawFragment");
+        for (int i = 0; i < viewPagerAdapter.fragmentManager.getFragments().size(); i++) {
+            Fragment f = viewPagerAdapter.fragmentManager.getFragments().get(i);
+            if (f != null) {
+                Log.e("FRAGMENTS", "Current tag:" + f.getTag() + ", iteration: " + i);
+            }
+        }
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDetach() {
+        Log.e("DEBUG", "OnDetach of DrawFragment");
+        super.onDetach();
+    }
+
+    @Override
+    public void onStop() {
+        Log.e("DEBUG", "OnStop of DrawFragment");
+        for (int i = 0; i < viewPagerAdapter.fragmentManager.getFragments().size(); i++) {
+            Fragment f = viewPagerAdapter.fragmentManager.getFragments().get(i);
+            if (f != null) {
+                Log.e("FRAGMENTS", "Current tag:" + f.getTag() + ", iteration: " + i);
+            }
+        }
+        super.onStop();
+        for (int i = 0; i < viewPagerAdapter.fragmentManager.getFragments().size(); i++) {
+            Fragment f = viewPagerAdapter.fragmentManager.getFragments().get(i);
+            if (f != null) {
+                Log.e("FRAGMENTS", "Current tag:" + f.getTag() + ", iteration: " + i);
+            }
+        }
+    }
+
+    @Override
+    public void onResume() {
+        Log.e("DEBUG", "OnResume of DrawFragment");
+        super.onResume();
+        viewPager.setAdapter(viewPagerAdapter);
+    }
+
+    @Override
+    public void onStart() {
+        Log.e("DEBUG", "OnStart of DrawFragment");
+        super.onStart();
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        Log.e("DEBUG", "OnAttach of DrawFragment");
+        super.onAttach(context);
+    }
+
 
     @SuppressWarnings("deprecation")
     abstract static class SaveSnapshotTask extends AsyncTask<Bitmap, String, Void> {

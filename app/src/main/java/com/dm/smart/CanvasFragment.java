@@ -7,6 +7,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -17,6 +18,7 @@ import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -102,12 +104,12 @@ public class CanvasFragment extends Fragment {
         // Init body figures for drawing
         bodyViewFront = mCanvas.findViewById(R.id.drawing_view_front);
         bodyViewFront.setBGImage(setBodyImage("body_" + gender + "_front", false));
-        bodyViewFront.setMaskImage(setBodyImage("body_" + gender + "_neutral_front_mask", false));
+        bodyViewFront.setMaskImage(setBodyImage("body_" + gender + "_front_mask", false));
         bodyViewFront.setColor(color);
 
         bodyViewBack = mCanvas.findViewById(R.id.drawing_view_back);
         bodyViewBack.setBGImage(setBodyImage("body_" + gender + "_back", false));
-        bodyViewBack.setMaskImage(setBodyImage("body_" + gender + "_mask", false));
+        bodyViewBack.setMaskImage(setBodyImage("body_" + gender + "_back_mask", false));
         bodyViewBack.setColor(color);
 
         // Init gray overlay
@@ -173,6 +175,7 @@ public class CanvasFragment extends Fragment {
         btnSwitchBody.setScaleType(ImageView.ScaleType.FIT_CENTER);
         textViewSwitchBody.setText(getResources().getString(R.string.back_view));
         String finalGender = gender;
+        current_state_front = true;
         btnSwitchBody.setOnClickListener(v -> {
             if (current_state_front) {
                 btnSwitchBody.setImageBitmap(setBodyImage("body_" + finalGender + "_back_mask", true));
@@ -362,7 +365,6 @@ public class CanvasFragment extends Fragment {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
-
         return mCanvas;
     }
 
@@ -436,5 +438,53 @@ public class CanvasFragment extends Fragment {
 
         public Brush() {
         }
+    }
+
+    @Override
+    public void onPause() {
+        Log.e("DEBUG", "OnPause of CanvasFragment " + this.getTag());
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.e("DEBUG", "OnDestroy of CanvasFragment " + this.getTag());
+        super.onDestroy();
+    }
+
+    @Override
+    public void onDestroyView() {
+        Log.e("DEBUG", "OnDestroyView of CanvasFragment " + this.getTag());
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDetach() {
+        Log.e("DEBUG", "OnDetach of CanvasFragment " + this.getTag());
+        super.onDetach();
+    }
+
+    @Override
+    public void onStop() {
+        Log.e("DEBUG", "OnStop of CanvasFragment " + this.getTag());
+        super.onStop();
+    }
+
+    @Override
+    public void onResume() {
+        Log.e("DEBUG", "OnResume of CanvasFragment " + this.getTag());
+        super.onResume();
+    }
+
+    @Override
+    public void onStart() {
+        Log.e("DEBUG", "OnStart of CanvasFragment " + this.getTag());
+        super.onStart();
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        Log.e("DEBUG", "OnAttach of CanvasFragment " + this.getTag());
+        super.onAttach(context);
     }
 }

@@ -14,41 +14,60 @@
     <color name="gray">#b1aa9e</color>
     <color name="background_material_light">#fafafa</color>
 
-    <!-- List of symptom colors -->
-    <color name="symptom_1">#ed3b00</color>
-    <color name="symptom_2">#00ff00</color>
-    <color name="symptom_3">#f3cb00</color>
-    <color name="symptom_4">#ff0000</color>
-    <color name="symptom_5">#0000ff</color>
-    <color name="symptom_6">#008000</color>
-    <color name="symptom_7">#ff8c00</color>
-    <color name="symptom_8">#00b2ee</color>
-    <color name="symptom_9">#8acd00</color>
-    <color name="symptom_10">#0080ff</color>
-    <color name="symptom_11">#aa00ff</color>
-    <color name="symptom_12">#ffff00</color>
-    <color name="symptom_13">#fa1a00</color>
-    <color name="symptom_14">#8b2500</color>
-    <color name="symptom_15">#00ff70</color>
-    <color name="symptom_16">#ff00ff</color>
-    <color name="symptom_17">#0055ed</color>
+    <!-- List of symptom colors old -->
+    <color name="symptom_old_1">#ed3b00</color>
+    <color name="symptom_old_2">#00ff00</color>
+    <color name="symptom_old_3">#f3cb00</color>
+    <color name="symptom_old_4">#ff0000</color>
+    <color name="symptom_old_5">#0000ff</color>
+    <color name="symptom_old_6">#008000</color>
+    <color name="symptom_old_7">#ff8c00</color>
+    <color name="symptom_old_8">#00b2ee</color>
+    <color name="symptom_old_9">#8acd00</color>
+    <color name="symptom_old_10">#0080ff</color>
+    <color name="symptom_old_11">#aa00ff</color>
+    <color name="symptom_old_12">#ffff00</color>
+    <color name="symptom_old_13">#fa1a00</color>
+    <color name="symptom_old_14">#8b2500</color>
+    <color name="symptom_old_15">#00ff70</color>
+    <color name="symptom_old_16">#ff00ff</color>
+    <color name="symptom_old_17">#0055ed</color>
+    <string-array name="colors_symptoms_old">
+        <item>@color/symptom_old_1</item>
+        <item>@color/symptom_old_2</item>
+        <item>@color/symptom_old_3</item>
+        <item>@color/symptom_old_4</item>
+        <item>@color/symptom_old_5</item>
+        <item>@color/symptom_old_6</item>
+        <item>@color/symptom_old_7</item>
+        <item>@color/symptom_old_8</item>
+        <item>@color/symptom_old_9</item>
+        <item>@color/symptom_old_10</item>
+        <item>@color/symptom_old_11</item>
+        <item>@color/symptom_old_12</item>
+        <item>@color/symptom_old_13</item>
+        <item>@color/symptom_old_14</item>
+        <item>@color/symptom_old_15</item>
+        <item>@color/symptom_old_16</item>
+        <item>@color/symptom_old_17</item>
+    </string-array>
+
+    <color name="symptom_indigo">#7858FF</color>
+    <color name="symptom_green">#188918</color>
+    <color name="symptom_pink">#CC00DC</color>
+    <color name="symptom_teal">#07838F</color>
+    <color name="symptom_red">#D20A0A</color>
+    <color name="symptom_blue">#0070F2</color>
+    <color name="symptom_mango">#C35500</color>
+    <color name="symptom_grey">#5B738B</color>
     <string-array name="colors_symptoms">
-        <item>@color/symptom_1</item>
-        <item>@color/symptom_2</item>
-        <item>@color/symptom_3</item>
-        <item>@color/symptom_4</item>
-        <item>@color/symptom_5</item>
-        <item>@color/symptom_6</item>
-        <item>@color/symptom_7</item>
-        <item>@color/symptom_8</item>
-        <item>@color/symptom_9</item>
-        <item>@color/symptom_10</item>
-        <item>@color/symptom_11</item>
-        <item>@color/symptom_12</item>
-        <item>@color/symptom_13</item>
-        <item>@color/symptom_14</item>
-        <item>@color/symptom_15</item>
-        <item>@color/symptom_16</item>
-        <item>@color/symptom_17</item>
+        <item>@color/symptom_indigo</item>
+        <item>@color/symptom_green</item>
+        <item>@color/symptom_pink</item>
+        <item>@color/symptom_teal</item>
+        <item>@color/symptom_red</item>
+        <item>@color/symptom_blue</item>
+        <item>@color/symptom_mango</item>
+        <item>@color/symptom_grey</item>
     </string-array>
 </resources>

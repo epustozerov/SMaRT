@@ -9,6 +9,7 @@
     <string name="brush_erase">Clear</string>
     <string name="brush_line">Line</string>
     <string name="brush_region">Region</string>
+    <string name="brush_out">Extracorporeal</string>
     <string name="select_condition">Start making a record</string>
     <string name="new_record">New record</string>
     <string name="complete_recording">Complete recording</string>
