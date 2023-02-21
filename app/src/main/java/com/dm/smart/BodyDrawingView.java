@@ -9,13 +9,13 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
-import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -45,7 +45,6 @@ public class BodyDrawingView extends View {
     private Paint freshPaint = null;
     private Bitmap backgroundImage = null;
     private Bitmap maskImage = null;
-    private int color = -1;
     private int intensity = -1;
     private CanvasFragment.Brush brush = null;
 
@@ -111,14 +110,6 @@ public class BodyDrawingView extends View {
         });
     }
 
-    private static int getIntensityWeightedColor(int intColor, int intensity) {
-        float[] hsvColor = new float[3];
-        Color.RGBToHSV((intColor >> 16) & 0xFF, (intColor >> 8) & 0xFF,
-                (intColor) & 0xFF, hsvColor);
-        hsvColor[1] = 0.10f + (0.01f * intensity * 0.9f);
-        return Color.HSVToColor(hsvColor);
-    }
-
     @Override
     protected void onSizeChanged(int w, int h, int old_w, int old_h) {
         if (isInEditMode()) {
@@ -173,7 +164,7 @@ public class BodyDrawingView extends View {
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
             drawImageCanvas.drawPath(step.path, paint);
         } else {
-            paint.setColor(getIntensityWeightedColor(color, intensity));
+            paint.setColor(intensity);
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_ATOP));
             tempCanvas.drawPath(step.path, paint);
             if (!step.brush.title.equals(getResources().getString(R.string.brush_out))) {
@@ -191,10 +182,6 @@ public class BodyDrawingView extends View {
 
     public void setMaskImage(Bitmap maskImage) {
         this.maskImage = maskImage;
-    }
-
-    public void setColor(int color) {
-        this.color = color;
     }
 
     public void setIntensity(int intensity) {
@@ -312,9 +299,8 @@ public class BodyDrawingView extends View {
             }
             return true;
         }
-
-        if (intensity < 0f) {
-            showToast(getResources().getString(R.string.select_intensity));
+        if (intensity == -1) {
+            showToast(getResources().getString(R.string.toast_select_intensity));
             return true;
         }
 
@@ -340,7 +326,7 @@ public class BodyDrawingView extends View {
                 freshPaint.setStyle(Paint.Style.STROKE);
                 freshPaint.setStrokeWidth(mZoomingScale * brush.thickness);
                 freshPaint.setColor(brush.type.equals("erase") ? Color.WHITE
-                        : getIntensityWeightedColor(color, intensity));
+                        : intensity);
 
             } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
                 // Get all points from event.getHistoricalX/Y for a smoother draw;
@@ -370,8 +356,6 @@ public class BodyDrawingView extends View {
 
                 Step step = new Step();
                 step.brush = brush;
-                step.point = new PointF(pts[0], pts[1]);
-                // drawStep(step);
             }
         }
         invalidate();
@@ -381,8 +365,8 @@ public class BodyDrawingView extends View {
     public void showToast(String text_to_show) {
         Toast toast = new Toast(getContext());
         toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
         LayoutInflater inflater_toast = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        // LayoutInflater inflater_toast = getContext().getLayoutInflater();
         View toast_view = inflater_toast.inflate(R.layout.toast_bordered,
                 this.findViewById(R.id.toast_layout));
         TextView text = toast_view.findViewById(R.id.toast_text);
@@ -395,7 +379,6 @@ public class BodyDrawingView extends View {
     private class Step {
         CanvasFragment.Brush brush;
         Path path;
-        PointF point;
 
         Step() {
             steps.add(this);

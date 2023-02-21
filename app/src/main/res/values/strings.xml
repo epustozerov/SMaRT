@@ -15,13 +15,13 @@
     <string name="complete_recording">Complete recording</string>
     <string name="switch_bodyview">Switch body view</string>
     <string name="button_sensations_toolkit">Show sensations</string>
-    <string name="select_tag">⇚ Please first select a sensation tag(s)</string>
+    <string name="toast_select_tag">⇚ Please first select a sensation tag(s)</string>
+    <string name="toast_select_intensity">⇛ Please first select an intensity on the scale</string>
     <string name="to_drawing">To drawing</string>
     <string name="to_tags">To tags</string>
     <string name="add_new_patient">Add New Patient</string>
     <string name="records">Records:</string>
     <string name="sensation">Sensation</string>
-    <string name="select_intensity">⟰ Please first select an intensity on the scale</string>
     <string name="dialog_drawing_completed">"Did you really draw <b>all Symptoms</b>?"</string>
     <string name="dialog_delete_subject">"Do you want to delete the subject and <b>all their Data?</b>?"</string>
     <string name="dialog_delete_record">"Do you want to delete selected record?"</string>

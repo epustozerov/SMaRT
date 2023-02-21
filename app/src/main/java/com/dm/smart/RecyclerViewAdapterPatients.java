@@ -98,11 +98,11 @@ public class RecyclerViewAdapterPatients extends RecyclerView.Adapter<RecyclerVi
         @Override
         public void onClick(View view) {
             if (mClickListener != null) {
-                mClickListener.onItemClick(getAdapterPosition());
+                mClickListener.onItemClick(getBindingAdapterPosition());
                 DBAdapter DBAdapter = new DBAdapter(mContext);
                 DBAdapter.open();
                 Cursor cursorSinglePatient =
-                        DBAdapter.getPatientById(mSubjects.get(getAdapterPosition()).getId());
+                        DBAdapter.getPatientById(mSubjects.get(getBindingAdapterPosition()).getId());
                 cursorSinglePatient.moveToFirst();
                 MainActivity.currentlySelectedSubject = SubjectFragment.extractPatientFromTheDB(cursorSinglePatient);
                 cursorSinglePatient.close();
@@ -113,7 +113,7 @@ public class RecyclerViewAdapterPatients extends RecyclerView.Adapter<RecyclerVi
         @Override
         public void onCreateContextMenu(ContextMenu contextMenu, View view,
                                         ContextMenu.ContextMenuInfo contextMenuInfo) {
-            selectedPatientPosition = getAdapterPosition();
+            selectedPatientPosition = getBindingAdapterPosition();
             String patient_name = mSubjects.get(selectedPatientPosition).getName();
             int patient_gender = mSubjects.get(selectedPatientPosition).getGender();
             String string_gender = mContext.getResources().getStringArray(R.array.genders)[patient_gender];

@@ -15,11 +15,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +27,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -36,7 +35,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.dm.smart.ui.elements.combo_seekbar.ComboSeekBar;
+import com.rtugeek.android.colorseekbar.ColorSeekBar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,11 +44,13 @@ import java.util.List;
 
 public class CanvasFragment extends Fragment {
 
-    private final List<String> sortedChoices = new ArrayList<>();
     public final ArrayList<String> selectedSensations = new ArrayList<>();
+    private final List<String> sortedChoices = new ArrayList<>();
+    public int color;
+
     public BodyDrawingView bodyViewFront;
     public BodyDrawingView bodyViewBack;
-    public int color;
+    TypedArray body_figures;
     private BodyDrawingView currentBodyView;
     private BodyDrawingView hiddenBodyView;
     private Brush currentBrush;
@@ -76,21 +77,21 @@ public class CanvasFragment extends Fragment {
         initBrushes();
     }
 
-    @SuppressLint({"ClickableViewAccessibility", "UseCompatLoadingForDrawables"})
+    @SuppressLint({"ClickableViewAccessibility", "UseCompatLoadingForDrawables", "ResourceType"})
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        String gender = "neutral";
+        body_figures = getResources().obtainTypedArray(R.array.body_figures_neutral);
         switch (MainActivity.currentlySelectedSubject.getGender()) {
             case 0:
-                gender = "neutral";
+                body_figures = getResources().obtainTypedArray(R.array.body_figures_neutral);
                 break;
             case 1:
-                gender = "female";
+                body_figures = getResources().obtainTypedArray(R.array.body_figures_female);
                 break;
             case 2:
-                gender = "male";
+                body_figures = getResources().obtainTypedArray(R.array.body_figures_male);
         }
 
         if (mCanvas != null) {
@@ -102,15 +103,15 @@ public class CanvasFragment extends Fragment {
         final LinearLayout tagContainerSensations = mCanvas.findViewById(R.id.drawn_sensations);
 
         // Init body figures for drawing
+
+
         bodyViewFront = mCanvas.findViewById(R.id.drawing_view_front);
-        bodyViewFront.setBGImage(setBodyImage("body_" + gender + "_front", false));
-        bodyViewFront.setMaskImage(setBodyImage("body_" + gender + "_front_mask", false));
-        bodyViewFront.setColor(color);
+        bodyViewFront.setBGImage(setBodyImage(body_figures.getResourceId(0, 0), false));
+        bodyViewFront.setMaskImage(setBodyImage(body_figures.getResourceId(1, 0), false));
 
         bodyViewBack = mCanvas.findViewById(R.id.drawing_view_back);
-        bodyViewBack.setBGImage(setBodyImage("body_" + gender + "_back", false));
-        bodyViewBack.setMaskImage(setBodyImage("body_" + gender + "_back_mask", false));
-        bodyViewBack.setColor(color);
+        bodyViewBack.setBGImage(setBodyImage(body_figures.getResourceId(2, 0), false));
+        bodyViewBack.setMaskImage(setBodyImage(body_figures.getResourceId(3, 0), false));
 
         // Init gray overlay
         final LinearLayout viewA = mCanvas.findViewById(R.id.viewA);
@@ -124,7 +125,7 @@ public class CanvasFragment extends Fragment {
             AnimatorSet animSet = new AnimatorSet();
             if (tagsVisible) {
                 if (sortedChoices.size() == 0) {
-                    showToast(getResources().getString(R.string.select_tag));
+                    showToast(getResources().getString(R.string.toast_select_tag));
                     return;
                 }
                 buttonSensationsTool.setText(getResources().getString(R.string.to_tags));
@@ -152,7 +153,7 @@ public class CanvasFragment extends Fragment {
             AnimatorSet animSet = new AnimatorSet();
             if (tagsVisible) {
                 if (sortedChoices.size() == 0) {
-                    showToast(getResources().getString(R.string.select_tag));
+                    showToast(getResources().getString(R.string.toast_select_tag));
                     return;
                 }
                 buttonSensationsTool.setText(getResources().getString(R.string.to_tags));
@@ -171,20 +172,24 @@ public class CanvasFragment extends Fragment {
         mLongAnimationDuration = getResources().getInteger(android.R.integer.config_longAnimTime);
         final ImageButton btnSwitchBody = mCanvas.findViewById(R.id.button_switch_bodyview);
         final TextView textViewSwitchBody = mCanvas.findViewById(R.id.textview_switch_bodyview);
-        btnSwitchBody.setImageBitmap(setBodyImage("body_" + gender + "_back_mask", true));
+        btnSwitchBody.setImageBitmap(setBodyImage(body_figures.getResourceId(3, 0), true));
         btnSwitchBody.setScaleType(ImageView.ScaleType.FIT_CENTER);
         textViewSwitchBody.setText(getResources().getString(R.string.back_view));
-        String finalGender = gender;
         current_state_front = true;
+        TypedArray finalBody_figures = body_figures;
         btnSwitchBody.setOnClickListener(v -> {
-            if (current_state_front) {
-                btnSwitchBody.setImageBitmap(setBodyImage("body_" + finalGender + "_back_mask", true));
+            if (!current_state_front) {
+                btnSwitchBody.setImageBitmap(setBodyImage(finalBody_figures.getResourceId(3, 0), true));
                 textViewSwitchBody.setText(getResources().getString(R.string.back_view));
-                current_state_front = false;
-            } else {
-                btnSwitchBody.setImageBitmap(setBodyImage("body_+" + finalGender + "_front_mask", true));
-                textViewSwitchBody.setText(getResources().getString(R.string.front_view));
                 current_state_front = true;
+                currentBodyView = bodyViewBack;
+                hiddenBodyView = bodyViewFront;
+            } else {
+                btnSwitchBody.setImageBitmap(setBodyImage(finalBody_figures.getResourceId(1, 0), true));
+                textViewSwitchBody.setText(getResources().getString(R.string.front_view));
+                current_state_front = false;
+                currentBodyView = bodyViewFront;
+                hiddenBodyView = bodyViewBack;
             }
             v.setEnabled(false);
             hiddenBodyView.setAlpha(0f);
@@ -330,39 +335,24 @@ public class CanvasFragment extends Fragment {
         toolContainer.addView(btnUndo, lp2);
 
         // Init intensity scale
-        ComboSeekBar intensityScale = mCanvas.findViewById(R.id.intensity_scale);
-        Drawable transparentDrawable = new ColorDrawable(Color.TRANSPARENT);
-        intensityScale.setThumb(transparentDrawable);
+        ColorSeekBar intensityScale = mCanvas.findViewById(R.id.color_seek_bar);
         float[] hsv = new float[3];
         Color.colorToHSV(color, hsv);
         hsv[1] = 0.1f;
         int color_min = Color.HSVToColor(hsv);
         hsv[1] = 1.0f;
         int color_max = Color.HSVToColor(hsv);
-        intensityScale.setColors(new int[]{color_min, color_max});
-        final Drawable cursor = getResources().getDrawable(R.drawable.text_cursor, null);
+        intensityScale.setColorSeeds(new int[]{color_max, color_min});
 
-        intensityScale.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                currentIntensity = i;
-                currentBodyView.setIntensity(i);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                seekBar.setThumb(cursor);
-                if (currentBrushId != lastBrushId) {
-                    toolsBtns.get(eraserId).setPressed(false);
-                    toolsBtns.get(lastBrushId).setPressed(true);
-                    currentBrushId = lastBrushId;
-                    currentBrush = brushes.get(currentBrushId);
-                    currentBodyView.setBrush(currentBrush);
-                }
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
+        intensityScale.setOnColorChangeListener((progress, color) -> {
+            currentBodyView.setIntensity(color);
+            currentIntensity = color;
+            if (currentBrushId != lastBrushId) {
+                toolsBtns.get(eraserId).setPressed(false);
+                toolsBtns.get(lastBrushId).setPressed(true);
+                currentBrushId = lastBrushId;
+                currentBrush = brushes.get(currentBrushId);
+                currentBodyView.setBrush(currentBrush);
             }
         });
         return mCanvas;
@@ -371,6 +361,7 @@ public class CanvasFragment extends Fragment {
     public void showToast(String text_to_show) {
         Toast toast = new Toast(getContext());
         toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
         LayoutInflater inflater_toast = getLayoutInflater();
         View toast_view = inflater_toast.inflate(R.layout.toast_bordered,
                 mCanvas.findViewById(R.id.toast_layout));
@@ -385,15 +376,13 @@ public class CanvasFragment extends Fragment {
                 getResources().getDisplayMetrics());
     }
 
-    public Bitmap setBodyImage(String type, boolean thumbed) {
-        int rid = getResources().getIdentifier(type, "drawable",
-                requireActivity().getPackageName());
+    public Bitmap setBodyImage(int body_type_id, boolean thumbed) {
         if (thumbed) {
             return Bitmap.createScaledBitmap(
-                    BitmapFactory.decodeResource(getResources(), rid),
-                    249, 352, true);
+                    BitmapFactory.decodeResource(getResources(), body_type_id),
+                    149, 220, true);
         } else {
-            return BitmapFactory.decodeResource(getResources(), rid);
+            return BitmapFactory.decodeResource(getResources(), body_type_id);
         }
     }
 
@@ -424,19 +413,6 @@ public class CanvasFragment extends Fragment {
             tempPaint.setStrokeWidth(tempBrush.thickness);
             tempBrush.paint = tempPaint;
             brushes.add(tempBrush);
-        }
-    }
-
-    public static class Brush {
-
-        public String title;
-        public Drawable icon;
-        public String type;
-        public boolean drawByMove;
-        public int thickness;
-        public Paint paint;
-
-        public Brush() {
         }
     }
 
@@ -486,5 +462,18 @@ public class CanvasFragment extends Fragment {
     public void onAttach(@NonNull Context context) {
         Log.e("DEBUG", "OnAttach of CanvasFragment " + this.getTag());
         super.onAttach(context);
+    }
+
+    public static class Brush {
+
+        public String title;
+        public Drawable icon;
+        public String type;
+        public boolean drawByMove;
+        public int thickness;
+        public Paint paint;
+
+        public Brush() {
+        }
     }
 }

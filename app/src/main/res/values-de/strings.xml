@@ -18,11 +18,11 @@
     <string name="records">Aufzeichnungen:</string>
     <string name="sensation">Empfindung</string>
     <string name="button_sensations_toolkit">Empfindungen zeigen</string>
-    <string name="select_tag">⇚ Bitte wählen Sie zunächst einen/mehrere Begriff(e) für die Empfindung aus</string>
+    <string name="toast_select_tag">⇚ Bitte wählen Sie zunächst einen/mehrere Begriff(e) für die Empfindung aus</string>
+    <string name="toast_select_intensity">⇛ Bitte wählen Sie zunächst eine Intensität auf der Skala aus</string>
     <string name="switch_bodyview">Körperansicht wechseln</string>
     <string name="to_drawing">Zur Zeichnung</string>
     <string name="to_tags">Zur den Begriffen</string>
-    <string name="select_intensity">⟰ Bitte wählen Sie zunächst eine Intensität auf der Skala aus ⟰</string>
     <string name="dialog_drawing_completed">Haben Sie wirklich <b>alle Befunde</b> eingezeichnet?</string>
     <string name="dialog_delete_subject">Möchten Sie den Proband und <b>alle ihre Daten löschen</b>?</string>
     <string name="dialog_delete_record">"Möchten Sie den ausgewählten Aufzeihnung löschen?"</string>

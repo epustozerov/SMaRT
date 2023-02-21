@@ -12,7 +12,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
@@ -30,7 +29,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -180,7 +178,6 @@ public class SubjectFragment extends Fragment {
         cursorRecords.close();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
 
@@ -210,7 +207,6 @@ public class SubjectFragment extends Fragment {
         populateListPatients();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void openFolder() {
         Record selectedRecord =
                 adapter_records.getItem(adapter_records.selectedRecordPosition);
@@ -273,7 +269,6 @@ public class SubjectFragment extends Fragment {
         dialog.show();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("UseCompatLoadingForDrawables")
     public void showMergedImageDialog() throws NoSuchFieldException, IllegalAccessException {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
@@ -331,7 +326,7 @@ public class SubjectFragment extends Fragment {
             list_sensations.set(i, "<font color=" + colors.get(i) + ">" + list_sensations.get(i) + "</font>");
             text_sensations_colored.append(list_sensations.get(i)).append("<br/>");
         }
-        text_view_sensations.setText(Html.fromHtml(text_sensations_colored.toString()));
+        text_view_sensations.setText(Html.fromHtml(text_sensations_colored.toString(), Html.FROM_HTML_MODE_LEGACY));
         builder.setView(alertView);
         AlertDialog dialog = builder.create();
         dialog.show();

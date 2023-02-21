@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -24,6 +25,7 @@
 
     </HorizontalScrollView>
 
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -38,97 +40,91 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="8dp"
+                android:layout_margin="8sp"
                 android:orientation="vertical">
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="8"
-                    android:animateLayoutChanges="false">
-
-                    <com.dm.smart.BodyDrawingView
-                        android:id="@+id/drawing_view_front"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
-
-                    <com.dm.smart.BodyDrawingView
-                        android:id="@+id/drawing_view_back"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
-
-                    <FrameLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="top|end"
-                        android:layout_marginEnd="32dp"
-                        android:background="@drawable/switch_bodyview_roundcorner"
-                        android:elevation="8dp"
-                        android:orientation="vertical">
-
-                        <ImageButton
-                            android:id="@+id/button_switch_bodyview"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center|top"
-                            android:background="@null"
-                            android:contentDescription="@string/switch_bodyview"
-                            android:paddingLeft="10dp"
-                            android:paddingTop="10dp"
-                            android:paddingRight="10dp"
-                            android:paddingBottom="40dp"
-                            android:scaleType="center" />
-
-                        <TextView
-                            android:id="@+id/textview_switch_bodyview"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center|bottom"
-                            android:clickable="false"
-                            android:gravity="center"
-                            android:textAllCaps="true"
-                            android:textStyle="bold" />
-                    </FrameLayout>
-                </FrameLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
+                    android:layout_height="0dp"
+                    android:layout_marginBottom="8sp"
+                    android:layout_weight="5"
                     android:orientation="horizontal">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginStart="4dp"
-                        android:gravity="end" />
-
-                    <com.dm.smart.ui.elements.combo_seekbar.ComboSeekBar
-                        android:id="@+id/intensity_scale"
+                    <FrameLayout
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="30dp"
-                        android:layout_marginRight="30dp"
-                        android:layout_weight="1" />
+                        android:layout_height="match_parent"
+                        android:layout_weight="5"
+                        android:animateLayoutChanges="false">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginEnd="4dp"
-                        android:gravity="start" />
+                        <com.dm.smart.BodyDrawingView
+                            android:id="@+id/drawing_view_front"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+
+                        <com.dm.smart.BodyDrawingView
+                            android:id="@+id/drawing_view_back"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+
+                        <FrameLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="top|end"
+                            android:layout_marginEnd="32dp"
+                            android:background="@drawable/switch_bodyview_roundcorner"
+                            android:elevation="8dp"
+                            android:orientation="vertical">
+
+                            <ImageButton
+                                android:id="@+id/button_switch_bodyview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center|top"
+                                android:background="@null"
+                                android:contentDescription="@string/switch_bodyview"
+                                android:paddingLeft="10dp"
+                                android:paddingTop="10dp"
+                                android:paddingRight="10dp"
+                                android:paddingBottom="40dp"
+                                android:scaleType="center" />
+
+                            <TextView
+                                android:id="@+id/textview_switch_bodyview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center|bottom"
+                                android:clickable="false"
+                                android:gravity="center"
+                                android:textAllCaps="true"
+                                android:textStyle="bold" />
+                        </FrameLayout>
+
+                    </FrameLayout>
+
+                    <com.rtugeek.android.colorseekbar.ColorSeekBar
+                        android:id="@+id/color_seek_bar"
+                        android:layout_width="60sp"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="16sp"
+                        android:layout_marginTop="6sp"
+                        android:layout_marginRight="16sp"
+                        android:layout_marginBottom="6sp"
+                        app:colorSeekBarBarHeight="40sp"
+                        app:colorSeekBarProgress="0"
+                        app:colorSeekBarRadius="0sp"
+                        app:colorSeekBarVertical="true" />
+
 
                 </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/tools_container"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="68dp"
+                    android:layout_marginTop="1sp"
+                    android:layout_marginBottom="1sp"
+                    android:layout_weight="1"
                     android:orientation="horizontal">
 
                 </LinearLayout>

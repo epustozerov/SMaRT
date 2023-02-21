@@ -15,5 +15,4 @@ public class SettingsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         return inflater.inflate(R.layout.fragment_instructions, container, false);
     }
-
 }

@@ -23,19 +23,19 @@
                 android:layout_width="100sp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.7"
-                android:hint="@string/new_subject"
+                android:autofillHints="@string/new_subject"
                 android:ems="10"
-                android:state_focused="false"
+                android:hint="@string/new_subject"
                 android:inputType="textPersonName"
+                android:state_focused="false"
                 android:textSize="20sp"
-                tools:ignore="LabelFor"
-                android:autofillHints="@string/new_subject" />
+                tools:ignore="LabelFor" />
 
             <Spinner
                 android:id="@+id/spinner_gender"
-                android:layout_weight="0.15"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_weight="0.15" />
 
             <Button
                 android:id="@+id/button_add_patient"
@@ -63,9 +63,9 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list_view_records"
+            android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:layout_marginBottom="20dp"
-            android:layout_width="match_parent">
+            android:layout_marginBottom="20dp">
 
         </androidx.recyclerview.widget.RecyclerView>
 

@@ -1,7 +1,5 @@
 package com.dm.smart;
 
-import static com.dm.smart.MainActivity.viewPagerAdapter;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -44,6 +42,8 @@ import java.util.stream.Collectors;
 public class DrawFragment extends Fragment {
 
     ViewPager2 viewPager;
+
+    ViewPagerAdapter viewPagerAdapter;
 
     List<Integer> colors;
     Lifecycle lifecycle;
@@ -91,10 +91,9 @@ public class DrawFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-//        if (viewPagerAdapter == null) {
-//            viewPagerAdapter = new ViewPagerAdapter(getChildFragmentManager(), lifecycle);
-//        }
+        if (viewPagerAdapter == null) {
+            viewPagerAdapter = new ViewPagerAdapter(getChildFragmentManager(), lifecycle);
+        }
 
         viewPager = view.findViewById(R.id.view_pager);
         viewPager.setUserInputEnabled(false);

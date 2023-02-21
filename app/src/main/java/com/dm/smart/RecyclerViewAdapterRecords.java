@@ -95,13 +95,13 @@ public class RecyclerViewAdapterRecords extends RecyclerView.Adapter<RecyclerVie
 
         @Override
         public void onClick(View view) {
-            if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
+            if (mClickListener != null) mClickListener.onItemClick(view, getBindingAdapterPosition());
         }
 
         @Override
         public void onCreateContextMenu(ContextMenu contextMenu, View view,
                                         ContextMenu.ContextMenuInfo contextMenuInfo) {
-            selectedRecordPosition = getAdapterPosition();
+            selectedRecordPosition = getBindingAdapterPosition();
             int record_id = mRecords.get(selectedRecordPosition).getId();
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(mRecords.get(selectedRecordPosition).getTimestamp());

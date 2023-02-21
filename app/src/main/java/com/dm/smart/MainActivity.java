@@ -18,13 +18,10 @@ public class MainActivity extends AppCompatActivity {
 
     static Subject currentlySelectedSubject;
 
-    static ViewPagerAdapter viewPagerAdapter;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        viewPagerAdapter = new ViewPagerAdapter(this);
         // Add a dafault patient if the database is empty
         DBAdapter db = new DBAdapter(this);
         db.open();

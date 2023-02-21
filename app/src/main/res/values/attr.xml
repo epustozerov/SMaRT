@@ -8,6 +8,5 @@
             <enum name="right" value="3" />
         </attr>
         <attr name="backgroundId" format="integer" />
-
     </declare-styleable>
 </resources>
