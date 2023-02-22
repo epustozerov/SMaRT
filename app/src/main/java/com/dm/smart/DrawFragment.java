@@ -201,10 +201,12 @@ public class DrawFragment extends Fragment {
             CanvasFragment cf_base =
                     (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + 0);
             assert cf_base != null;
-            Bitmap merged = Bitmap.createBitmap(cf_base.bodyViewFront.snapshot.getWidth(),
+            Bitmap merged_f = Bitmap.createBitmap(cf_base.bodyViewFront.snapshot.getWidth(),
                     cf_base.bodyViewFront.snapshot.getHeight(), cf_base.bodyViewFront.snapshot.getConfig());
-            Canvas canvasMergedFront = new Canvas(merged);
-            Canvas canvasMergedBack = new Canvas(merged);
+            Bitmap merged_b = Bitmap.createBitmap(cf_base.bodyViewBack.snapshot.getWidth(),
+                    cf_base.bodyViewBack.snapshot.getHeight(), cf_base.bodyViewBack.snapshot.getConfig());
+            Canvas canvasMergedFront = new Canvas(merged_f);
+            Canvas canvasMergedBack = new Canvas(merged_b);
             for (int i = 0; i < createdWindows; i++) {
                 CanvasFragment cf =
                         (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
@@ -222,8 +224,8 @@ public class DrawFragment extends Fragment {
                 if (cf.bodyViewBack.snapshot != null)
                     canvasMergedBack.drawBitmap(cf.bodyViewBack.snapshot, 0f, 0f, null);
             }
-            SaveSnapshotTask.doInBackground(merged, directory, "merged_f.png");
-            SaveSnapshotTask.doInBackground(merged, directory, "merged_b.png");
+            SaveSnapshotTask.doInBackground(merged_f, directory, "merged_f.png");
+            SaveSnapshotTask.doInBackground(merged_b, directory, "merged_b.png");
         }
     }
 

@@ -7,6 +7,7 @@ import static com.dm.smart.RecyclerViewAdapterSubjects.PATIENT_DELETE;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -41,11 +42,12 @@ import com.dm.smart.items.Record;
 import com.dm.smart.items.Subject;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class SubjectFragment extends Fragment {
@@ -54,6 +56,8 @@ public class SubjectFragment extends Fragment {
     RecyclerViewAdapterRecords adapter_records;
     private ArrayList<Subject> subjects;
     private ArrayList<Record> records;
+
+    TypedArray body_figures;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -286,12 +290,13 @@ public class SubjectFragment extends Fragment {
         dialog.show();
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
+
+    @SuppressLint("ResourceType")
     public void showMergedImageDialog() throws NoSuchFieldException, IllegalAccessException {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         @SuppressLint("InflateParams") View alertView =
                 getLayoutInflater().inflate(R.layout.alert_image, null);
-        ImageView imageMerged = alertView.findViewById(R.id.image_view_body);
+        ImageView image_view_body = alertView.findViewById(R.id.image_view_body);
         Record selectedRecord =
                 adapter_records.getItem(adapter_records.selectedRecordPosition);
         DBAdapter DBAdapter = new DBAdapter(requireActivity());
@@ -299,38 +304,53 @@ public class SubjectFragment extends Fragment {
         Cursor cursorSingleSubject =
                 DBAdapter.getPatientById(selectedRecord.getPatientId());
         cursorSingleSubject.moveToFirst();
-        Subject selected_subject = extractPatientFromTheDB(cursorSingleSubject);
+        Subject selected_subject = subjects.get(adapter_subjects.selectedPatientPosition);
         cursorSingleSubject.close();
-        Uri uri = Uri.parse(String.valueOf(Paths.get(String.valueOf(
-                        Environment.getExternalStoragePublicDirectory(
-                                Environment.DIRECTORY_DOCUMENTS)), "SMaRT",
-                selectedRecord.getPatientId() + " " + selected_subject.getName(),
-                String.valueOf(selectedRecord.getId()), "merged_f.png")));
-        File imgFile = new File(String.valueOf(uri));
-        int gender = selected_subject.getGender();
-        String resouceId = "neutral";
-        switch (gender) {
+        File image_sensations_front = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selected_subject.getId() + " " +
+                selected_subject.getName() + "/" + selectedRecord.getId() + "/merged_f.png");
+        File image_sensations_back = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selected_subject.getId() + " " +
+                selected_subject.getName() + "/" + selectedRecord.getId() + "/merged_b.png");
+        body_figures = getResources().obtainTypedArray(R.array.body_figures_neutral);
+        switch (subjects.get(adapter_subjects.selectedPatientPosition).getGender()) {
             case 0:
-                resouceId = "neutral";
+                body_figures = getResources().obtainTypedArray(R.array.body_figures_neutral);
                 break;
             case 1:
-                resouceId = "female";
+                body_figures = getResources().obtainTypedArray(R.array.body_figures_female);
                 break;
             case 2:
-                resouceId = "male";
+                body_figures = getResources().obtainTypedArray(R.array.body_figures_male);
         }
-        Field idField = R.drawable.class.getDeclaredField("body_" + resouceId + "_front");
-        imageMerged.setImageDrawable(requireContext().getDrawable(idField.getInt(idField)));
-        if (imgFile.exists()) {
-            Bitmap background = BitmapFactory.decodeResource(getResources(),
-                    idField.getInt(idField));
-            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-            Bitmap mutableBackground = background.copy(Bitmap.Config.ARGB_8888, true);
-            Canvas canvas = new Canvas(mutableBackground);
-            canvas.drawBitmap(mutableBackground, 0f, 0f, null);
-            canvas.drawBitmap(myBitmap, 0f, 0f, null);
-            imageMerged.setImageBitmap(mutableBackground);
-        }
+
+        AtomicBoolean current_view_front = new AtomicBoolean(true);
+        Bitmap sensations_front = BitmapFactory.decodeFile(image_sensations_front.getAbsolutePath());
+        Bitmap sensations_back = BitmapFactory.decodeFile(image_sensations_back.getAbsolutePath());
+
+        Bitmap background_front = BitmapFactory.decodeResource(getResources(),
+                body_figures.getResourceId(0, 0));
+        Bitmap background_back = BitmapFactory.decodeResource(getResources(),
+                body_figures.getResourceId(2, 0));
+
+        AtomicReference<Bitmap> mutableBackground = new AtomicReference<>(background_front.copy(Bitmap.Config.ARGB_8888, true));
+        AtomicReference<Canvas> canvas = new AtomicReference<>(new Canvas(mutableBackground.get()));
+        canvas.get().drawBitmap(sensations_front, 0f, 0f, null);
+        image_view_body.setImageBitmap(mutableBackground.get());
+        image_view_body.setOnClickListener(v -> {
+            if (current_view_front.get()) {
+                current_view_front.set(false);
+                mutableBackground.set(background_back.copy(Bitmap.Config.ARGB_8888, true));
+                canvas.set(new Canvas(mutableBackground.get()));
+                canvas.get().drawBitmap(sensations_back, 0f, 0f, null);
+            } else {
+                current_view_front.set(true);
+                mutableBackground.set(background_front.copy(Bitmap.Config.ARGB_8888, true));
+                canvas.set(new Canvas(mutableBackground.get()));
+                canvas.get().drawBitmap(sensations_front, 0f, 0f, null);
+            }
+            image_view_body.setImageBitmap(mutableBackground.get());
+        });
 
         // Write the colored list of sensations to the text view
         List<Integer> colors = Arrays.stream(requireActivity().getResources().
@@ -344,6 +364,7 @@ public class SubjectFragment extends Fragment {
             text_sensations_colored.append(list_sensations.get(i)).append("<br/>");
         }
         text_view_sensations.setText(Html.fromHtml(text_sensations_colored.toString(), Html.FROM_HTML_MODE_LEGACY));
+
         builder.setView(alertView);
         AlertDialog dialog = builder.create();
         dialog.show();

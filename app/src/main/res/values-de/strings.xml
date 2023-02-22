@@ -23,6 +23,7 @@
     <string name="toast_select_tag">⇚ Bitte wählen Sie zunächst einen/mehrere Begriff(e) für die Empfindung aus</string>
     <string name="toast_select_intensity">⇛ Bitte wählen Sie zunächst eine Intensität auf der Skala aus</string>
     <string name="toast_empty_name">Bitte geben Sie zunächst einen Namen für den Proband ein</string>
+    <string name="toast_no_back_sensations">Auf der Rückseite wurden keine Aufzeichnungen gemacht</string>
     <string name="switch_bodyview">Körperansicht wechseln</string>
     <string name="to_drawing">Zur Zeichnung</string>
     <string name="to_tags">Zur den Begriffen</string>

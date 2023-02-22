@@ -19,6 +19,7 @@
     <string name="toast_select_tag">⇚ Please first select a sensation tag(s)</string>
     <string name="toast_select_intensity">⇛ Please first select an intensity on the scale</string>
     <string name="toast_empty_name">Please first enter a name for the subject</string>
+    <string name="toast_no_back_sensations">No records were made on the back side</string>
     <string name="to_drawing">To drawing</string>
     <string name="to_tags">To tags</string>
     <string name="add_new_patient">Add New Patient</string>
