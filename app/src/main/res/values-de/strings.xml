@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SMaRT</string>
+    <string name="body_scheme">Körperschema</string>
     <string name="back_view">Rückansicht</string>
     <string name="front_view">Vorderansicht</string>
     <string name="brush_erase">Löschen</string>
@@ -15,11 +16,13 @@
     <string name="complete_recording">Zeichnung beended</string>
     <string name="new_record">Neuer Begriff</string>
     <string name="add_new_patient">Neuer Proband einfügen</string>
-    <string name="records">Aufzeichnungen:</string>
+    <string name="subjects"><b>Probanden:</b></string>
+    <string name="records"><b>Aufzeichnungen:</b></string>
     <string name="sensation">Empfindung</string>
     <string name="button_sensations_toolkit">Empfindungen zeigen</string>
     <string name="toast_select_tag">⇚ Bitte wählen Sie zunächst einen/mehrere Begriff(e) für die Empfindung aus</string>
     <string name="toast_select_intensity">⇛ Bitte wählen Sie zunächst eine Intensität auf der Skala aus</string>
+    <string name="toast_empty_name">Bitte geben Sie zunächst einen Namen für den Proband ein</string>
     <string name="switch_bodyview">Körperansicht wechseln</string>
     <string name="to_drawing">Zur Zeichnung</string>
     <string name="to_tags">Zur den Begriffen</string>
@@ -32,7 +35,7 @@
     <string name="menu_remove_patient">Ausgewählte Patienten und ihre Daten entfernen</string>
     <string name="menu_remove_record">Ausgewählten Datensatz entfernen</string>
     <string name="menu_show_record_folder">Ordner mit Bildern anzeigen</string>
-    <string name="menu_show_image">Datensatz anzeigen</string>
+    <string name="menu_show_image">Symptomübersicht Anzeigen</string>
 
     <!-- List of sensation types -->
     <string name="sensation_type_1">Ausstrahlend</string>

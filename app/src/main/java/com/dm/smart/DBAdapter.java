@@ -80,7 +80,7 @@ public class DBAdapter {
     Cursor getAllPatients() {
         return db.query(DATABASE_TABLE_PATIENTS,
                 new String[]{SUBJECT_ID, SUBJECT_NAME, SUBJECT_GENDER, SUBJECT_TIMESTAMP},
-                SUBJECT_DELETED + "='" + 0 + "'", null, null, null, SUBJECT_ID);
+                SUBJECT_DELETED + "='" + 0 + "'", null, null, null, SUBJECT_ID + " DESC");
     }
 
     Cursor getRecordsSinglePatient(long patient_id) {
@@ -91,14 +91,14 @@ public class DBAdapter {
                 null, null, null, RECORD_ID);
     }
 
-    public void insertPatient(Subject new_subject) {
+    public long insertPatient(Subject new_subject) {
         ContentValues cv_new_patient = new ContentValues();
         cv_new_patient.put(SUBJECT_NAME, new_subject.getName());
         cv_new_patient.put(SUBJECT_GENDER, new_subject.getGender());
         cv_new_patient.put(SUBJECT_DELETED, 0);
         long timestamp = new Date().getTime();
         cv_new_patient.put(SUBJECT_TIMESTAMP, timestamp);
-        db.insert(DATABASE_TABLE_PATIENTS, null, cv_new_patient);
+        return db.insert(DATABASE_TABLE_PATIENTS, null, cv_new_patient);
     }
 
     public long insertRecord(Record new_record) {

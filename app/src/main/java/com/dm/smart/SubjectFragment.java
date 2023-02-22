@@ -1,9 +1,9 @@
 package com.dm.smart;
 
-import static com.dm.smart.RecyclerViewAdapterPatients.PATIENT_DELETE;
 import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_DELETE;
 import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_SHOW_FOLDER;
 import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_SHOW_IMAGE;
+import static com.dm.smart.RecyclerViewAdapterSubjects.PATIENT_DELETE;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -17,6 +17,7 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.text.Html;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,10 +28,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -47,10 +50,85 @@ import java.util.stream.Collectors;
 
 public class SubjectFragment extends Fragment {
 
-    RecyclerViewAdapterPatients adapter_patients;
+    RecyclerViewAdapterSubjects adapter_subjects;
     RecyclerViewAdapterRecords adapter_records;
     private ArrayList<Subject> subjects;
     private ArrayList<Record> records;
+
+
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container, Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        View mView = inflater.inflate(R.layout.fragment_subject, container, false);
+        Log.e("SELECTED PATIENT", String.valueOf(MainActivity.currentlySelectedSubject.getId()));
+
+        // Spinner for Gender selection
+        Spinner spinner = mView.findViewById(R.id.spinner_gender);
+        ArrayAdapter<CharSequence> adapter_gender = ArrayAdapter.createFromResource(getContext(),
+                R.array.genders, android.R.layout.simple_spinner_item);
+        adapter_gender.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter_gender);
+
+        // RecyclerView for Patients
+        RecyclerView list_view_patients = mView.findViewById(R.id.list_view_patients);
+        list_view_patients.setLayoutManager(new LinearLayoutManager(requireActivity()));
+        subjects = new ArrayList<>();
+        adapter_subjects = new RecyclerViewAdapterSubjects(requireActivity(), subjects);
+        list_view_patients.setAdapter(adapter_subjects);
+        adapter_subjects.setClickListener((int position) -> {
+            int previousSelectedPatientId = adapter_subjects.selectedPatientPosition;
+            adapter_subjects.selectedPatientPosition = position;
+            adapter_subjects.notifyItemChanged(position);
+            adapter_subjects.notifyItemChanged(previousSelectedPatientId);
+            DBAdapter DBAdapter = new DBAdapter(requireActivity());
+            DBAdapter.open();
+            Cursor cursorSinglePatient =
+                    DBAdapter.getPatientById(adapter_subjects.getItem(position).getId());
+            cursorSinglePatient.moveToFirst();
+            MainActivity.currentlySelectedSubject = extractPatientFromTheDB(cursorSinglePatient);
+            cursorSinglePatient.close();
+            DBAdapter.close();
+            Log.e("SELECTED AFTER CLICK", String.valueOf(MainActivity.currentlySelectedSubject.getId()));
+            populateListRecords();
+        });
+
+        // RecyclerView for Records
+        RecyclerView list_view_records = mView.findViewById(R.id.list_view_records);
+        list_view_records.setLayoutManager(new LinearLayoutManager(requireActivity()));
+        records = new ArrayList<>();
+        adapter_records = new RecyclerViewAdapterRecords(requireActivity(), records);
+        list_view_records.setAdapter(adapter_records);
+
+        // EditText and Button for adding new Patients
+        EditText edittext_patient_name = mView.findViewById(R.id.edittext_patient_name);
+        Button button_add_patients = mView.findViewById(R.id.button_add_patient);
+        button_add_patients.setOnClickListener((View view) -> {
+            if (edittext_patient_name.getText().toString().equals("")) {
+                Toast toast = Toast.makeText(getContext(), getString(R.string.toast_empty_name), Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
+            } else {
+                DBAdapter DBAdapter = new DBAdapter(requireActivity());
+                DBAdapter.open();
+                Subject new_subject =
+                        new Subject(edittext_patient_name.getText().toString(),
+                                (int) spinner.getSelectedItemId());
+                new_subject.setId((int) DBAdapter.insertPatient(new_subject));
+                DBAdapter.close();
+                MainActivity.currentlySelectedSubject = new_subject;
+                edittext_patient_name.setText("");
+                populateListSubjects();
+                populateListRecords();
+                Navigation.findNavController(requireActivity(),
+                                R.id.nav_host_fragment_activity_main).
+                        navigate(R.id.navigation_add_sense);
+            }
+        });
+        populateListSubjects();
+        populateListRecords();
+        return mView;
+    }
 
     static Subject extractPatientFromTheDB(Cursor cursor) {
         @SuppressLint("Range") int id = cursor.getInt(cursor.
@@ -66,75 +144,12 @@ public class SubjectFragment extends Fragment {
         return new Subject(id, name, gender, timestamp);
     }
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        View mView = inflater.inflate(R.layout.fragment_patient, container, false);
-        Log.e("SELECTED PATIENT", String.valueOf(MainActivity.currentlySelectedSubject));
-
-        // Spinner for Gender selection
-        Spinner spinner = mView.findViewById(R.id.spinner_gender);
-        ArrayAdapter<CharSequence> adapter_gender = ArrayAdapter.createFromResource(getContext(),
-                R.array.genders, android.R.layout.simple_spinner_item);
-        adapter_gender.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter_gender);
-
-        // RecyclerView for Patients
-        RecyclerView list_view_patients = mView.findViewById(R.id.list_view_patients);
-        list_view_patients.setLayoutManager(new LinearLayoutManager(requireActivity()));
-        subjects = new ArrayList<>();
-        adapter_patients = new RecyclerViewAdapterPatients(requireActivity(), subjects);
-        list_view_patients.setAdapter(adapter_patients);
-        adapter_patients.setClickListener((int position) -> {
-            int previousSelectedPatientId = adapter_patients.selectedPatientPosition;
-            adapter_patients.selectedPatientPosition = position;
-            adapter_patients.notifyItemChanged(position);
-            adapter_patients.notifyItemChanged(previousSelectedPatientId);
-            DBAdapter DBAdapter = new DBAdapter(requireActivity());
-            DBAdapter.open();
-            Cursor cursorSinglePatient =
-                    DBAdapter.getPatientById(adapter_patients.getItem(position).getId());
-            cursorSinglePatient.moveToFirst();
-            MainActivity.currentlySelectedSubject = extractPatientFromTheDB(cursorSinglePatient);
-            cursorSinglePatient.close();
-            DBAdapter.close();
-            Log.e("SELECTED AFTER CLICK", String.valueOf(MainActivity.currentlySelectedSubject));
-            populateListRecords();
-        });
-
-        // RecyclerView for Records
-        RecyclerView list_view_records = mView.findViewById(R.id.list_view_records);
-        list_view_records.setLayoutManager(new LinearLayoutManager(requireActivity()));
-        records = new ArrayList<>();
-        adapter_records = new RecyclerViewAdapterRecords(requireActivity(), records);
-        list_view_records.setAdapter(adapter_records);
-
-        // EditText and Button for adding new Patients
-        EditText edittext_patient_name = mView.findViewById(R.id.edittext_patient_name);
-        Button button_add_patients = mView.findViewById(R.id.button_add_patient);
-        button_add_patients.setOnClickListener((View view) -> {
-            DBAdapter DBAdapter = new DBAdapter(requireActivity());
-            DBAdapter.open();
-            Subject new_subject =
-                    new Subject(edittext_patient_name.getText().toString(),
-                            (int) spinner.getSelectedItemId());
-            DBAdapter.insertPatient(new_subject);
-            DBAdapter.close();
-            edittext_patient_name.setText("");
-            populateListPatients();
-        });
-        populateListPatients();
-        populateListRecords();
-        return mView;
-    }
-
-    private void populateListPatients() {
+    private void populateListSubjects() {
         subjects.clear();
         DBAdapter DBAdapter = new DBAdapter(requireActivity());
         DBAdapter.open();
         Cursor cursorPatients = DBAdapter.getAllPatients();
-        updateArrayPatients(cursorPatients);
+        updateArraySubjects(cursorPatients);
         DBAdapter.close();
     }
 
@@ -149,13 +164,20 @@ public class SubjectFragment extends Fragment {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private void updateArrayPatients(Cursor cursorPatients) {
+    private void updateArraySubjects(Cursor cursorPatients) {
         if (cursorPatients.moveToFirst())
             do {
                 Subject newSubject = extractPatientFromTheDB(cursorPatients);
                 subjects.add(newSubject);
             } while (cursorPatients.moveToNext());
-        adapter_patients.notifyDataSetChanged();
+        Log.e("SELECTED PATIENT", String.valueOf(MainActivity.currentlySelectedSubject.getId()));
+        Log.e("PREV SELECTED PATIENT", String.valueOf(adapter_subjects.selectedPatientPosition));
+        Integer id_to_select = MainActivity.currentlySelectedSubject.getId();
+        Subject selected = subjects.stream().filter(carnet ->
+                id_to_select.equals(carnet.getId())).findFirst().orElse(null);
+        adapter_subjects.selectedPatientPosition = subjects.indexOf(selected);
+        adapter_subjects.notifyDataSetChanged();
+        Log.e("NOW SELECTED PATIENT", String.valueOf(adapter_subjects.selectedPatientPosition));
         cursorPatients.close();
     }
 
@@ -201,11 +223,6 @@ public class SubjectFragment extends Fragment {
         return false;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        populateListPatients();
-    }
 
     public void openFolder() {
         Record selectedRecord =
@@ -235,12 +252,12 @@ public class SubjectFragment extends Fragment {
                 setPositiveButton(getResources().getString(R.string.dialog_yes),
                         (dialog, id) -> {
                             Subject selectedSubject =
-                                    adapter_patients.getItem(adapter_patients.selectedPatientPosition);
+                                    adapter_subjects.getItem(adapter_subjects.selectedPatientPosition);
                             DBAdapter DBAdapter = new DBAdapter(requireActivity());
                             DBAdapter.open();
                             DBAdapter.deletePatient(selectedSubject.getId());
                             DBAdapter.close();
-                            populateListPatients();
+                            populateListSubjects();
                         })
                 .setNegativeButton(getResources().getString(R.string.dialog_no),
                         (dialog, id) -> {
@@ -330,5 +347,12 @@ public class SubjectFragment extends Fragment {
         builder.setView(alertView);
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        populateListSubjects();
+        populateListRecords();
     }
 }

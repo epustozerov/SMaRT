@@ -1,7 +1,7 @@
 package com.dm.smart.items;
 
 public class Subject {
-    private final int id;
+    private int id;
     private final String name;
     private final int gender;
     private final long timestamp;
@@ -36,4 +36,7 @@ public class Subject {
         return timestamp;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
 }

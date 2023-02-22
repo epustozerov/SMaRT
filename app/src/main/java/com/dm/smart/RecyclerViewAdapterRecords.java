@@ -54,7 +54,7 @@ public class RecyclerViewAdapterRecords extends RecyclerView.Adapter<RecyclerVie
         SimpleDateFormat formatter =
                 new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
         String dateString = formatter.format(cal.getTime());
-        holder.myTextView.setText(String.format("%s %s", dateString, record.getId()));
+        holder.myTextView.setText(String.format("%s | Nr. %s", dateString, record.getId()));
     }
 
     // total number of rows

@@ -21,7 +21,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-public class RecyclerViewAdapterPatients extends RecyclerView.Adapter<RecyclerViewAdapterPatients.ViewHolder> {
+public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerViewAdapterSubjects.ViewHolder> {
 
     static final int PATIENT_DELETE = Menu.FIRST;
     private final List<Subject> mSubjects;
@@ -31,7 +31,7 @@ public class RecyclerViewAdapterPatients extends RecyclerView.Adapter<RecyclerVi
     private ItemClickListener mClickListener;
 
     // data is passed into the constructor
-    RecyclerViewAdapterPatients(Context context, List<Subject> data) {
+    RecyclerViewAdapterSubjects(Context context, List<Subject> data) {
         this.mInflater = LayoutInflater.from(context);
         this.mSubjects = data;
         this.mContext = context;

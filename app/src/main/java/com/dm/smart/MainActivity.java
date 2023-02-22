@@ -25,23 +25,20 @@ public class MainActivity extends AppCompatActivity {
         // Add a dafault patient if the database is empty
         DBAdapter db = new DBAdapter(this);
         db.open();
-        // check if table patients is empty
         Cursor cursor = db.getAllPatients();
         if (cursor.getCount() == 0) {
             Subject defaultSubject = new Subject("Default Patient", 0);
             db.insertPatient(defaultSubject);
-            currentlySelectedSubject = defaultSubject;
-        } else {
-            cursor.moveToFirst();
-            currentlySelectedSubject = extractPatientFromTheDB(cursor);
         }
+        cursor.moveToFirst();
+        currentlySelectedSubject = extractPatientFromTheDB(cursor);
         db.close();
 
         com.dm.smart.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_patient, R.id.navigation_add_sense, R.id.navigation_settings)
+                R.id.navigation_subject, R.id.navigation_add_sense, R.id.navigation_settings)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);

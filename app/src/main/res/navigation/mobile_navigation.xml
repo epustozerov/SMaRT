@@ -2,13 +2,13 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    app:startDestination="@+id/navigation_patient">
+    app:startDestination="@+id/navigation_subject">
 
     <fragment
-        android:id="@+id/navigation_patient"
+        android:id="@+id/navigation_subject"
         android:name="com.dm.smart.SubjectFragment"
         android:label="@string/title_subject"
-        tools:layout="@layout/fragment_patient" />
+        tools:layout="@layout/fragment_subject" />
 
     <fragment
         android:id="@+id/navigation_add_sense"

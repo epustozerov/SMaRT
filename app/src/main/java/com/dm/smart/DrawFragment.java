@@ -156,7 +156,7 @@ public class DrawFragment extends Fragment {
                             storeData();
                             Navigation.findNavController(requireActivity(),
                                             R.id.nav_host_fragment_activity_main).
-                                    navigate(R.id.navigation_patient);
+                                    navigate(R.id.navigation_subject);
                         });
         AlertDialog dialog = builder.create();
         dialog.show();
