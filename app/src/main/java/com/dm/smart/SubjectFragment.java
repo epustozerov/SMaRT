@@ -1,17 +1,16 @@
 package com.dm.smart;
 
 import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_DELETE;
+import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_SHARE;
 import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_SHOW_FOLDER;
 import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_SHOW_IMAGE;
 import static com.dm.smart.RecyclerViewAdapterSubjects.PATIENT_DELETE;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -28,11 +27,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -43,11 +42,12 @@ import com.dm.smart.items.Subject;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class SubjectFragment extends Fragment {
@@ -57,7 +57,7 @@ public class SubjectFragment extends Fragment {
     private ArrayList<Subject> subjects;
     private ArrayList<Record> records;
 
-    TypedArray body_figures;
+    boolean current_view_front;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -216,6 +216,9 @@ public class SubjectFragment extends Fragment {
         } else if (item.getItemId() == RECORD_SHOW_FOLDER) {
             openFolder();
             return true;
+        } else if (item.getItemId() == RECORD_SHARE) {
+            shareSensations();
+            return true;
         } else if (item.getItemId() == RECORD_SHOW_IMAGE) {
             try {
                 showMergedImageDialog();
@@ -225,6 +228,57 @@ public class SubjectFragment extends Fragment {
             return true;
         }
         return false;
+    }
+
+    private void shareSensations() {
+
+        // Load front and back sensations images
+        Record selectedRecord =
+                adapter_records.getItem(adapter_records.selectedRecordPosition);
+        Subject selectedSubject = subjects.get(adapter_subjects.selectedPatientPosition);
+        File image_sensations_front = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId() + " " +
+                selectedSubject.getName() + "/" + selectedRecord.getId() + "/complete_picture_f.png");
+        File image_sensations_back = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId() + " " +
+                selectedSubject.getName() + "/" + selectedRecord.getId() + "/complete_picture_b.png");
+        Uri image_sensations_front_uri = FileProvider.getUriForFile(requireActivity(),
+                BuildConfig.APPLICATION_ID + ".provider",
+                image_sensations_front);
+        Uri image_sensations_back_uri = FileProvider.getUriForFile(requireActivity(),
+                BuildConfig.APPLICATION_ID + ".provider",
+                image_sensations_back);
+        ArrayList<Uri> imageUris = new ArrayList<>();
+        imageUris.add(image_sensations_front_uri);
+        imageUris.add(image_sensations_back_uri);
+        Intent shareIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+        // shareIntent.setType("message/rfc822");
+        shareIntent.setType("image/png");
+        shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
+
+        // Make a date
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(selectedRecord.getTimestamp());
+        SimpleDateFormat formatter =
+                new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
+        String dateString = formatter.format(cal.getTime());
+
+        // Write the colored list of sensations to email text
+        List<Integer> colors = Arrays.stream(requireActivity().getResources().
+                getIntArray(R.array.colors_symptoms)).boxed().collect(Collectors.toList());
+        String text_sensations = selectedRecord.getSensations();
+        ArrayList<String> list_sensations = new ArrayList<>(Arrays.asList(text_sensations.split(";")));
+        StringBuilder text_sensations_colored = new StringBuilder();
+        for (int i = 0; i < list_sensations.size(); i++) {
+            list_sensations.set(i, "<font color=" + colors.get(i) + ">" + list_sensations.get(i) + "</font>");
+            text_sensations_colored.append(list_sensations.get(i)).append("<br/>");
+        }
+        shareIntent.putExtra(Intent.EXTRA_TEXT,
+                Html.fromHtml(text_sensations_colored.toString(), Html.FROM_HTML_MODE_LEGACY));
+        shareIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT,
+                getResources().getString(R.string.menu_export_title, selectedSubject.getName(), dateString));
+        startActivity(Intent.createChooser(shareIntent, "SEND IMAGE"));
     }
 
 
@@ -308,66 +362,28 @@ public class SubjectFragment extends Fragment {
         cursorSingleSubject.close();
         File image_sensations_front = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selected_subject.getId() + " " +
-                selected_subject.getName() + "/" + selectedRecord.getId() + "/merged_f.png");
+                selected_subject.getName() + "/" + selectedRecord.getId() + "/complete_picture_f.png");
         File image_sensations_back = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selected_subject.getId() + " " +
-                selected_subject.getName() + "/" + selectedRecord.getId() + "/merged_b.png");
-        body_figures = getResources().obtainTypedArray(R.array.body_figures_neutral);
-        switch (subjects.get(adapter_subjects.selectedPatientPosition).getGender()) {
-            case 0:
-                body_figures = getResources().obtainTypedArray(R.array.body_figures_neutral);
-                break;
-            case 1:
-                body_figures = getResources().obtainTypedArray(R.array.body_figures_female);
-                break;
-            case 2:
-                body_figures = getResources().obtainTypedArray(R.array.body_figures_male);
-        }
-
-        AtomicBoolean current_view_front = new AtomicBoolean(true);
+                selected_subject.getName() + "/" + selectedRecord.getId() + "/complete_picture_b.png");
         Bitmap sensations_front = BitmapFactory.decodeFile(image_sensations_front.getAbsolutePath());
         Bitmap sensations_back = BitmapFactory.decodeFile(image_sensations_back.getAbsolutePath());
-
-        Bitmap background_front = BitmapFactory.decodeResource(getResources(),
-                body_figures.getResourceId(0, 0));
-        Bitmap background_back = BitmapFactory.decodeResource(getResources(),
-                body_figures.getResourceId(2, 0));
-
-        AtomicReference<Bitmap> mutableBackground = new AtomicReference<>(background_front.copy(Bitmap.Config.ARGB_8888, true));
-        AtomicReference<Canvas> canvas = new AtomicReference<>(new Canvas(mutableBackground.get()));
-        canvas.get().drawBitmap(sensations_front, 0f, 0f, null);
-        image_view_body.setImageBitmap(mutableBackground.get());
-        image_view_body.setOnClickListener(v -> {
-            if (current_view_front.get()) {
-                current_view_front.set(false);
-                mutableBackground.set(background_back.copy(Bitmap.Config.ARGB_8888, true));
-                canvas.set(new Canvas(mutableBackground.get()));
-                canvas.get().drawBitmap(sensations_back, 0f, 0f, null);
-            } else {
-                current_view_front.set(true);
-                mutableBackground.set(background_front.copy(Bitmap.Config.ARGB_8888, true));
-                canvas.set(new Canvas(mutableBackground.get()));
-                canvas.get().drawBitmap(sensations_front, 0f, 0f, null);
-            }
-            image_view_body.setImageBitmap(mutableBackground.get());
-        });
-
-        // Write the colored list of sensations to the text view
-        List<Integer> colors = Arrays.stream(requireActivity().getResources().
-                getIntArray(R.array.colors_symptoms)).boxed().collect(Collectors.toList());
-        TextView text_view_sensations = alertView.findViewById(R.id.text_view_sensations);
-        String text_sensations = selectedRecord.getSensations();
-        ArrayList<String> list_sensations = new ArrayList<>(Arrays.asList(text_sensations.split(";")));
-        StringBuilder text_sensations_colored = new StringBuilder();
-        for (int i = 0; i < list_sensations.size(); i++) {
-            list_sensations.set(i, "<font color=" + colors.get(i) + ">" + list_sensations.get(i) + "</font>");
-            text_sensations_colored.append(list_sensations.get(i)).append("<br/>");
-        }
-        text_view_sensations.setText(Html.fromHtml(text_sensations_colored.toString(), Html.FROM_HTML_MODE_LEGACY));
-
+        current_view_front = true;
+        image_view_body.setImageBitmap(sensations_front);
+        image_view_body.setOnClickListener(v -> reverse_body_view(image_view_body, sensations_front, sensations_back));
         builder.setView(alertView);
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void reverse_body_view(ImageView image_view_body, Bitmap sensations_front, Bitmap sensations_back) {
+        if (current_view_front) {
+            image_view_body.setImageBitmap(sensations_front);
+            current_view_front = false;
+        } else {
+            image_view_body.setImageBitmap(sensations_back);
+            current_view_front = true;
+        }
     }
 
     @Override

@@ -36,6 +36,8 @@
     <string name="menu_remove_record">Remove selected record</string>
     <string name="menu_show_record_folder">Show folder with images</string>
     <string name="menu_show_image">Display symptom overview</string>
+    <string name="menu_share">Share symptom record</string>
+    <string name="menu_export_title">Sensations of %1$s at %2$s</string>
 
     <!-- List of sensation types -->
     <string name="sensation_type_1">Burning</string>

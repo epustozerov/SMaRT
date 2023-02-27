@@ -43,7 +43,7 @@ public class BodyDrawingView extends View {
     private Bitmap freshSnapshot = null;
     private Path freshPath = null;
     private Paint freshPaint = null;
-    private Bitmap backgroundImage = null;
+    Bitmap backgroundImage = null;
     private Bitmap maskImage = null;
     private int intensity = -1;
     private CanvasFragment.Brush brush = null;

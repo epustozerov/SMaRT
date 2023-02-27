@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -35,6 +36,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -182,7 +184,7 @@ public class DrawFragment extends Fragment {
             }
             sensations.append("; ");
         }
-
+        Log.e("THESE ARE SENSATIONS WE HAVE:", sensations.toString());
         Record record = new Record(patient_id, sensations.toString());
         long record_id = DBAdapter.insertRecord(record);
         DBAdapter.close();
@@ -200,11 +202,23 @@ public class DrawFragment extends Fragment {
             // Merge images into one
             CanvasFragment cf_base =
                     (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + 0);
+            Bitmap merged_f;
+            Bitmap merged_b;
+
             assert cf_base != null;
-            Bitmap merged_f = Bitmap.createBitmap(cf_base.bodyViewFront.snapshot.getWidth(),
-                    cf_base.bodyViewFront.snapshot.getHeight(), cf_base.bodyViewFront.snapshot.getConfig());
-            Bitmap merged_b = Bitmap.createBitmap(cf_base.bodyViewBack.snapshot.getWidth(),
-                    cf_base.bodyViewBack.snapshot.getHeight(), cf_base.bodyViewBack.snapshot.getConfig());
+            if (cf_base.bodyViewFront.snapshot != null) {
+                merged_f = Bitmap.createBitmap(cf_base.bodyViewFront.snapshot.getWidth(),
+                        cf_base.bodyViewFront.snapshot.getHeight(), cf_base.bodyViewFront.snapshot.getConfig());
+            } else {
+                merged_f = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+            }
+            if (cf_base.bodyViewBack.snapshot != null) {
+                merged_b = Bitmap.createBitmap(cf_base.bodyViewBack.snapshot.getWidth(),
+                        cf_base.bodyViewBack.snapshot.getHeight(), cf_base.bodyViewBack.snapshot.getConfig());
+            } else {
+                merged_b = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+            }
+
             Canvas canvasMergedFront = new Canvas(merged_f);
             Canvas canvasMergedBack = new Canvas(merged_b);
             for (int i = 0; i < createdWindows; i++) {
@@ -224,10 +238,51 @@ public class DrawFragment extends Fragment {
                 if (cf.bodyViewBack.snapshot != null)
                     canvasMergedBack.drawBitmap(cf.bodyViewBack.snapshot, 0f, 0f, null);
             }
-            SaveSnapshotTask.doInBackground(merged_f, directory, "merged_f.png");
-            SaveSnapshotTask.doInBackground(merged_b, directory, "merged_b.png");
+            SaveSnapshotTask.doInBackground(merged_f, directory, "merged_sensations_f.png");
+            SaveSnapshotTask.doInBackground(merged_b, directory, "merged_sensations_b.png");
+            Bitmap full_f = make_full_picture(merged_f, cf_base.bodyViewFront.backgroundImage, sensations.toString());
+            SaveSnapshotTask.doInBackground(full_f, directory, "complete_picture_f.png");
+            Bitmap full_b = make_full_picture(merged_b, cf_base.bodyViewBack.backgroundImage, sensations.toString());
+            SaveSnapshotTask.doInBackground(full_b, directory, "complete_picture_b.png");
         }
     }
+
+
+    @SuppressWarnings("deprecation")
+    abstract static class SaveSnapshotTask extends AsyncTask<Bitmap, String, Void> {
+        protected static void doInBackground(Bitmap figure, File directory, String name) {
+            File photo = new File(directory, name);
+            try {
+                FileOutputStream fos = new FileOutputStream(photo.getPath());
+                if (figure != null) {
+                    figure.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                    fos.close();
+                    Log.i("SAVE_FILE", "YES");
+                }
+            } catch (java.io.IOException e) {
+                Log.e("ERROR_SAVING", "Exception in SaveSnapshotTask", e);
+            }
+        }
+    }
+
+    Bitmap make_full_picture(Bitmap sensations, Bitmap background, String text_sensations) {
+        ArrayList<String> list_sensations = new ArrayList<>(Arrays.asList(text_sensations.split(";")));
+        Bitmap full_picture = Bitmap.createBitmap(background.getWidth(),
+                background.getHeight() + 100 * list_sensations.size(), background.getConfig());
+        Canvas canvas = new Canvas(full_picture);
+        canvas.drawBitmap(background, 0f, 0f, null);
+        canvas.drawBitmap(sensations, 0f, 0f, null);
+        Paint paint = new Paint();
+        paint.setTextSize(80);
+        List<Integer> colors = Arrays.stream(requireActivity().getResources().
+                getIntArray(R.array.colors_symptoms)).boxed().collect(Collectors.toList());
+        for (int i = 0; i < list_sensations.size(); i++) {
+            paint.setColor(colors.get(i));
+            canvas.drawText(list_sensations.get(i).trim(), 0, background.getHeight() + 100 * i, paint);
+        }
+        return full_picture;
+    }
+
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
@@ -321,20 +376,4 @@ public class DrawFragment extends Fragment {
     }
 
 
-    @SuppressWarnings("deprecation")
-    abstract static class SaveSnapshotTask extends AsyncTask<Bitmap, String, Void> {
-        protected static void doInBackground(Bitmap figure, File directory, String name) {
-            File photo = new File(directory, name);
-            try {
-                FileOutputStream fos = new FileOutputStream(photo.getPath());
-                if (figure != null) {
-                    figure.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                    fos.close();
-                    Log.i("SAVE_FILE", "YES");
-                }
-            } catch (java.io.IOException e) {
-                Log.e("ERROR_SAVING", "Exception in SaveSnapshotTask", e);
-            }
-        }
-    }
 }

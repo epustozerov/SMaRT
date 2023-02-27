@@ -22,7 +22,9 @@ public class RecyclerViewAdapterRecords extends RecyclerView.Adapter<RecyclerVie
 
     static final int RECORD_SHOW_IMAGE = Menu.FIRST + 1;
     static final int RECORD_SHOW_FOLDER = Menu.FIRST + 2;
-    static final int RECORD_DELETE = Menu.FIRST + 3;
+
+    static final int RECORD_SHARE = Menu.FIRST + 3;
+    static final int RECORD_DELETE = Menu.FIRST + 4;
     private final List<Record> mRecords;
     private final LayoutInflater mInflater;
     private final Context mContext;
@@ -113,7 +115,9 @@ public class RecyclerViewAdapterRecords extends RecyclerView.Adapter<RecyclerVie
                     mContext.getString(R.string.menu_show_image));
             contextMenu.add(1, RECORD_SHOW_FOLDER, Menu.NONE,
                     mContext.getString(R.string.menu_show_record_folder));
-            contextMenu.add(2, RECORD_DELETE, Menu.NONE,
+            contextMenu.add(2, RECORD_SHARE, Menu.NONE,
+                    mContext.getString(R.string.menu_share));
+            contextMenu.add(3, RECORD_DELETE, Menu.NONE,
                     mContext.getString(R.string.menu_remove_record));
         }
     }

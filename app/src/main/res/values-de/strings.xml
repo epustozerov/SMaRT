@@ -37,6 +37,8 @@
     <string name="menu_remove_record">Ausgewählten Datensatz entfernen</string>
     <string name="menu_show_record_folder">Ordner mit Bildern anzeigen</string>
     <string name="menu_show_image">Symptomübersicht Anzeigen</string>
+    <string name="menu_share">Symptomaufzeichnung teilen</string>
+    <string name="menu_export_title">Sensationen von %1$s um %2$s</string>
 
     <!-- List of sensation types -->
     <string name="sensation_type_1">Ausstrahlend</string>
