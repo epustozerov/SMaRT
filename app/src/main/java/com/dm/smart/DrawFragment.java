@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -140,6 +141,7 @@ public class DrawFragment extends Fragment {
     }
 
     void createNewTab() {
+        long startTime = SystemClock.elapsedRealtime();
         int newPageIndex = viewPagerAdapter.getItemCount();
         int color = colors.get(newPageIndex % colors.size());
         Bundle b = new Bundle();
@@ -148,6 +150,10 @@ public class DrawFragment extends Fragment {
         viewPagerAdapter.add(b);
         viewPagerAdapter.notifyItemChanged(newPageIndex);
         viewPager.setCurrentItem(newPageIndex);
+        long endTime = SystemClock.elapsedRealtime();
+        long elapsedMilliSeconds = endTime - startTime;
+        double elapsedSeconds = elapsedMilliSeconds / 1000.0;
+        Log.e("NEW TAB", "New tab creation elapsed time: " + elapsedSeconds);
     }
 
     public void showDrawingDoneDialog() {
