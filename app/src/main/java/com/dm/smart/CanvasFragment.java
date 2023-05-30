@@ -338,10 +338,11 @@ public class CanvasFragment extends Fragment {
         ColorSeekBar intensityScale = mCanvas.findViewById(R.id.color_seek_bar);
         float[] hsv = new float[3];
         Color.colorToHSV(color, hsv);
-        hsv[1] = 0.1f;
-        int color_min = Color.HSVToColor(hsv);
         hsv[1] = 1.0f;
         int color_max = Color.HSVToColor(hsv);
+        hsv[1] = 0.1f;
+        hsv[2] = 1f;
+        int color_min = Color.HSVToColor(hsv);
         intensityScale.setColorSeeds(new int[]{color_max, color_min});
 
         intensityScale.setOnColorChangeListener((progress, color) -> {
