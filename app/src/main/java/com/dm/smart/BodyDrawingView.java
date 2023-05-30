@@ -365,7 +365,7 @@ public class BodyDrawingView extends View {
     public void showToast(String text_to_show) {
         Toast toast = new Toast(getContext());
         toast.setDuration(Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.setGravity(Gravity.CENTER, 0, 500);
         LayoutInflater inflater_toast = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View toast_view = inflater_toast.inflate(R.layout.toast_bordered,
                 this.findViewById(R.id.toast_layout));

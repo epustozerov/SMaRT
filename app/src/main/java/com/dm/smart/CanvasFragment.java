@@ -361,10 +361,9 @@ public class CanvasFragment extends Fragment {
     public void showToast(String text_to_show) {
         Toast toast = new Toast(getContext());
         toast.setDuration(Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.setGravity(Gravity.CENTER, 0, 500);
         LayoutInflater inflater_toast = getLayoutInflater();
-        View toast_view = inflater_toast.inflate(R.layout.toast_bordered,
-                mCanvas.findViewById(R.id.toast_layout));
+        View toast_view = inflater_toast.inflate(R.layout.toast_bordered, mCanvas.findViewById(R.id.toast_layout));
         TextView text = toast_view.findViewById(R.id.toast_text);
         text.setText(text_to_show);
         toast.setView(toast_view);

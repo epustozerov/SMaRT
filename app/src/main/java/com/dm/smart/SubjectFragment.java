@@ -2,7 +2,6 @@ package com.dm.smart;
 
 import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_DELETE;
 import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_SHARE;
-import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_SHOW_FOLDER;
 import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_SHOW_IMAGE;
 import static com.dm.smart.RecyclerViewAdapterSubjects.PATIENT_DELETE;
 
@@ -14,7 +13,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.DocumentsContract;
 import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
@@ -41,7 +39,6 @@ import com.dm.smart.items.Record;
 import com.dm.smart.items.Subject;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -213,9 +210,9 @@ public class SubjectFragment extends Fragment {
         } else if (item.getItemId() == RECORD_DELETE) {
             showDeleteRecordDialog();
             return true;
-        } else if (item.getItemId() == RECORD_SHOW_FOLDER) {
-            openFolder();
-            return true;
+//        } else if (item.getItemId() == RECORD_SHOW_FOLDER) {
+//            openFolder();
+//            return true;
         } else if (item.getItemId() == RECORD_SHARE) {
             shareSensations();
             return true;
@@ -281,28 +278,6 @@ public class SubjectFragment extends Fragment {
         startActivity(Intent.createChooser(shareIntent, "SEND IMAGE"));
     }
 
-
-    public void openFolder() {
-        Record selectedRecord =
-                adapter_records.getItem(adapter_records.selectedRecordPosition);
-        DBAdapter DBAdapter = new DBAdapter(requireActivity());
-        DBAdapter.open();
-        Cursor cursorSinglePatient =
-                DBAdapter.getPatientById(selectedRecord.getPatientId());
-        cursorSinglePatient.moveToFirst();
-        Subject selected_subject = extractPatientFromTheDB(cursorSinglePatient);
-        cursorSinglePatient.close();
-        DBAdapter.close();
-        Uri uri = Uri.parse(String.valueOf(Paths.get(String.valueOf(
-                        Environment.getExternalStoragePublicDirectory(
-                                Environment.DIRECTORY_DOCUMENTS)), "SMaRT",
-                selectedRecord.getPatientId() + " " + selected_subject.getName(),
-                String.valueOf(selectedRecord.getId()))));
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setDataAndType(uri, DocumentsContract.Document.MIME_TYPE_DIR);
-        startActivity(Intent.createChooser(intent, "Open folder"));
-    }
 
     public void showDeletePatientDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
