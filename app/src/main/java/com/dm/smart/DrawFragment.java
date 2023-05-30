@@ -161,10 +161,12 @@ public class DrawFragment extends Fragment {
         builder.setMessage(getResources().getString(R.string.dialog_drawing_completed)).
                 setPositiveButton(getResources().getString(R.string.dialog_drawing_confirmed),
                         (dialog, id) -> {
-                            storeData();
                             Navigation.findNavController(requireActivity(),
                                             R.id.nav_host_fragment_activity_main).
                                     navigate(R.id.navigation_subject);
+
+                            Runnable runnable = this::storeData;
+                            new Thread(runnable).start();
                         });
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -173,6 +175,7 @@ public class DrawFragment extends Fragment {
     void storeData() {
 
         // Create a new record in the database
+        long startTime = SystemClock.elapsedRealtime();
         DBAdapter DBAdapter = new DBAdapter(requireActivity());
         DBAdapter.open();
         int patient_id = MainActivity.currentlySelectedSubject.getId();
@@ -190,10 +193,14 @@ public class DrawFragment extends Fragment {
             }
             sensations.append("; ");
         }
-        Log.e("THESE ARE SENSATIONS WE HAVE:", sensations.toString());
+        Log.e("THESE ARE THE SENSATIONS WE HAVE:", sensations.toString());
         Record record = new Record(patient_id, sensations.toString());
         long record_id = DBAdapter.insertRecord(record);
         DBAdapter.close();
+        long endTime = SystemClock.elapsedRealtime();
+        long elapsedMilliSeconds = endTime - startTime;
+        double elapsedSeconds = elapsedMilliSeconds / 1000.0;
+        Log.e("STORAGE", "DB storage elapsed time: " + elapsedSeconds);
 
         // Create a new folder for the record
         File directory = new File(
@@ -227,6 +234,12 @@ public class DrawFragment extends Fragment {
 
             Canvas canvasMergedFront = new Canvas(merged_f);
             Canvas canvasMergedBack = new Canvas(merged_b);
+
+            endTime = SystemClock.elapsedRealtime();
+            elapsedMilliSeconds = endTime - startTime;
+            elapsedSeconds = elapsedMilliSeconds / 1000.0;
+            Log.e("STORAGE", "Storage init elapsed time: " + elapsedSeconds);
+
             for (int i = 0; i < createdWindows; i++) {
                 CanvasFragment cf =
                         (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
@@ -243,6 +256,10 @@ public class DrawFragment extends Fragment {
                     canvasMergedFront.drawBitmap(cf.bodyViewFront.snapshot, 0f, 0f, null);
                 if (cf.bodyViewBack.snapshot != null)
                     canvasMergedBack.drawBitmap(cf.bodyViewBack.snapshot, 0f, 0f, null);
+                endTime = SystemClock.elapsedRealtime();
+                elapsedMilliSeconds = endTime - startTime;
+                elapsedSeconds = elapsedMilliSeconds / 1000.0;
+                Log.e("STORAGE", "Particular canvas storage elapsed time: " + elapsedSeconds);
             }
             SaveSnapshotTask.doInBackground(merged_f, directory, "merged_sensations_f.png");
             SaveSnapshotTask.doInBackground(merged_b, directory, "merged_sensations_b.png");
@@ -250,6 +267,10 @@ public class DrawFragment extends Fragment {
             SaveSnapshotTask.doInBackground(full_f, directory, "complete_picture_f.png");
             Bitmap full_b = make_full_picture(merged_b, cf_base.bodyViewBack.backgroundImage, sensations.toString());
             SaveSnapshotTask.doInBackground(full_b, directory, "complete_picture_b.png");
+            endTime = SystemClock.elapsedRealtime();
+            elapsedMilliSeconds = endTime - startTime;
+            elapsedSeconds = elapsedMilliSeconds / 1000.0;
+            Log.e("STORAGE", "Finalization elapsed time: " + elapsedSeconds);
         }
     }
 
