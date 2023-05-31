@@ -20,13 +20,15 @@
     <string name="toast_select_intensity">⇛ Please first select an intensity on the scale</string>
     <string name="toast_empty_name">Please first enter a name for the subject</string>
     <string name="toast_no_back_sensations">No records were made on the back side</string>
+    <string name="textview_max">max</string>
+    <string name="textview_min">min</string>
     <string name="to_drawing">To drawing</string>
     <string name="to_tags">To tags</string>
     <string name="add_new_patient">Add New Patient</string>
     <string name="subjects"><b>Subjects:</b></string>
     <string name="records"><b>Records:</b></string>
     <string name="sensation">Sensation</string>
-    <string name="dialog_drawing_completed">"Did you really draw <b>all Symptoms</b>?"</string>
+    <string name="dialog_drawing_completed">"Did you really draw <b>all Symptoms</b>? Subsequent editing is not possible."</string>
     <string name="dialog_delete_subject">"Do you want to delete the subject and <b>all their Data?</b>?"</string>
     <string name="dialog_delete_record">"Do you want to delete selected record?"</string>
     <string name="dialog_drawing_confirmed">"Finish Drawing"</string>

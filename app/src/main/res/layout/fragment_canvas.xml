@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -48,13 +49,15 @@
                     android:layout_height="0dp"
                     android:layout_marginBottom="8sp"
                     android:layout_weight="5"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:baselineAligned="false">
 
                     <FrameLayout
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="5"
-                        android:animateLayoutChanges="false">
+                        android:animateLayoutChanges="false"
+                        tools:ignore="NestedWeights">
 
                         <com.dm.smart.BodyDrawingView
                             android:id="@+id/drawing_view_front"
@@ -101,19 +104,47 @@
 
                     </FrameLayout>
 
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="60sp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="16sp"
+                    android:layout_marginTop="6sp"
+                    android:layout_marginRight="16sp"
+                    android:layout_marginBottom="6sp">
+
+                    <TextView
+                        android:id="@+id/textview_max"
+                        android:text="@string/textview_max"
+                        android:layout_width="wrap_content"
+                        android:layout_height="20sp"
+                        android:minHeight="20sp"
+                        android:layout_gravity="top|center"
+                        android:clickable="false"
+                        android:textAllCaps="true"
+                        android:textStyle="bold" />
+
                     <com.rtugeek.android.colorseekbar.ColorSeekBar
                         android:id="@+id/color_seek_bar"
-                        android:layout_width="60sp"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="16sp"
-                        android:layout_marginTop="6sp"
-                        android:layout_marginRight="16sp"
-                        android:layout_marginBottom="6sp"
+                        android:layout_height="700sp"
+                        android:layout_width="match_parent"
                         app:colorSeekBarBarHeight="40sp"
                         app:colorSeekBarProgress="0"
                         app:colorSeekBarRadius="0sp"
                         app:colorSeekBarVertical="true" />
 
+                    <TextView
+                        android:id="@+id/textview_min"
+                        android:text="@string/textview_min"
+                        android:layout_width="wrap_content"
+                        android:layout_height="20sp"
+                        android:minHeight="20sp"
+                        android:layout_gravity="bottom|center"
+                        android:clickable="false"
+                        android:textAllCaps="true"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
 
                 </LinearLayout>
 
