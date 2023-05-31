@@ -130,7 +130,7 @@
                         android:layout_width="match_parent"
                         app:colorSeekBarBarHeight="40sp"
                         app:colorSeekBarProgress="0"
-                        app:colorSeekBarRadius="0sp"
+                        app:colorSeekBarRadius="3sp"
                         app:colorSeekBarVertical="true" />
 
                     <TextView

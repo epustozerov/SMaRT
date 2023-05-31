@@ -12,9 +12,12 @@ import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,11 +38,62 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.rtugeek.android.colorseekbar.AlphaSeekBar;
+import com.rtugeek.android.colorseekbar.BaseSeekBar;
 import com.rtugeek.android.colorseekbar.ColorSeekBar;
+import com.rtugeek.android.colorseekbar.thumb.DefaultThumbDrawer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+
+
+class CustomThumbDrawer extends DefaultThumbDrawer {
+
+    private final Paint thumbStrokePaint = new Paint();
+    private final Paint thumbSolidPaint = new Paint();
+    private final Paint thumbColorPaint = new Paint();
+    private final Path outerCircle = new Path();
+    private final Path innerCircle = new Path();
+
+    public CustomThumbDrawer(int size, int ringSolidColor, int ringBorderColor) {
+        super(size, ringSolidColor, ringBorderColor);
+        thumbStrokePaint.setAntiAlias(true);
+        thumbSolidPaint.setAntiAlias(true);
+        thumbColorPaint.setAntiAlias(true);
+
+        thumbStrokePaint.setStyle(Paint.Style.STROKE);
+
+        setRingBorderColor(ringBorderColor);
+        setRingSolidColor(ringSolidColor);
+        setRingBorderSize(3);
+    }
+
+    @Override
+    public void onDrawThumb(RectF thumbBounds, BaseSeekBar seekBar, Canvas canvas) {
+        float centerX = thumbBounds.centerX();
+        float centerY = thumbBounds.centerY();
+        outerCircle.reset();
+        innerCircle.reset();
+        if (seekBar instanceof ColorSeekBar) {
+            thumbColorPaint.setColor(((ColorSeekBar) seekBar).getColor());
+        } else if (seekBar instanceof AlphaSeekBar) {
+            thumbColorPaint.setAlpha(((AlphaSeekBar) seekBar).getAlphaValue());
+        }
+        float outerRadius = thumbBounds.height() / 2f;
+        int ringSize = 4;
+        float innerRadius = outerRadius - ringSize;
+        outerCircle.addCircle(centerX, centerY, outerRadius, Path.Direction.CW);
+        innerCircle.addCircle(centerX, centerY, innerRadius, Path.Direction.CW);
+        outerCircle.op(innerCircle, Path.Op.DIFFERENCE);
+        canvas.drawCircle(centerX, centerY, innerRadius, thumbColorPaint);
+        canvas.drawRect(thumbBounds.left, centerY - 3, thumbBounds.right, centerY + 3, thumbSolidPaint);
+        canvas.drawPath(outerCircle, thumbSolidPaint);
+        canvas.drawPath(outerCircle, thumbStrokePaint);
+    }
+
+}
 
 
 public class CanvasFragment extends Fragment {
@@ -344,6 +398,7 @@ public class CanvasFragment extends Fragment {
         hsv[2] = 1f;
         int color_min = Color.HSVToColor(hsv);
         intensityScale.setColorSeeds(new int[]{color_max, color_min});
+        intensityScale.setThumbDrawer(new CustomThumbDrawer(65, Color.WHITE, Color.BLACK));
 
         intensityScale.setOnColorChangeListener((progress, color) -> {
             currentBodyView.setIntensity(color);
