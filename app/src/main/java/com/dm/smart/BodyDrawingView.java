@@ -194,16 +194,18 @@ public class BodyDrawingView extends View {
     }
 
     public void undoLastStep() {
-        if (steps.size() > 0) {
+        if (steps.size() > 1) {
             steps.remove(steps.size() - 1);
             if (freshSnapshot != null) {
                 freshSnapshot.recycle();
                 freshSnapshot = null;
             }
-            for (Step step : steps) {
-                drawStep(step);
+            if (steps.size() > 0) {
+                for (Step step : steps) {
+                    drawStep(step);
+                }
+                invalidate();
             }
-            invalidate();
         }
     }
 
