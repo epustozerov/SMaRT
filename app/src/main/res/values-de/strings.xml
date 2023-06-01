@@ -35,6 +35,8 @@
     <string name="dialog_delete_subject">Möchten Sie den Proband und <b>alle ihre Daten löschen</b>?</string>
     <string name="dialog_delete_record">"Möchten Sie den ausgewählten Aufzeihnung löschen?"</string>
     <string name="dialog_drawing_confirmed">"Zeichnung beenden"</string>
+    <string name="dialog_save_images">"Die nicht gespeicherte Zeichnung wird gelöscht. Möchten Sie zur Patientenübersicht fortfahren?"
+    </string>
     <string name="dialog_yes">Ja</string>
     <string name="dialog_no">Nein</string>
     <string name="menu_remove_patient">Ausgewählte Patienten und ihre Daten entfernen</string>

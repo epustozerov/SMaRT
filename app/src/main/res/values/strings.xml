@@ -33,6 +33,7 @@
     <string name="dialog_delete_subject">"Do you want to delete the subject and <b>all their Data?</b>?"</string>
     <string name="dialog_delete_record">"Do you want to delete selected record?"</string>
     <string name="dialog_drawing_confirmed">"Finish Drawing"</string>
+    <string name="dialog_save_images">"The unsaved images will be deleted. Would you like to proceed to patient overview?"</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
     <string name="menu_remove_patient">Remove selected subject and their records</string>

@@ -164,7 +164,6 @@ public class DrawFragment extends Fragment {
                             Navigation.findNavController(requireActivity(),
                                             R.id.nav_host_fragment_activity_main).
                                     navigate(R.id.navigation_subject);
-
                             Runnable runnable = this::storeData;
                             new Thread(runnable).start();
                         });
@@ -367,6 +366,7 @@ public class DrawFragment extends Fragment {
 
     @Override
     public void onStop() {
+
         Log.e("DEBUG", "OnStop of DrawFragment");
         for (int i = 0; i < viewPagerAdapter.fragmentManager.getFragments().size(); i++) {
             Fragment f = viewPagerAdapter.fragmentManager.getFragments().get(i);

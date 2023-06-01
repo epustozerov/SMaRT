@@ -81,7 +81,7 @@ class CustomThumbDrawer extends DefaultThumbDrawer {
             thumbColorPaint.setAlpha(((AlphaSeekBar) seekBar).getAlphaValue());
         }
         float outerRadius = thumbBounds.height() / 2f;
-        int ringSize = 4;
+        int ringSize = 5;
         float innerRadius = outerRadius - ringSize;
         outerCircle.addCircle(centerX, centerY, outerRadius, Path.Direction.CW);
         innerCircle.addCircle(centerX, centerY, innerRadius, Path.Direction.CW);
