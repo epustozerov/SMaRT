@@ -59,8 +59,7 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setOnItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.navigation_add_sense:
-                    NavigationUI.onNavDestinationSelected(item, navController);
-                    break;
+                    return NavigationUI.onNavDestinationSelected(item, navController);
                 case R.id.navigation_subject:
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setMessage(R.string.dialog_save_images)
@@ -70,9 +69,9 @@ public class MainActivity extends AppCompatActivity {
                             });
                     AlertDialog dialog = builder.create();
                     dialog.show();
-                    break;
+                    return false;
             }
-            return true;
+            return false;
         });
     }
 
