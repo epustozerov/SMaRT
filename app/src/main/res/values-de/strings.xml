@@ -44,6 +44,8 @@
     <string name="menu_show_image">Symptomübersicht Anzeigen</string>
     <string name="menu_share">Symptomaufzeichnung teilen</string>
     <string name="menu_export_title">Empfindungen von %1$s um %2$s</string>
+    <string name="menu_instructions">Anweisungen</string>
+
     <!-- List of sensation types -->
     <string name="sensation_type_1">Ausstrahlend</string>
     <string name="sensation_type_2">Brennend</string>

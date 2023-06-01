@@ -210,9 +210,6 @@ public class SubjectFragment extends Fragment {
         } else if (item.getItemId() == RECORD_DELETE) {
             showDeleteRecordDialog();
             return true;
-//        } else if (item.getItemId() == RECORD_SHOW_FOLDER) {
-//            openFolder();
-//            return true;
         } else if (item.getItemId() == RECORD_SHARE) {
             shareSensations();
             return true;

@@ -6,6 +6,11 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -69,5 +74,36 @@ public class MainActivity extends AppCompatActivity {
             }
             return true;
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        if (item.getItemId() == R.id.menu_instructions) {
+            showInstructions(item);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    // Open alert window with instructions image on menu item click
+    public void showInstructions(android.view.MenuItem item) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        @SuppressLint("InflateParams") View alertView =
+                getLayoutInflater().inflate(R.layout.alert_image, null);
+        ImageView image_view_body = alertView.findViewById(R.id.image_view_body);
+        image_view_body.setImageResource(R.drawable.instructions);
+        builder.setView(alertView);
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }
