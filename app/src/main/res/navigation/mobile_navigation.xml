@@ -15,10 +15,4 @@
         android:name="com.dm.smart.DrawFragment"
         android:label="@string/title_add_sense"
         tools:layout="@layout/fragment_draw" />
-
-    <fragment
-        android:id="@+id/navigation_settings"
-        android:name="com.dm.smart.SettingsFragment"
-        android:label="@string/title_settings"
-        tools:layout="@layout/fragment_instructions" />
 </navigation>
