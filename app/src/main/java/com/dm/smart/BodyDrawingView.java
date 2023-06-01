@@ -167,7 +167,8 @@ public class BodyDrawingView extends View {
             paint.setColor(intensity);
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_ATOP));
             tempCanvas.drawPath(step.path, paint);
-            if (!step.brush.title.equals(getResources().getString(R.string.brush_out))) {
+            if (!step.brush.title.equals(getResources().getString(R.string.brush_line_out))
+                    && !step.brush.title.equals(getResources().getString(R.string.brush_region_out))) {
                 paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
                 tempCanvas.drawBitmap(maskImage, 0, 0, paint);
             }

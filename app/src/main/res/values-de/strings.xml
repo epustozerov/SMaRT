@@ -7,7 +7,8 @@
     <string name="brush_erase">Löschen</string>
     <string name="brush_line">Linie</string>
     <string name="brush_region">Region</string>
-    <string name="brush_out">Außerkörperlich</string>
+    <string name="brush_line_out">Linie Außerkörperlich</string>
+    <string name="brush_region_out">Region Außerkörperlich</string>
     <string name="select_condition">Beginn der Aufzeichnung</string>
     <string name="title_subject">Proband</string>
     <string name="title_add_sense">Sinnesbewertung hinzufügen</string>

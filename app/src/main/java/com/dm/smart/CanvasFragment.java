@@ -48,7 +48,6 @@ import java.util.Arrays;
 import java.util.List;
 
 
-
 class CustomThumbDrawer extends DefaultThumbDrawer {
 
     private final Paint thumbStrokePaint = new Paint();
