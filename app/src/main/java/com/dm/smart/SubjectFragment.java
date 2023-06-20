@@ -31,7 +31,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -121,9 +120,6 @@ public class SubjectFragment extends Fragment {
                 edittext_patient_name.setText("");
                 populateListSubjects();
                 populateListRecords();
-                Navigation.findNavController(requireActivity(),
-                                R.id.nav_host_fragment_activity_main).
-                        navigate(R.id.navigation_add_sense);
             }
         });
         populateListSubjects();
