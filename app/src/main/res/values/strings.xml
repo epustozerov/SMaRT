@@ -1,9 +1,6 @@
 <resources>
     <string name="app_name">SMaRT</string>
     <string name="body_scheme">Body scheme</string>
-    <string name="title_subject">Subject</string>
-    <string name="title_add_sense">Add Sense Evaluation</string>
-    <string name="title_settings">Settings</string>
     <string name="description_of_measurement_procedure">Description of measurement procedure</string>
     <string name="back_view">Back view</string>
     <string name="front_view">Front view</string>
@@ -12,6 +9,9 @@
     <string name="brush_region">Region</string>
     <string name="brush_line_out">Line Extracorporeal</string>
     <string name="brush_region_out">Region Extracorporeal</string>
+    <string name="title_subject">Subject</string>
+    <string name="title_add_sense">New drawing</string>
+    <string name="title_settings">Settings</string>
     <string name="select_condition">Start making a record</string>
     <string name="new_record">New record</string>
     <string name="complete_recording">Complete recording</string>
@@ -25,7 +25,7 @@
     <string name="textview_min">min</string>
     <string name="to_drawing">To drawing</string>
     <string name="to_tags">To tags</string>
-    <string name="add_new_patient">Add New Patient</string>
+    <string name="add_new_subject">Create new subject</string>
     <string name="subjects"><b>Subjects:</b></string>
     <string name="records"><b>Records:</b></string>
     <string name="sensation">Sensation</string>
@@ -33,10 +33,10 @@
     <string name="dialog_delete_subject">"Do you want to delete the subject and <b>all their Data?</b>?"</string>
     <string name="dialog_delete_record">"Do you want to delete selected record?"</string>
     <string name="dialog_drawing_confirmed">"Finish Drawing"</string>
-    <string name="dialog_save_images">"The unsaved images will be deleted. Would you like to proceed to patient overview?"</string>
+    <string name="dialog_save_images">"The unsaved images will be deleted. Would you like to proceed to subject overview?"</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
-    <string name="menu_remove_patient">Remove selected subject and their records</string>
+    <string name="menu_remove_subject">Remove selected subject and their records</string>
     <string name="menu_remove_record">Remove selected record</string>
     <string name="menu_show_image">Display symptom overview</string>
     <string name="menu_share">Share symptom record</string>

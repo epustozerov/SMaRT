@@ -25,7 +25,7 @@ public class Record {
         return id;
     }
 
-    public int getPatientId() {
+    public int getSubjectId() {
         return patient_id;
     }
 

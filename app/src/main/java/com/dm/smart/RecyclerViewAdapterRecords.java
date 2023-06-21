@@ -87,7 +87,7 @@ public class RecyclerViewAdapterRecords extends RecyclerView.Adapter<RecyclerVie
 
         ViewHolder(View itemView) {
             super(itemView);
-            myTextView = itemView.findViewById(R.id.patient_name);
+            myTextView = itemView.findViewById(R.id.subject_name);
             itemView.setOnClickListener(this);
             itemView.setLongClickable(true);
             itemView.setOnCreateContextMenuListener(this);

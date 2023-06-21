@@ -1,6 +1,6 @@
 package com.dm.smart;
 
-import static com.dm.smart.SubjectFragment.extractPatientFromTheDB;
+import static com.dm.smart.SubjectFragment.extractSubjectFromTheDB;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -34,13 +34,13 @@ public class MainActivity extends AppCompatActivity {
         // Add a dafault patient if the database is empty
         DBAdapter db = new DBAdapter(this);
         db.open();
-        Cursor cursor = db.getAllPatients();
+        Cursor cursor = db.getAllSubjects();
         if (cursor.getCount() == 0) {
-            Subject defaultSubject = new Subject("Default Patient", 0);
-            db.insertPatient(defaultSubject);
+            Subject defaultSubject = new Subject("Default Subject", 0);
+            db.insertSubject(defaultSubject);
         }
         cursor.moveToFirst();
-        currentlySelectedSubject = extractPatientFromTheDB(cursor);
+        currentlySelectedSubject = extractSubjectFromTheDB(cursor);
         db.close();
 
         com.dm.smart.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());

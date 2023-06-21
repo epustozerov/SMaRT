@@ -11,12 +11,12 @@
     <string name="brush_region_out">Region Außerkörperlich</string>
     <string name="select_condition">Beginn der Aufzeichnung</string>
     <string name="title_subject">Proband</string>
-    <string name="title_add_sense">Sinnesbewertung hinzufügen</string>
+    <string name="title_add_sense">Neue Zeichnung</string>
     <string name="title_settings">Einstellungen</string>
     <string name="description_of_measurement_procedure">Beschreibung des Messverfahrens</string>
     <string name="complete_recording">Zeichnung beenden</string>
-    <string name="new_record">Neuer Empfindung</string>
-    <string name="add_new_patient">Neuer Proband einfügen</string>
+    <string name="new_record">Neue Empfindung</string>
+    <string name="add_new_subject">Neuen Probanden erstellen</string>
     <string name="subjects"><b>Probanden:</b></string>
     <string name="records"><b>Aufzeichnungen:</b></string>
     <string name="sensation">Empfindung</string>
@@ -35,11 +35,11 @@
     <string name="dialog_delete_subject">Möchten Sie den Proband und <b>alle ihre Daten löschen</b>?</string>
     <string name="dialog_delete_record">"Möchten Sie den ausgewählten Aufzeihnung löschen?"</string>
     <string name="dialog_drawing_confirmed">"Zeichnung beenden"</string>
-    <string name="dialog_save_images">"Die nicht gespeicherte Zeichnung wird gelöscht. Möchten Sie zur Patientenübersicht fortfahren?"
+    <string name="dialog_save_images">"Die nicht gespeicherte Zeichnung wird gelöscht. Möchten Sie zur Probandenübersicht fortfahren?"
     </string>
     <string name="dialog_yes">Ja</string>
     <string name="dialog_no">Nein</string>
-    <string name="menu_remove_patient">Ausgewählte Patienten und ihre Daten entfernen</string>
+    <string name="menu_remove_subject">Ausgewählte Probanden und ihre Daten entfernen</string>
     <string name="menu_remove_record">Ausgewählten Datensatz entfernen</string>
     <string name="menu_show_image">Symptomübersicht Anzeigen</string>
     <string name="menu_share">Symptomaufzeichnung teilen</string>
@@ -85,7 +85,7 @@
     </string-array>
 
     <!-- List of genders -->
-    <string name="gender_neutral">neutrum</string>
+    <string name="gender_neutral">neutral</string>
     <string name="gender_male">männlich</string>
     <string name="gender_female">weiblich</string>
     <string name="new_subject">Neuer Proband</string>

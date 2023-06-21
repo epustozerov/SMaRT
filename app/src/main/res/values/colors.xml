@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Initial list of base app colors -->
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
@@ -13,6 +14,10 @@
     <color name="primary_material_light">#edeae6</color>
     <color name="gray">#b1aa9e</color>
     <color name="background_material_light">#fafafa</color>
+
+    <!-- Customized app colors -->
+    <color name="gray_dark">#786e64</color>
+    <color name="gray_light">#b1aa9e</color>
 
     <!-- List of symptom colors old -->
     <color name="symptom_old_1">#ed3b00</color>
@@ -60,7 +65,7 @@
     <color name="symptom_blue">#0070F2</color>
     <color name="symptom_mango">#C35500</color>
     <color name="symptom_grey">#5B738B</color>
-    <string-array name="colors_symptoms">
+    <string-array name="colors_symptoms_bright">
         <item>@color/symptom_indigo</item>
         <item>@color/symptom_green</item>
         <item>@color/symptom_pink</item>
@@ -70,4 +75,25 @@
         <item>@color/symptom_mango</item>
         <item>@color/symptom_grey</item>
     </string-array>
+
+
+    <color name="okabe_black">#000000</color>
+    <color name="okabe_orange">#E69F00</color>
+    <color name="okabe_sky_blue">#56B4E9</color>
+    <color name="okabe_bluish_green">#009E73</color>
+    <color name="okabe_yellow">#F0E442</color>
+    <color name="okabe_blue">#0072B2</color>
+    <color name="okabe_vermillion">#D55E00</color>
+    <color name="okabe_reddish_purple">#CC79A7</color>
+    <string-array name="colors_symptoms">
+        <item>@color/okabe_black</item>
+        <item>@color/okabe_orange</item>
+        <item>@color/okabe_sky_blue</item>
+        <item>@color/okabe_bluish_green</item>
+        <item>@color/okabe_yellow</item>
+        <item>@color/okabe_blue</item>
+        <item>@color/okabe_vermillion</item>
+        <item>@color/okabe_reddish_purple</item>
+    </string-array>
+
 </resources>

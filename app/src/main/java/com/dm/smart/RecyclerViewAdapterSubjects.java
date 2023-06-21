@@ -23,11 +23,11 @@ import java.util.Locale;
 
 public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerViewAdapterSubjects.ViewHolder> {
 
-    static final int PATIENT_DELETE = Menu.FIRST;
+    static final int SUBJECT_DELETE = Menu.FIRST;
     private final List<Subject> mSubjects;
     private final LayoutInflater mInflater;
     private final Context mContext;
-    public int selectedPatientPosition = 0;
+    public int selectedSubjectPosition = 0;
     private ItemClickListener mClickListener;
 
     // data is passed into the constructor
@@ -50,11 +50,11 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
     public void onBindViewHolder(ViewHolder holder, int position) {
         Subject subject = mSubjects.get(position);
         holder.myTextView.setText(String.format("%s", subject.getName()));
-        if (selectedPatientPosition == position) {
-            holder.myTextView.setTextColor(ContextCompat.getColor(mContext, R.color.purple_500));
+        if (selectedSubjectPosition == position) {
+            holder.myTextView.setTextColor(ContextCompat.getColor(mContext, R.color.gray_dark));
             holder.myTextView.setTypeface(null, Typeface.BOLD);
         } else {
-            holder.myTextView.setTextColor(ContextCompat.getColor(mContext, R.color.gray));
+            holder.myTextView.setTextColor(ContextCompat.getColor(mContext, R.color.gray_light));
             holder.myTextView.setTypeface(null, Typeface.NORMAL);
         }
     }
@@ -88,7 +88,7 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
 
         ViewHolder(View itemView) {
             super(itemView);
-            myTextView = itemView.findViewById(R.id.patient_name);
+            myTextView = itemView.findViewById(R.id.subject_name);
             itemView.setOnClickListener(this);
             itemView.setLongClickable(true);
             itemView.setOnCreateContextMenuListener(this);
@@ -102,9 +102,9 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
                 DBAdapter DBAdapter = new DBAdapter(mContext);
                 DBAdapter.open();
                 Cursor cursorSinglePatient =
-                        DBAdapter.getPatientById(mSubjects.get(getBindingAdapterPosition()).getId());
+                        DBAdapter.getSubjectById(mSubjects.get(getBindingAdapterPosition()).getId());
                 cursorSinglePatient.moveToFirst();
-                MainActivity.currentlySelectedSubject = SubjectFragment.extractPatientFromTheDB(cursorSinglePatient);
+                MainActivity.currentlySelectedSubject = SubjectFragment.extractSubjectFromTheDB(cursorSinglePatient);
                 cursorSinglePatient.close();
                 DBAdapter.close();
             }
@@ -113,19 +113,19 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
         @Override
         public void onCreateContextMenu(ContextMenu contextMenu, View view,
                                         ContextMenu.ContextMenuInfo contextMenuInfo) {
-            selectedPatientPosition = getBindingAdapterPosition();
-            String patient_name = mSubjects.get(selectedPatientPosition).getName();
-            int patient_gender = mSubjects.get(selectedPatientPosition).getGender();
+            selectedSubjectPosition = getBindingAdapterPosition();
+            String patient_name = mSubjects.get(selectedSubjectPosition).getName();
+            int patient_gender = mSubjects.get(selectedSubjectPosition).getGender();
             String string_gender = mContext.getResources().getStringArray(R.array.genders)[patient_gender];
             Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(mSubjects.get(selectedPatientPosition).getTimestamp());
+            cal.setTimeInMillis(mSubjects.get(selectedSubjectPosition).getTimestamp());
             SimpleDateFormat formatter =
                     new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
             String dateString = formatter.format(cal.getTime());
             contextMenu.setHeaderTitle(patient_name + ", " + string_gender +
                     ",\n created: " + dateString);
-            contextMenu.add(0, PATIENT_DELETE, Menu.NONE,
-                    mContext.getString(R.string.menu_remove_patient));
+            contextMenu.add(0, SUBJECT_DELETE, Menu.NONE,
+                    mContext.getString(R.string.menu_remove_subject));
         }
     }
 }
