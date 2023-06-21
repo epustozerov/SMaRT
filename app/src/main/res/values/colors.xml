@@ -18,6 +18,7 @@
     <!-- Customized app colors -->
     <color name="gray_dark">#786e64</color>
     <color name="gray_light">#b1aa9e</color>
+    <color name="gray_lighter">#eeeeee</color>
 
     <!-- List of symptom colors old -->
     <color name="symptom_old_1">#ed3b00</color>
@@ -86,7 +87,6 @@
     <color name="okabe_vermillion">#D55E00</color>
     <color name="okabe_reddish_purple">#CC79A7</color>
     <string-array name="colors_symptoms">
-        <item>@color/okabe_black</item>
         <item>@color/okabe_orange</item>
         <item>@color/okabe_sky_blue</item>
         <item>@color/okabe_bluish_green</item>

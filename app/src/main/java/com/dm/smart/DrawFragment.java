@@ -54,8 +54,19 @@ public class DrawFragment extends Fragment {
     static int dampen(int color) {
         float[] hsv = new float[3];
         Color.colorToHSV(color, hsv);
-        hsv[1] = 0.55f;
+        hsv[1] = 0.5f;
         return Color.HSVToColor(hsv);
+    }
+
+    static int[] define_min_max_colors(int color) {
+        float[] hsv = new float[3];
+        Color.colorToHSV(color, hsv);
+        hsv[1] = 1.0f;
+        int color_max = Color.HSVToColor(hsv);
+        hsv[1] = 0.1f;
+        hsv[2] = 1f;
+        int color_min = Color.HSVToColor(hsv);
+        return new int[] {color_max, color_min};
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.dm.smart;
 
 import static com.dm.smart.DrawFragment.dampen;
+import static com.dm.smart.DrawFragment.define_min_max_colors;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -281,7 +282,7 @@ public class CanvasFragment extends Fragment {
                         ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.setMargins(Math.round(dp2px(4)), Math.round(dp2px(4)),
                 Math.round(dp2px(4)), Math.round(dp2px(4)));
-        LinearLayout choicesContainer = mCanvas.findViewById(R.id.sensations_container);
+        LinearLayout sensationsContainer = mCanvas.findViewById(R.id.sensations_container);
 
         // Create buttons with sensations in the side panel
         View.OnClickListener choiceClickListener = v -> {
@@ -316,13 +317,15 @@ public class CanvasFragment extends Fragment {
         for (String choice : sensation_types) {
             ToggleButton b = new ToggleButton(getContext());
             b.setBackground(requireContext().getDrawable(R.drawable.custom_radio));
+            // set text color to black
+            b.setTextColor(Color.BLACK);
             b.setTextOn(choice);
             b.setTextOff(choice);
             b.setText(choice);
             b.setPadding(Math.round(dp2px(8)), Math.round(dp2px(8)),
                     Math.round(dp2px(8)), Math.round(dp2px(8)));
             b.setOnClickListener(choiceClickListener);
-            choicesContainer.addView(b, lp);
+            sensationsContainer.addView(b, lp);
         }
 
         // Init the bottom tool bar
@@ -389,14 +392,7 @@ public class CanvasFragment extends Fragment {
 
         // Init intensity scale
         ColorSeekBar intensityScale = mCanvas.findViewById(R.id.color_seek_bar);
-        float[] hsv = new float[3];
-        Color.colorToHSV(color, hsv);
-        hsv[1] = 1.0f;
-        int color_max = Color.HSVToColor(hsv);
-        hsv[1] = 0.1f;
-        hsv[2] = 1f;
-        int color_min = Color.HSVToColor(hsv);
-        intensityScale.setColorSeeds(new int[]{color_max, color_min});
+        intensityScale.setColorSeeds(define_min_max_colors(color));
         intensityScale.setThumbDrawer(new CustomThumbDrawer(65, Color.WHITE, Color.BLACK));
 
         intensityScale.setOnColorChangeListener((progress, color) -> {
