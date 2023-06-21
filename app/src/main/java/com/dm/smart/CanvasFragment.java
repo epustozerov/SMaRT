@@ -525,5 +525,14 @@ public class CanvasFragment extends Fragment {
 
         public Brush() {
         }
+
+        public Brush(Brush brush) {
+            this.title = brush.title;
+            this.icon = brush.icon;
+            this.type = brush.type;
+            this.drawByMove = brush.drawByMove;
+            this.thickness = brush.thickness;
+            this.paint = new Paint(brush.paint);
+        }
     }
 }

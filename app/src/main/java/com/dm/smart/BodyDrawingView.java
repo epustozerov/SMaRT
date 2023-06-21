@@ -48,6 +48,7 @@ public class BodyDrawingView extends View {
     private int intensity = -1;
     private CanvasFragment.Brush brush = null;
 
+
     public BodyDrawingView(Context context) {
         this(context, null);
     }
@@ -160,11 +161,11 @@ public class BodyDrawingView extends View {
         Canvas tempCanvas = new Canvas(currentSnapshot);
         Paint paint = new Paint(step.brush.paint);
         paint.setStrokeWidth(step.brush.thickness);
+        paint.setColor(step.brush.paint.getColor());
         if (step.brush.type.equals("erase")) {
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
             drawImageCanvas.drawPath(step.path, paint);
         } else {
-            paint.setColor(intensity);
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_ATOP));
             tempCanvas.drawPath(step.path, paint);
             if (!step.brush.title.equals(getResources().getString(R.string.brush_line_out))
@@ -194,7 +195,7 @@ public class BodyDrawingView extends View {
     }
 
     public void undoLastStep() {
-        if (steps.size() > 1) {
+        if (steps.size() > 0) {
             steps.remove(steps.size() - 1);
             if (freshSnapshot != null) {
                 freshSnapshot.recycle();
@@ -204,6 +205,13 @@ public class BodyDrawingView extends View {
                 for (Step step : steps) {
                     drawStep(step);
                 }
+                invalidate();
+            } else {
+                freshSnapshot = Bitmap.createBitmap(mBGRect.width(), mBGRect.height(),
+                        Bitmap.Config.ARGB_8888);
+                drawImageCanvas = new Canvas(freshSnapshot);
+                drawImageCanvas.drawBitmap(freshSnapshot, 0, 0, null);
+                snapshot = freshSnapshot;
                 invalidate();
             }
         }
@@ -345,10 +353,13 @@ public class BodyDrawingView extends View {
                 freshPath.lineTo(x, y);
 
                 Step step = new Step();
-                step.brush = brush;
+                step.brush = new CanvasFragment.Brush(brush);
+
+                step.brush.paint.setColor(intensity);
                 step.path = new Path(freshPath);
                 freshPath = null;
                 step.path.transform(mInvertMatrix);
+                steps.add(step);
                 drawStep(step);
             }
         } else {
@@ -379,12 +390,9 @@ public class BodyDrawingView extends View {
     }
 
 
-    private class Step {
+    private static class Step {
+
         CanvasFragment.Brush brush;
         Path path;
-
-        Step() {
-            steps.add(this);
-        }
     }
 }
