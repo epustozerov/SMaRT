@@ -189,7 +189,6 @@ public class DrawFragment extends Fragment {
         DBAdapter DBAdapter = new DBAdapter(requireActivity());
         DBAdapter.open();
         int patient_id = MainActivity.currentlySelectedSubject.getId();
-        String patient_name = MainActivity.currentlySelectedSubject.getName();
         int createdWindows = viewPagerAdapter.getItemCount();
         StringBuilder sensations = new StringBuilder();
         for (int i = 0; i < createdWindows; i++) {
@@ -216,32 +215,38 @@ public class DrawFragment extends Fragment {
         File directory = new File(
                 String.valueOf(Paths.get(String.valueOf(Environment.getExternalStoragePublicDirectory(
                                 Environment.DIRECTORY_DOCUMENTS)), "SMaRT",
-                        patient_id + " " + patient_name, String.valueOf(record_id))));
+                        String.valueOf(patient_id), String.valueOf(record_id))));
         if (!directory.exists()) //noinspection ResultOfMethodCallIgnored
             directory.mkdirs();
 
         // Save all the images
         if (createdWindows > 0) {
-            // Merge images into one
             CanvasFragment cf_base =
                     (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + 0);
-            Bitmap merged_f;
-            Bitmap merged_b;
+            int height = 1494;
+            int width = 2200;
+            Bitmap.Config config = Bitmap.Config.ARGB_8888;
 
-            assert cf_base != null;
-            if (cf_base.bodyViewFront.snapshot != null) {
-                merged_f = Bitmap.createBitmap(cf_base.bodyViewFront.snapshot.getWidth(),
-                        cf_base.bodyViewFront.snapshot.getHeight(), cf_base.bodyViewFront.snapshot.getConfig());
-            } else {
-                merged_f = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-            }
-            if (cf_base.bodyViewBack.snapshot != null) {
-                merged_b = Bitmap.createBitmap(cf_base.bodyViewBack.snapshot.getWidth(),
-                        cf_base.bodyViewBack.snapshot.getHeight(), cf_base.bodyViewBack.snapshot.getConfig());
-            } else {
-                merged_b = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+            for (int i = 0; i < createdWindows; i++) {
+                CanvasFragment cf =
+                        (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
+                if (cf != null) {
+                    if (cf.bodyViewFront.snapshot != null) {
+                        height = cf.bodyViewFront.snapshot.getHeight();
+                        width = cf.bodyViewFront.snapshot.getWidth();
+                        config = cf.bodyViewFront.snapshot.getConfig();
+                        break;
+                    } else if (cf.bodyViewBack.snapshot != null) {
+                        height = cf.bodyViewBack.snapshot.getHeight();
+                        width = cf.bodyViewBack.snapshot.getWidth();
+                        config = cf.bodyViewBack.snapshot.getConfig();
+                        break;
+                    }
+                }
             }
 
+            Bitmap merged_f = Bitmap.createBitmap(width, height, config);
+            Bitmap merged_b = Bitmap.createBitmap(width, height, config);
             Canvas canvasMergedFront = new Canvas(merged_f);
             Canvas canvasMergedBack = new Canvas(merged_b);
 
@@ -273,6 +278,7 @@ public class DrawFragment extends Fragment {
             }
             SaveSnapshotTask.doInBackground(merged_f, directory, "merged_sensations_f.png");
             SaveSnapshotTask.doInBackground(merged_b, directory, "merged_sensations_b.png");
+            assert cf_base != null;
             Bitmap full_f = make_full_picture(merged_f, cf_base.bodyViewFront.backgroundImage, sensations.toString());
             SaveSnapshotTask.doInBackground(full_f, directory, "complete_picture_f.png");
             Bitmap full_b = make_full_picture(merged_b, cf_base.bodyViewBack.backgroundImage, sensations.toString());
@@ -295,6 +301,12 @@ public class DrawFragment extends Fragment {
                     figure.compress(Bitmap.CompressFormat.PNG, 100, fos);
                     fos.close();
                     Log.i("SAVE_FILE", "YES");
+                } else {
+                    // Save the empty image
+                    Bitmap empty = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+                    empty.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                    fos.close();
+                    Log.i("SAVE_FILE", "NO");
                 }
             } catch (java.io.IOException e) {
                 Log.e("ERROR_SAVING", "Exception in SaveSnapshotTask", e);
