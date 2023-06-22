@@ -1,5 +1,7 @@
 package com.dm.smart;
 
+import static com.dm.smart.ui.elements.CustomToasts.showToast;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -15,12 +17,9 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -47,6 +46,8 @@ public class BodyDrawingView extends View {
     private Bitmap maskImage = null;
     private int intensity = -1;
     private CanvasFragment.Brush brush = null;
+
+    Toast showedToast = null;
 
 
     public BodyDrawingView(Context context) {
@@ -311,7 +312,11 @@ public class BodyDrawingView extends View {
             return true;
         }
         if (intensity == -1) {
-            showToast(getResources().getString(R.string.toast_select_intensity));
+            if (showedToast != null) {
+                showedToast.cancel();
+            }
+            showedToast = showToast(this.getContext(), getResources().getString(R.string.toast_select_intensity));
+            showedToast.show();
             return true;
         }
 
@@ -374,19 +379,6 @@ public class BodyDrawingView extends View {
         }
         invalidate();
         return true;
-    }
-
-    public void showToast(String text_to_show) {
-        Toast toast = new Toast(getContext());
-        toast.setDuration(Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 500);
-        LayoutInflater inflater_toast = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View toast_view = inflater_toast.inflate(R.layout.toast_bordered,
-                this.findViewById(R.id.toast_layout));
-        TextView text = toast_view.findViewById(R.id.toast_text);
-        text.setText(text_to_show);
-        toast.setView(toast_view);
-        toast.show();
     }
 
 

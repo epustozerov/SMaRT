@@ -196,7 +196,7 @@
 
             </ScrollView>
 
-            <com.dm.smart.ui.elements.vertical_button.VerticalButton
+            <com.dm.smart.ui.elements.VerticalButton
                 android:id="@+id/button_sensations_tool"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -66,7 +66,7 @@ public class DrawFragment extends Fragment {
         hsv[1] = 0.1f;
         hsv[2] = 1f;
         int color_min = Color.HSVToColor(hsv);
-        return new int[] {color_max, color_min};
+        return new int[]{color_max, color_min};
     }
 
     @Override

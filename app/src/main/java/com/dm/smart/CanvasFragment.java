@@ -1,5 +1,6 @@
 package com.dm.smart;
 
+import static com.dm.smart.ui.elements.CustomToasts.showToast;
 import static com.dm.smart.DrawFragment.dampen;
 import static com.dm.smart.DrawFragment.define_min_max_colors;
 
@@ -13,17 +14,13 @@ import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,61 +36,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.rtugeek.android.colorseekbar.AlphaSeekBar;
-import com.rtugeek.android.colorseekbar.BaseSeekBar;
+import com.dm.smart.ui.elements.CustomThumbDrawer;
 import com.rtugeek.android.colorseekbar.ColorSeekBar;
-import com.rtugeek.android.colorseekbar.thumb.DefaultThumbDrawer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-
-class CustomThumbDrawer extends DefaultThumbDrawer {
-
-    private final Paint thumbStrokePaint = new Paint();
-    private final Paint thumbSolidPaint = new Paint();
-    private final Paint thumbColorPaint = new Paint();
-    private final Path outerCircle = new Path();
-    private final Path innerCircle = new Path();
-
-    public CustomThumbDrawer(int size, int ringSolidColor, int ringBorderColor) {
-        super(size, ringSolidColor, ringBorderColor);
-        thumbStrokePaint.setAntiAlias(true);
-        thumbSolidPaint.setAntiAlias(true);
-        thumbColorPaint.setAntiAlias(true);
-
-        thumbStrokePaint.setStyle(Paint.Style.STROKE);
-
-        setRingBorderColor(ringBorderColor);
-        setRingSolidColor(ringSolidColor);
-        setRingBorderSize(3);
-    }
-
-    @Override
-    public void onDrawThumb(RectF thumbBounds, BaseSeekBar seekBar, Canvas canvas) {
-        float centerX = thumbBounds.centerX();
-        float centerY = thumbBounds.centerY();
-        outerCircle.reset();
-        innerCircle.reset();
-        if (seekBar instanceof ColorSeekBar) {
-            thumbColorPaint.setColor(((ColorSeekBar) seekBar).getColor());
-        } else if (seekBar instanceof AlphaSeekBar) {
-            thumbColorPaint.setAlpha(((AlphaSeekBar) seekBar).getAlphaValue());
-        }
-        float outerRadius = thumbBounds.height() / 2f;
-        int ringSize = 5;
-        float innerRadius = outerRadius - ringSize;
-        outerCircle.addCircle(centerX, centerY, outerRadius, Path.Direction.CW);
-        innerCircle.addCircle(centerX, centerY, innerRadius, Path.Direction.CW);
-        outerCircle.op(innerCircle, Path.Op.DIFFERENCE);
-        canvas.drawCircle(centerX, centerY, innerRadius, thumbColorPaint);
-        canvas.drawRect(thumbBounds.left, centerY - 3, thumbBounds.right, centerY + 3, thumbSolidPaint);
-        canvas.drawPath(outerCircle, thumbSolidPaint);
-        canvas.drawPath(outerCircle, thumbStrokePaint);
-    }
-
-}
 
 
 public class CanvasFragment extends Fragment {
@@ -116,6 +64,8 @@ public class CanvasFragment extends Fragment {
     private View mCanvas = null;
     private int currentBrushId, eraserId, lastBrushId;
     private int mLongAnimationDuration;
+
+    Toast showedToast = null;
 
     public CanvasFragment(Bundle b) {
         color = b.getInt("color");
@@ -179,7 +129,11 @@ public class CanvasFragment extends Fragment {
             AnimatorSet animSet = new AnimatorSet();
             if (tagsVisible) {
                 if (sortedChoices.size() == 0) {
-                    showToast(getResources().getString(R.string.toast_select_tag));
+                    if (showedToast != null) {
+                        showedToast.cancel();
+                    }
+                    showedToast = showToast(this.getContext(), getResources().getString(R.string.toast_select_intensity));
+                    showedToast.show();
                     return;
                 }
                 buttonSensationsTool.setText(getResources().getString(R.string.to_tags));
@@ -207,7 +161,11 @@ public class CanvasFragment extends Fragment {
             AnimatorSet animSet = new AnimatorSet();
             if (tagsVisible) {
                 if (sortedChoices.size() == 0) {
-                    showToast(getResources().getString(R.string.toast_select_tag));
+                    if (showedToast != null) {
+                        showedToast.cancel();
+                    }
+                    showedToast = showToast(this.getContext(), getResources().getString(R.string.toast_select_intensity));
+                    showedToast.show();
                     return;
                 }
                 buttonSensationsTool.setText(getResources().getString(R.string.to_tags));
@@ -409,17 +367,6 @@ public class CanvasFragment extends Fragment {
         return mCanvas;
     }
 
-    public void showToast(String text_to_show) {
-        Toast toast = new Toast(getContext());
-        toast.setDuration(Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 500);
-        LayoutInflater inflater_toast = getLayoutInflater();
-        View toast_view = inflater_toast.inflate(R.layout.toast_bordered, mCanvas.findViewById(R.id.toast_layout));
-        TextView text = toast_view.findViewById(R.id.toast_text);
-        text.setText(text_to_show);
-        toast.setView(toast_view);
-        toast.show();
-    }
 
     private float dp2px(int dp) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
@@ -535,4 +482,7 @@ public class CanvasFragment extends Fragment {
             this.paint = new Paint(brush.paint);
         }
     }
+
+
 }
+

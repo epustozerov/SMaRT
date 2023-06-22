@@ -1,4 +1,4 @@
-package com.dm.smart.ui.elements.vertical_button;
+package com.dm.smart.ui.elements;
 
 import android.content.Context;
 import android.graphics.Canvas;
