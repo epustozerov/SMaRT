@@ -167,14 +167,11 @@ public class SubjectFragment extends Fragment {
                 Subject newSubject = extractSubjectFromTheDB(cursorSubjects);
                 subjects.add(newSubject);
             } while (cursorSubjects.moveToNext());
-//        Log.e("SELECTED SUBJECT", String.valueOf(MainActivity.currentlySelectedSubject.getId()));
-//        Log.e("PREV SELECTED SUBJECT", String.valueOf(adapter_subjects.selectedSubjectPosition));
         Integer id_to_select = MainActivity.currentlySelectedSubject.getId();
         Subject selected = subjects.stream().filter(carnet ->
                 id_to_select.equals(carnet.getId())).findFirst().orElse(null);
         adapter_subjects.selectedSubjectPosition = subjects.indexOf(selected);
         adapter_subjects.notifyDataSetChanged();
-//        Log.e("NOW SELECTED SUBJECT", String.valueOf(adapter_subjects.selectedSubjectPosition));
         cursorSubjects.close();
     }
 
@@ -187,11 +184,13 @@ public class SubjectFragment extends Fragment {
                         getColumnIndex(DBAdapter.RECORD_ID));
                 @SuppressLint("Range") int subject_id = cursorRecords.getInt(cursorRecords.
                         getColumnIndex(DBAdapter.RECORD_SUBJECT_ID));
+                @SuppressLint("Range") int n = cursorRecords.getInt(cursorRecords.
+                        getColumnIndex(DBAdapter.RECORD_N));
                 @SuppressLint("Range") String sensations = cursorRecords.getString(cursorRecords.
                         getColumnIndex(DBAdapter.RECORD_SENSATIONS));
                 @SuppressLint("Range") long timestamp = cursorRecords.getLong(cursorRecords.
                         getColumnIndex(DBAdapter.RECORD_TIMESTAMP));
-                records.add(0, new Record(id, subject_id, sensations, timestamp));
+                records.add(0, new Record(id, subject_id, n, sensations, timestamp));
             } while (cursorRecords.moveToNext());
         adapter_records.notifyDataSetChanged();
         cursorRecords.close();

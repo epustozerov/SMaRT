@@ -21,6 +21,8 @@ public class DBAdapter {
     public static final String SUBJECT_TIMESTAMP = "timestamp";
     public static final String RECORD_ID = "id";
     public static final String RECORD_SUBJECT_ID = "subject_id";
+
+    public static final String RECORD_N = "n";
     public static final String RECORD_SENSATIONS = "sensations";
     public static final String RECORD_DELETED = "deleted";
     public static final String RECORD_TIMESTAMP = "timestamp";
@@ -85,7 +87,7 @@ public class DBAdapter {
 
     Cursor getRecordsSingleSubject(long subject_id) {
         return db.query(DATABASE_TABLE_RECORDS,
-                new String[]{RECORD_ID, RECORD_SUBJECT_ID, RECORD_SENSATIONS, RECORD_TIMESTAMP},
+                new String[]{RECORD_ID, RECORD_SUBJECT_ID, RECORD_N, RECORD_SENSATIONS, RECORD_TIMESTAMP},
                 (RECORD_SUBJECT_ID + "='" + subject_id + "'") +
                         " AND " + (RECORD_DELETED + "='" + 0 + "'"),
                 null, null, null, RECORD_ID);
@@ -101,14 +103,15 @@ public class DBAdapter {
         return db.insert(DATABASE_TABLE_SUBJECTS, null, cv_new_subject);
     }
 
-    public long insertRecord(Record new_record) {
+    public void insertRecord(Record new_record) {
         ContentValues cv_new_record = new ContentValues();
         cv_new_record.put(RECORD_SUBJECT_ID, new_record.getSubjectId());
+        cv_new_record.put(RECORD_N, new_record.getN());
         cv_new_record.put(RECORD_SENSATIONS, new_record.getSensations());
         cv_new_record.put(RECORD_DELETED, 0);
         long timestamp = new Date().getTime();
         cv_new_record.put(SUBJECT_TIMESTAMP, timestamp);
-        return db.insert(DATABASE_TABLE_RECORDS, null, cv_new_record);
+        db.insert(DATABASE_TABLE_RECORDS, null, cv_new_record);
     }
 
     private static class DBOpenHelper extends SQLiteOpenHelper {
@@ -121,8 +124,9 @@ public class DBAdapter {
 
         private static final String DATABASE_CREATE_2 = "create table " + DATABASE_TABLE_RECORDS +
                 " (" + RECORD_ID + " integer primary key autoincrement, " + RECORD_SUBJECT_ID +
-                " integer, " + RECORD_SENSATIONS + " string, " + RECORD_DELETED + " integer, " +
-                RECORD_TIMESTAMP + " long);";
+                " integer, " + RECORD_N + " integer, " + RECORD_SENSATIONS + " string, " + RECORD_DELETED + " integer, " +
+                RECORD_TIMESTAMP + " long, " +
+                "FOREIGN KEY(" + RECORD_SUBJECT_ID + ") REFERENCES " + DATABASE_TABLE_SUBJECTS + "(" + SUBJECT_ID + "));";
 
         DBOpenHelper(Context context) {
             super(context, DBAdapter.DATABASE_NAME, null, DBAdapter.DATABASE_VERSION);

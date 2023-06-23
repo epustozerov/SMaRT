@@ -204,7 +204,14 @@ public class DrawFragment extends Fragment {
         }
         Log.e("THESE ARE THE SENSATIONS WE HAVE:", sensations.toString());
         Record record = new Record(patient_id, sensations.toString());
-        long record_id = DBAdapter.insertRecord(record);
+
+        // get the amount of records by patient specified with patient_id
+        Cursor cursorRecords =
+                DBAdapter.getRecordsSingleSubject(MainActivity.currentlySelectedSubject.getId());
+        int recordCount = cursorRecords.getCount();
+        cursorRecords.close();
+        record.setN(recordCount + 1);
+        DBAdapter.insertRecord(record);
         DBAdapter.close();
         long endTime = SystemClock.elapsedRealtime();
         long elapsedMilliSeconds = endTime - startTime;
@@ -215,7 +222,7 @@ public class DrawFragment extends Fragment {
         File directory = new File(
                 String.valueOf(Paths.get(String.valueOf(Environment.getExternalStoragePublicDirectory(
                                 Environment.DIRECTORY_DOCUMENTS)), "SMaRT",
-                        String.valueOf(patient_id), String.valueOf(record_id))));
+                        String.valueOf(patient_id), String.valueOf(recordCount + 1))));
         if (!directory.exists()) //noinspection ResultOfMethodCallIgnored
             directory.mkdirs();
 
