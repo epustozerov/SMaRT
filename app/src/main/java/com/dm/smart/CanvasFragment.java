@@ -65,6 +65,8 @@ public class CanvasFragment extends Fragment {
     private int currentBrushId, eraserId, lastBrushId;
     private int mLongAnimationDuration;
 
+    private boolean allowOutsideDrawing = false;
+
     Toast showedToast = null;
 
     public CanvasFragment(Bundle b) {
@@ -312,6 +314,7 @@ public class CanvasFragment extends Fragment {
             return true;
         };
 
+
         for (Brush brush : brushes) {
             ImageButton btn = new ImageButton(getContext());
             btn.setBackground(requireContext().getDrawable(R.drawable.listitem_selector));
@@ -348,6 +351,26 @@ public class CanvasFragment extends Fragment {
         btnUndo.setOnClickListener(view -> currentBodyView.undoLastStep());
         toolContainer.addView(btnUndo, lp2);
 
+        ImageButton btnOutOfBody = new ImageButton(getContext());
+
+        // Out of body button
+        btnOutOfBody.setBackground(requireContext().getDrawable(R.drawable.listitem_selector));
+        btnOutOfBody.setImageDrawable(requireContext().getDrawable(R.drawable.icon_no_out));
+        btnOutOfBody.setCropToPadding(false);
+        btnOutOfBody.setScaleType(ImageButton.ScaleType.FIT_CENTER);
+        btnOutOfBody.setOnClickListener(view -> {
+            allowOutsideDrawing = !allowOutsideDrawing;
+            currentBodyView.setAllowOutsideDrawing(allowOutsideDrawing);
+            if (allowOutsideDrawing) {
+                btnOutOfBody.setImageDrawable(requireContext().getDrawable(R.drawable.icon_out));
+            } else {
+                btnOutOfBody.setImageDrawable(requireContext().getDrawable(R.drawable.icon_no_out));
+            }
+
+        });
+        toolContainer.addView(btnOutOfBody, lp2);
+
+
         // Init intensity scale
         ColorSeekBar intensityScale = mCanvas.findViewById(R.id.color_seek_bar);
         intensityScale.setColorSeeds(define_min_max_colors(color));
@@ -382,6 +405,7 @@ public class CanvasFragment extends Fragment {
             return BitmapFactory.decodeResource(getResources(), body_type_id);
         }
     }
+
 
     @SuppressLint("ResourceType")
     private void initBrushes() {

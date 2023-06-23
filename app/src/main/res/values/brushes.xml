@@ -5,8 +5,6 @@
     <array name="brushes_list">
         <item>@array/brush_region</item>
         <item>@array/brush_line</item>
-        <item>@array/brush_line_out</item>
-        <item>@array/brush_region_out</item>
         <item>@array/brush_erase</item>
     </array>
 
@@ -22,24 +20,6 @@
     <array name="brush_line">
         <item name="title">@string/brush_line</item>
         <item name="icon">@drawable/icon_stroke</item>
-        <item name="draw_by_move">1</item>
-        <item name="thickness">10</item>
-        <item name="type">stroke</item>
-        <item name="fill_style">STROKE</item>
-    </array>
-
-    <array name="brush_region_out">
-        <item name="title">@string/brush_region_out</item>
-        <item name="icon">@drawable/icon_fill_out</item>
-        <item name="draw_by_move">1</item>
-        <item name="thickness">2</item>
-        <item name="type">fill</item>
-        <item name="fill_style">FILL</item>
-    </array>
-
-    <array name="brush_line_out">
-        <item name="title">@string/brush_line_out</item>
-        <item name="icon">@drawable/icon_stroke_out</item>
         <item name="draw_by_move">1</item>
         <item name="thickness">10</item>
         <item name="type">stroke</item>

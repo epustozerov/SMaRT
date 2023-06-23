@@ -48,6 +48,7 @@ public class BodyDrawingView extends View {
     private CanvasFragment.Brush brush = null;
 
     Toast showedToast = null;
+    private boolean allowOutsideDrawing;
 
 
     public BodyDrawingView(Context context) {
@@ -169,8 +170,7 @@ public class BodyDrawingView extends View {
         } else {
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_ATOP));
             tempCanvas.drawPath(step.path, paint);
-            if (!step.brush.title.equals(getResources().getString(R.string.brush_line_out))
-                    && !step.brush.title.equals(getResources().getString(R.string.brush_region_out))) {
+            if (!allowOutsideDrawing) {
                 paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
                 tempCanvas.drawBitmap(maskImage, 0, 0, paint);
             }
@@ -379,6 +379,10 @@ public class BodyDrawingView extends View {
         }
         invalidate();
         return true;
+    }
+
+    public void setAllowOutsideDrawing(boolean allowOutsideDrawing) {
+        this.allowOutsideDrawing = allowOutsideDrawing;
     }
 
 

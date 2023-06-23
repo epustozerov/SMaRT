@@ -35,12 +35,12 @@ public class MainActivity extends AppCompatActivity {
         DBAdapter db = new DBAdapter(this);
         db.open();
         Cursor cursor = db.getAllSubjects();
-        if (cursor.getCount() == 0) {
-            Subject defaultSubject = new Subject("Default Subject", 0);
-            db.insertSubject(defaultSubject);
-        }
         cursor.moveToFirst();
-        currentlySelectedSubject = extractSubjectFromTheDB(cursor);
+        if (cursor.getCount() > 0) {
+            currentlySelectedSubject = extractSubjectFromTheDB(cursor);
+        } else {
+            currentlySelectedSubject = new Subject("Default Subject", 0);
+        }
         db.close();
 
         com.dm.smart.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
