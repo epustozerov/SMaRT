@@ -87,6 +87,12 @@
     <string name="gender_female">Female</string>
     <string name="new_subject">New subject name</string>
     <string name="dialog_image">Overview</string>
+    <string name="dialog_close">Understood</string>
+    <string name="menu_show_instructions">Show instructions before recordings</string>
+    <string name="menu_request_password">Request password after recording</string>
+    <string name="sp_show_instructions">show_instructions</string>
+    <string name="sp_request_password">request_password</string>
+
     <string-array name="genders">
         <item>@string/gender_neutral</item>
         <item>@string/gender_female</item>

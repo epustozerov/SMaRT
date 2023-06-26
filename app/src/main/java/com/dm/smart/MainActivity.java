@@ -4,6 +4,8 @@ import static com.dm.smart.SubjectFragment.extractSubjectFromTheDB;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.Menu;
@@ -26,10 +28,14 @@ public class MainActivity extends AppCompatActivity {
 
     static Subject currentlySelectedSubject;
 
+    SharedPreferences sharedPref;
+
     @SuppressLint("NonConstantResourceId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
 
         // Add a dafault patient if the database is empty
         DBAdapter db = new DBAdapter(this);
@@ -43,9 +49,9 @@ public class MainActivity extends AppCompatActivity {
         }
         db.close();
 
-        com.dm.smart.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+        com.dm.smart.databinding.ActivityMainBinding binding =
+                ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
 
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.navigation_subject, R.id.navigation_add_sense)
@@ -59,6 +65,9 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setOnItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.navigation_add_sense:
+                    if (sharedPref.getBoolean(getString(R.string.sp_show_instructions), false)) {
+                        showInstructions();
+                    }
                     return NavigationUI.onNavDestinationSelected(item, navController);
                 case R.id.navigation_subject:
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -73,36 +82,72 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
+
+        if (sharedPref.getBoolean(getString(R.string.sp_request_password), false)) {
+            requestPassword();
+        }
+
+
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
+        boolean show_instructions = sharedPref.getBoolean(getString(R.string.sp_show_instructions), false);
+        boolean request_password = sharedPref.getBoolean(getString(R.string.sp_request_password), false);
+        menu.findItem(R.id.menu_show_instructions).setChecked(show_instructions);
+        menu.findItem(R.id.menu_request_password).setChecked(request_password);
         return true;
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         if (item.getItemId() == R.id.menu_instructions) {
-            showInstructions(item);
+            showInstructions();
             return true;
+        } else if (item.getItemId() == R.id.menu_show_instructions) {
+            item.setChecked(!item.isChecked());
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean(getString(R.string.sp_show_instructions), item.isChecked());
+            editor.apply();
+        } else if (item.getItemId() == R.id.menu_request_password) {
+            item.setChecked(!item.isChecked());
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean(getString(R.string.sp_request_password), item.isChecked());
+            editor.apply();
         }
-        return super.onOptionsItemSelected(item);
+        //return super.onOptionsItemSelected(item);
+        return false;
     }
 
     // Open alert window with instructions image on menu item click
-    public void showInstructions(android.view.MenuItem item) {
+    public void showInstructions() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         @SuppressLint("InflateParams") View alertView =
                 getLayoutInflater().inflate(R.layout.alert_image, null);
+
         ImageView image_view_body = alertView.findViewById(R.id.image_view_body);
         image_view_body.setImageResource(R.drawable.instructions);
         builder.setView(alertView);
         AlertDialog dialog = builder.create();
+        alertView.findViewById(R.id.button_close).setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
+    public void requestPassword() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        @SuppressLint("InflateParams") View alertView =
+                getLayoutInflater().inflate(R.layout.alert_image, null);
+
+        ImageView image_view_body = alertView.findViewById(R.id.image_view_body);
+        image_view_body.setImageResource(R.drawable.instructions);
+        builder.setView(alertView);
+        AlertDialog dialog = builder.create();
+        alertView.findViewById(R.id.button_close).setOnClickListener(v -> dialog.dismiss());
         dialog.show();
     }
 }

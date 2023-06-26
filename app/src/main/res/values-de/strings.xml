@@ -45,6 +45,7 @@
     <string name="menu_share">Symptomaufzeichnung teilen</string>
     <string name="menu_export_title">Empfindungen von %1$s um %2$s</string>
     <string name="menu_instructions">Anweisungen</string>
+    <string name="menu_show_instructions">Anweisungen vor den Aufnahmen anzeigen</string>
 
     <!-- List of sensation types -->
     <string name="sensation_type_1">Ausstrahlend</string>
@@ -90,6 +91,10 @@
     <string name="gender_female">weiblich</string>
     <string name="new_subject">Neuer Proband</string>
     <string name="dialog_image">Übersicht</string>
+    <string name="dialog_close">Verstanden</string>
+    <string name="sp_show_instructions">show_instructions</string>
+    <string name="sp_request_password">request_password</string>
+    <string name="menu_request_password">Passwort nach der Aufnahme anfordern</string>
     <string-array name="genders">
         <item>@string/gender_neutral</item>
         <item>@string/gender_female</item>

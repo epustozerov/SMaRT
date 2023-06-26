@@ -3,4 +3,12 @@
     <item
         android:id="@+id/menu_instructions"
         android:title="@string/menu_instructions" />
+    <item
+        android:id="@+id/menu_show_instructions"
+        android:title="@string/menu_show_instructions"
+        android:checkable="true" />
+    <item
+        android:id="@+id/menu_request_password"
+        android:title="@string/menu_request_password"
+        android:checkable="true" />
 </menu>
