@@ -32,6 +32,7 @@ import androidx.navigation.Navigation;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.dm.smart.items.Record;
+import com.dm.smart.ui.elements.CustomAlertDialogs;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -178,6 +179,11 @@ public class DrawFragment extends Fragment {
                                     navigate(R.id.navigation_subject);
                             Runnable runnable = this::storeData;
                             new Thread(runnable).start();
+                            if (MainActivity.sharedPref.getBoolean(getString(R.string.sp_request_password), false)) {
+                                android.app.AlertDialog alertDialog =
+                                        CustomAlertDialogs.requestPassword(getContext());
+                                alertDialog.show();
+                            }
                         });
         AlertDialog dialog = builder.create();
         dialog.show();

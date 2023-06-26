@@ -311,7 +311,6 @@ public class SubjectFragment extends Fragment {
         dialog.show();
     }
 
-
     @SuppressLint("ResourceType")
     public void showMergedImageDialog() throws NoSuchFieldException, IllegalAccessException {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());

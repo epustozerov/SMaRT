@@ -11,8 +11,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -22,13 +20,14 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.dm.smart.databinding.ActivityMainBinding;
 import com.dm.smart.items.Subject;
+import com.dm.smart.ui.elements.CustomAlertDialogs;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
 
     static Subject currentlySelectedSubject;
 
-    SharedPreferences sharedPref;
+    static SharedPreferences sharedPref;
 
     @SuppressLint("NonConstantResourceId")
     @Override
@@ -66,16 +65,22 @@ public class MainActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.navigation_add_sense:
                     if (sharedPref.getBoolean(getString(R.string.sp_show_instructions), false)) {
-                        showInstructions();
+                        android.app.AlertDialog alertDialog = CustomAlertDialogs.showInstructions(this);
+                        alertDialog.show();
                     }
                     return NavigationUI.onNavDestinationSelected(item, navController);
                 case R.id.navigation_subject:
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setMessage(R.string.dialog_save_images)
-                            .setPositiveButton(R.string.dialog_yes, (dialog, id) ->
-                                    NavigationUI.onNavDestinationSelected(item, navController))
-                            .setNegativeButton(R.string.dialog_no, (dialog, id) -> {
-                            });
+                    builder.setMessage(R.string.dialog_save_images);
+                    builder.setPositiveButton(R.string.dialog_continue, (dialog, id) -> {
+                        NavigationUI.onNavDestinationSelected(item, navController);
+                        if (sharedPref.getBoolean(getString(R.string.sp_request_password), false)) {
+                            AlertDialog alertDialog = CustomAlertDialogs.requestPassword(MainActivity.this);
+                            alertDialog.show();
+                        }
+                    });
+                    builder.setNegativeButton(R.string.dialog_no, (dialog, id) -> {
+                    });
                     AlertDialog dialog = builder.create();
                     dialog.show();
                     return false;
@@ -84,10 +89,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (sharedPref.getBoolean(getString(R.string.sp_request_password), false)) {
-            requestPassword();
+            android.app.AlertDialog alertDialog = CustomAlertDialogs.requestPassword(this);
+            alertDialog.show();
         }
-
-
     }
 
     @Override
@@ -105,7 +109,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         if (item.getItemId() == R.id.menu_instructions) {
-            showInstructions();
+            android.app.AlertDialog alertDialog = CustomAlertDialogs.showInstructions(this);
+            alertDialog.show();
             return true;
         } else if (item.getItemId() == R.id.menu_show_instructions) {
             item.setChecked(!item.isChecked());
@@ -113,41 +118,15 @@ public class MainActivity extends AppCompatActivity {
             editor.putBoolean(getString(R.string.sp_show_instructions), item.isChecked());
             editor.apply();
         } else if (item.getItemId() == R.id.menu_request_password) {
+            if (item.isChecked()) {
+                android.app.AlertDialog alertDialog = CustomAlertDialogs.requestPassword(this);
+                alertDialog.show();
+            }
             item.setChecked(!item.isChecked());
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putBoolean(getString(R.string.sp_request_password), item.isChecked());
             editor.apply();
         }
-        //return super.onOptionsItemSelected(item);
         return false;
-    }
-
-    // Open alert window with instructions image on menu item click
-    public void showInstructions() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        @SuppressLint("InflateParams") View alertView =
-                getLayoutInflater().inflate(R.layout.alert_image, null);
-
-        ImageView image_view_body = alertView.findViewById(R.id.image_view_body);
-        image_view_body.setImageResource(R.drawable.instructions);
-        builder.setView(alertView);
-        AlertDialog dialog = builder.create();
-        alertView.findViewById(R.id.button_close).setOnClickListener(v -> dialog.dismiss());
-        dialog.show();
-    }
-
-    public void requestPassword() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        @SuppressLint("InflateParams") View alertView =
-                getLayoutInflater().inflate(R.layout.alert_image, null);
-
-        ImageView image_view_body = alertView.findViewById(R.id.image_view_body);
-        image_view_body.setImageResource(R.drawable.instructions);
-        builder.setView(alertView);
-        AlertDialog dialog = builder.create();
-        alertView.findViewById(R.id.button_close).setOnClickListener(v -> dialog.dismiss());
-        dialog.show();
     }
 }

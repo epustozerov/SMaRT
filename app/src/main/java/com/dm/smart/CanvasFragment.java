@@ -277,7 +277,6 @@ public class CanvasFragment extends Fragment {
         for (String choice : sensation_types) {
             ToggleButton b = new ToggleButton(getContext());
             b.setBackground(requireContext().getDrawable(R.drawable.custom_radio));
-            // set text color to black
             b.setTextColor(Color.BLACK);
             b.setTextOn(choice);
             b.setTextOff(choice);
@@ -369,7 +368,6 @@ public class CanvasFragment extends Fragment {
 
         });
         toolContainer.addView(btnOutOfBody, lp2);
-
 
         // Init intensity scale
         ColorSeekBar intensityScale = mCanvas.findViewById(R.id.color_seek_bar);

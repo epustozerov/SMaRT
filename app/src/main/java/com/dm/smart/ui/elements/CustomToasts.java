@@ -10,8 +10,6 @@ import android.widget.Toast;
 import com.dm.smart.R;
 
 public class CustomToasts {
-
-
     public static Toast showToast(Context context, String text_to_show) {
         Toast toast = new Toast(context);
         toast.setDuration(Toast.LENGTH_SHORT);

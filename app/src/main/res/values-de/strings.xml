@@ -30,6 +30,9 @@
     <string name="switch_bodyview">Körperansicht wechseln</string>
     <string name="to_drawing">Zur Zeichnung</string>
     <string name="to_tags">Zur den Begriffen</string>
+    <string name="new_subject">Neuer Proband</string>
+
+    <!-- Dialogs -->
     <string name="dialog_drawing_completed">Haben Sie wirklich <b>alle Befunde</b> eingezeichnet?
         Eine nachträgliche Bearbeitung ist nicht möglich</string>
     <string name="dialog_delete_subject">Möchten Sie den Proband und <b>alle ihre Daten löschen</b>?</string>
@@ -37,8 +40,14 @@
     <string name="dialog_drawing_confirmed">"Zeichnung beenden"</string>
     <string name="dialog_save_images">"Die nicht gespeicherte Zeichnung wird gelöscht. Möchten Sie zur Probandenübersicht fortfahren?"
     </string>
+    <string name="dialog_image">Übersicht</string>
+    <string name="dialog_close">Ausblenden</string>
+    <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Ja</string>
+    <string name="dialog_continue">Fortfahren</string>
     <string name="dialog_no">Nein</string>
+
+    <!-- Menu -->
     <string name="menu_remove_subject">Ausgewählte Probanden und ihre Daten entfernen</string>
     <string name="menu_remove_record">Ausgewählten Datensatz entfernen</string>
     <string name="menu_show_image">Symptomübersicht Anzeigen</string>
@@ -46,6 +55,12 @@
     <string name="menu_export_title">Empfindungen von %1$s um %2$s</string>
     <string name="menu_instructions">Anweisungen</string>
     <string name="menu_show_instructions">Anweisungen vor den Aufnahmen anzeigen</string>
+    <string name="menu_request_password">Passwort nach der Aufnahme anfordern</string>
+    <string name="wrong_password">Falsches Passwort</string>
+
+    <!-- Shared Preferences -->
+    <string name="sp_show_instructions">show_instructions</string>
+    <string name="sp_request_password">request_password</string>
 
     <!-- List of sensation types -->
     <string name="sensation_type_1">Ausstrahlend</string>
@@ -89,12 +104,10 @@
     <string name="gender_neutral">neutral</string>
     <string name="gender_male">männlich</string>
     <string name="gender_female">weiblich</string>
-    <string name="new_subject">Neuer Proband</string>
-    <string name="dialog_image">Übersicht</string>
-    <string name="dialog_close">Verstanden</string>
-    <string name="sp_show_instructions">show_instructions</string>
-    <string name="sp_request_password">request_password</string>
-    <string name="menu_request_password">Passwort nach der Aufnahme anfordern</string>
+    <string name="password">1985</string>
+    <string name="dialog_password_title">Geben Sie das Passwort ein</string>
+    <string name="dialog_password_hint">Passwort</string>
+
     <string-array name="genders">
         <item>@string/gender_neutral</item>
         <item>@string/gender_female</item>
