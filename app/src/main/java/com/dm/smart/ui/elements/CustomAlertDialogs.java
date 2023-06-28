@@ -1,7 +1,9 @@
 package com.dm.smart.ui.elements;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -10,11 +12,16 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+
 import com.dm.smart.R;
+
+import java.util.Objects;
 
 public class CustomAlertDialogs {
 
-    public static AlertDialog requestPassword(Context context) {
+    public static AlertDialog requestPassword(Activity context, SharedPreferences sharedPref, String pref, android.view.MenuItem item) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View alertView = inflater.inflate(R.layout.alert_password, null);
@@ -24,6 +31,15 @@ public class CustomAlertDialogs {
         alertView.findViewById(R.id.button_close).setOnClickListener(v -> {
             if (password.getText().toString().equals(context.getString(R.string.password))) {
                 dialog.dismiss();
+                if (item != null) {
+                    item.setChecked(!item.isChecked());
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putBoolean(pref, item.isChecked());
+                    editor.apply();
+                    NavController navController = Navigation.findNavController(context, R.id.nav_host_fragment_activity_main);
+                    if (Objects.requireNonNull(navController.getCurrentDestination()).getId() == R.id.navigation_subject)
+                        navController.navigate(R.id.navigation_subject);
+                }
             } else {
                 password.setError(context.getString(R.string.wrong_password));
             }

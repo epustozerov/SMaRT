@@ -23,6 +23,8 @@ import com.dm.smart.items.Subject;
 import com.dm.smart.ui.elements.CustomAlertDialogs;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.Objects;
+
 public class MainActivity extends AppCompatActivity {
 
     static Subject currentlySelectedSubject;
@@ -75,7 +77,8 @@ public class MainActivity extends AppCompatActivity {
                     builder.setPositiveButton(R.string.dialog_continue, (dialog, id) -> {
                         NavigationUI.onNavDestinationSelected(item, navController);
                         if (sharedPref.getBoolean(getString(R.string.sp_request_password), false)) {
-                            AlertDialog alertDialog = CustomAlertDialogs.requestPassword(MainActivity.this);
+                            AlertDialog alertDialog = CustomAlertDialogs.requestPassword(
+                                    MainActivity.this, null, null, null);
                             alertDialog.show();
                         }
                     });
@@ -89,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (sharedPref.getBoolean(getString(R.string.sp_request_password), false)) {
-            android.app.AlertDialog alertDialog = CustomAlertDialogs.requestPassword(this);
+            android.app.AlertDialog alertDialog = CustomAlertDialogs.requestPassword(this, null, null, null);
             alertDialog.show();
         }
     }
@@ -100,11 +103,14 @@ public class MainActivity extends AppCompatActivity {
         inflater.inflate(R.menu.main_menu, menu);
         boolean show_instructions = sharedPref.getBoolean(getString(R.string.sp_show_instructions), false);
         boolean request_password = sharedPref.getBoolean(getString(R.string.sp_request_password), false);
+        boolean show_names = sharedPref.getBoolean(getString(R.string.sp_show_names), false);
         menu.findItem(R.id.menu_show_instructions).setChecked(show_instructions);
         menu.findItem(R.id.menu_request_password).setChecked(request_password);
+        menu.findItem(R.id.menu_show_names).setChecked(show_names);
         return true;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
@@ -118,14 +124,30 @@ public class MainActivity extends AppCompatActivity {
             editor.putBoolean(getString(R.string.sp_show_instructions), item.isChecked());
             editor.apply();
         } else if (item.getItemId() == R.id.menu_request_password) {
+            String pref = getString(R.string.sp_request_password);
             if (item.isChecked()) {
-                android.app.AlertDialog alertDialog = CustomAlertDialogs.requestPassword(this);
+                android.app.AlertDialog alertDialog = CustomAlertDialogs.requestPassword(this, sharedPref, pref, item);
                 alertDialog.show();
+            } else {
+                item.setChecked(!item.isChecked());
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean(pref, item.isChecked());
+                editor.apply();
             }
-            item.setChecked(!item.isChecked());
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean(getString(R.string.sp_request_password), item.isChecked());
-            editor.apply();
+        } else if (item.getItemId() == R.id.menu_show_names) {
+            String pref = getString(R.string.sp_show_names);
+            if (!item.isChecked()) {
+                android.app.AlertDialog alertDialog = CustomAlertDialogs.requestPassword(this, sharedPref, pref, item);
+                alertDialog.show();
+            } else {
+                item.setChecked(!item.isChecked());
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean(pref, item.isChecked());
+                editor.apply();
+            }
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+            if (Objects.requireNonNull(navController.getCurrentDestination()).getId() == R.id.navigation_subject)
+                navController.navigate(R.id.navigation_subject);
         }
         return false;
     }

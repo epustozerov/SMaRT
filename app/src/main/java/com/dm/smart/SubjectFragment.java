@@ -6,7 +6,9 @@ import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_SHOW_IMAGE;
 import static com.dm.smart.RecyclerViewAdapterSubjects.SUBJECT_DELETE;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -60,8 +62,10 @@ public class SubjectFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Read shared preference to shown subjects' names
+        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        boolean show_names = sharedPref.getBoolean(getString(R.string.sp_show_names), false);
         View mView = inflater.inflate(R.layout.fragment_subject, container, false);
-        // Log.e("SELECTED SUBJECT", String.valueOf(MainActivity.currentlySelectedSubject.getId()));
 
         // Spinner for Gender selection
         Spinner spinner = mView.findViewById(R.id.spinner_gender);
@@ -74,7 +78,7 @@ public class SubjectFragment extends Fragment {
         RecyclerView list_view_subjects = mView.findViewById(R.id.list_view_subjects);
         list_view_subjects.setLayoutManager(new LinearLayoutManager(requireActivity()));
         subjects = new ArrayList<>();
-        adapter_subjects = new RecyclerViewAdapterSubjects(requireActivity(), subjects);
+        adapter_subjects = new RecyclerViewAdapterSubjects(requireActivity(), subjects, show_names);
         list_view_subjects.setAdapter(adapter_subjects);
         adapter_subjects.setClickListener((int position) -> {
             int previousSelectedSubjectId = adapter_subjects.selectedSubjectPosition;
@@ -327,11 +331,11 @@ public class SubjectFragment extends Fragment {
         Subject selected_subject = subjects.get(adapter_subjects.selectedSubjectPosition);
         cursorSingleSubject.close();
         File image_sensations_front = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selected_subject.getId() + " " +
-                selected_subject.getName() + "/" + selectedRecord.getId() + "/complete_picture_f.png");
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selected_subject.getId()
+                + "/" + selectedRecord.getId() + "/complete_picture_f.png");
         File image_sensations_back = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selected_subject.getId() + " " +
-                selected_subject.getName() + "/" + selectedRecord.getId() + "/complete_picture_b.png");
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selected_subject.getId()
+                + "/" + selectedRecord.getId() + "/complete_picture_b.png");
         Bitmap sensations_front = BitmapFactory.decodeFile(image_sensations_front.getAbsolutePath());
         Bitmap sensations_back = BitmapFactory.decodeFile(image_sensations_back.getAbsolutePath());
         current_view_front = true;
@@ -339,6 +343,7 @@ public class SubjectFragment extends Fragment {
         image_view_body.setOnClickListener(v -> reverse_body_view(image_view_body, sensations_front, sensations_back));
         builder.setView(alertView);
         AlertDialog dialog = builder.create();
+        alertView.findViewById(R.id.button_close).setOnClickListener(v -> dialog.dismiss());
         dialog.show();
     }
 
@@ -355,6 +360,9 @@ public class SubjectFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        boolean show_names = sharedPref.getBoolean(getString(R.string.sp_show_names), false);
+        adapter_subjects.setShowNames(show_names);
         populateListSubjects();
         populateListRecords();
     }

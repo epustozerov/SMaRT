@@ -30,11 +30,21 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
     public int selectedSubjectPosition = 0;
     private ItemClickListener mClickListener;
 
+    private boolean show_names;
+
+    private final String string_subject;
+
     // data is passed into the constructor
-    RecyclerViewAdapterSubjects(Context context, List<Subject> data) {
+    RecyclerViewAdapterSubjects(Context context, List<Subject> subjects, boolean show_names) {
         this.mInflater = LayoutInflater.from(context);
-        this.mSubjects = data;
+        this.mSubjects = subjects;
         this.mContext = context;
+        this.show_names = show_names;
+        this.string_subject = context.getResources().getString(R.string.subject);
+    }
+
+    public void setShowNames(boolean show_names) {
+        this.show_names = show_names;
     }
 
     // inflates the row layout from xml when needed
@@ -47,9 +57,12 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
 
     // binds the data to the TextView in each row
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Subject subject = mSubjects.get(position);
-        holder.myTextView.setText(String.format("%s", subject.getName()));
+        if (show_names)
+            holder.myTextView.setText(String.format("%s", subject.getName()));
+        else
+            holder.myTextView.setText(String.format(string_subject + " %s", subject.getId()));
         if (selectedSubjectPosition == position) {
             holder.myTextView.setTextColor(ContextCompat.getColor(mContext, R.color.gray_dark));
             holder.myTextView.setTypeface(null, Typeface.BOLD);

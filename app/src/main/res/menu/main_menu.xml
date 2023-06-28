@@ -11,4 +11,8 @@
         android:id="@+id/menu_request_password"
         android:title="@string/menu_request_password"
         android:checkable="true" />
+    <item
+        android:id="@+id/menu_show_names"
+        android:title="@string/menu_show_names"
+        android:checkable="true" />
 </menu>

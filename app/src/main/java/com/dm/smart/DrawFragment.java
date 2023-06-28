@@ -197,7 +197,7 @@ public class DrawFragment extends Fragment {
                             new Thread(runnable).start();
                             if (MainActivity.sharedPref.getBoolean(getString(R.string.sp_request_password), false)) {
                                 android.app.AlertDialog alertDialog =
-                                        CustomAlertDialogs.requestPassword(getContext());
+                                        CustomAlertDialogs.requestPassword(getActivity(), null, null, null);
                                 alertDialog.show();
                             }
                         });
