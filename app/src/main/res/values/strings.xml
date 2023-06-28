@@ -30,6 +30,11 @@
     <string name="records"><b>Records:</b></string>
     <string name="sensation">Sensation</string>
     <string name="new_subject">New subject name</string>
+    <string name="password">1985</string>
+    <string name="wrong_password">Wrong password</string>
+    <string name="textview_general_view">General view</string>
+
+    <!-- Dialogs -->
     <string name="dialog_drawing_completed">"Did you really draw <b>all Symptoms</b>? Subsequent editing is not possible."</string>
     <string name="dialog_delete_subject">"Do you want to delete the subject and <b>all their Data?</b>?"</string>
     <string name="dialog_delete_record">"Do you want to delete selected record?"</string>
@@ -41,6 +46,11 @@
     <string name="dialog_image">Overview</string>
     <string name="dialog_close">Hide</string>
     <string name="dialog_ok">OK</string>
+    <string name="dialog_password_title">Enter the password</string>
+    <string name="dialog_password_hint">Password</string>
+
+
+    <!-- Menu -->
     <string name="menu_remove_subject">Remove selected subject and their records</string>
     <string name="menu_remove_record">Remove selected record</string>
     <string name="menu_show_image">Display symptom overview</string>
@@ -49,6 +59,7 @@
     <string name="menu_instructions">Instructions</string>
     <string name="menu_show_instructions">Show instructions before recordings</string>
     <string name="menu_request_password">Request password after recording</string>
+
 
     <!-- Shared Preferences -->
     <string name="sp_show_instructions">show_instructions</string>
@@ -96,10 +107,6 @@
     <string name="gender_neutral">Neutral</string>
     <string name="gender_male">Male</string>
     <string name="gender_female">Female</string>
-    <string name="password">1985</string>
-    <string name="wrong_password">Wrong password</string>
-    <string name="dialog_password_title">Enter the password</string>
-    <string name="dialog_password_hint">Password</string>
     <string-array name="genders">
         <item>@string/gender_neutral</item>
         <item>@string/gender_female</item>

@@ -2,6 +2,9 @@ package com.dm.smart.ui.elements;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -42,4 +45,17 @@ public class CustomAlertDialogs {
         return dialog;
     }
 
+    public static AlertDialog showGeneralView(Context context, Bitmap bitmap) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View alertView =
+                inflater.inflate(R.layout.alert_image, null);
+        ImageView image_view_body = alertView.findViewById(R.id.image_view_body);
+        Drawable d = new BitmapDrawable(context.getResources(), bitmap);
+        image_view_body.setBackground(d);
+        builder.setView(alertView);
+        AlertDialog dialog = builder.create();
+        alertView.findViewById(R.id.button_close).setOnClickListener(v -> dialog.dismiss());
+        return dialog;
+    }
 }

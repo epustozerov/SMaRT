@@ -46,9 +46,8 @@ import java.util.stream.Collectors;
 
 public class DrawFragment extends Fragment {
 
-    ViewPager2 viewPager;
-
-    ViewPagerAdapter viewPagerAdapter;
+    public ViewPager2 viewPager;
+    public ViewPagerAdapter viewPagerAdapter;
 
     List<Integer> colors;
     Lifecycle lifecycle;
@@ -114,6 +113,14 @@ public class DrawFragment extends Fragment {
         viewPager = view.findViewById(R.id.view_pager);
         viewPager.setUserInputEnabled(false);
         viewPager.setOffscreenPageLimit(10);
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                updateGeneralView();
+            }
+        });
+
         for (int i = 0; i < viewPagerAdapter.fragmentManager.getFragments().size(); i++) {
             Fragment f = viewPagerAdapter.fragmentManager.getFragments().get(i);
             if (f != null) {
@@ -162,7 +169,16 @@ public class DrawFragment extends Fragment {
         b.putInt("color", color);
         viewPagerAdapter.add(b);
         viewPagerAdapter.notifyItemChanged(newPageIndex);
-        viewPager.setCurrentItem(newPageIndex);
+
+        // if this is not the first tab, update the general view
+        if (newPageIndex > 0) {
+            Runnable runnable = () -> {
+                updateGeneralView();
+                viewPager.setCurrentItem(newPageIndex);
+            };
+            viewPager.post(runnable);
+        }
+
         long endTime = SystemClock.elapsedRealtime();
         long elapsedMilliSeconds = endTime - startTime;
         double elapsedSeconds = elapsedMilliSeconds / 1000.0;
@@ -293,9 +309,9 @@ public class DrawFragment extends Fragment {
             SaveSnapshotTask.doInBackground(merged_f, directory, "merged_sensations_f.png");
             SaveSnapshotTask.doInBackground(merged_b, directory, "merged_sensations_b.png");
             assert cf_base != null;
-            Bitmap full_f = make_full_picture(merged_f, cf_base.bodyViewFront.backgroundImage, sensations.toString());
+            Bitmap full_f = makeFullPicture(merged_f, cf_base.bodyViewFront.backgroundImage, sensations.toString());
             SaveSnapshotTask.doInBackground(full_f, directory, "complete_picture_f.png");
-            Bitmap full_b = make_full_picture(merged_b, cf_base.bodyViewBack.backgroundImage, sensations.toString());
+            Bitmap full_b = makeFullPicture(merged_b, cf_base.bodyViewBack.backgroundImage, sensations.toString());
             SaveSnapshotTask.doInBackground(full_b, directory, "complete_picture_b.png");
             endTime = SystemClock.elapsedRealtime();
             elapsedMilliSeconds = endTime - startTime;
@@ -304,6 +320,83 @@ public class DrawFragment extends Fragment {
         }
     }
 
+    void updateGeneralView() {
+
+        long startTime = SystemClock.elapsedRealtime();
+        int createdWindows = viewPagerAdapter.getItemCount();
+
+        if (createdWindows > 0) {
+            int height = 1494;
+            int width = 2200;
+            Bitmap.Config config = Bitmap.Config.ARGB_8888;
+
+            for (int i = 0; i < createdWindows; i++) {
+                CanvasFragment cf =
+                        (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
+                if (cf != null) {
+                    if (cf.bodyViewFront.snapshot != null) {
+                        height = cf.bodyViewFront.snapshot.getHeight();
+                        width = cf.bodyViewFront.snapshot.getWidth();
+                        config = cf.bodyViewFront.snapshot.getConfig();
+                        break;
+                    } else if (cf.bodyViewBack.snapshot != null) {
+                        height = cf.bodyViewBack.snapshot.getHeight();
+                        width = cf.bodyViewBack.snapshot.getWidth();
+                        config = cf.bodyViewBack.snapshot.getConfig();
+                        break;
+                    }
+                }
+            }
+
+            // Create the merged image with all sensations
+            Bitmap merged_f = Bitmap.createBitmap(width, height, config);
+            Bitmap merged_b = Bitmap.createBitmap(width, height, config);
+            Canvas canvasMergedFront = new Canvas(merged_f);
+            Canvas canvasMergedBack = new Canvas(merged_b);
+            for (int i = 0; i < createdWindows; i++) {
+                if (viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i) == null) continue;
+                CanvasFragment cf =
+                        (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
+                assert cf != null;
+                if (cf.bodyViewFront.snapshot != null)
+                    canvasMergedFront.drawBitmap(cf.bodyViewFront.snapshot, 0f, 0f, null);
+                if (cf.bodyViewBack.snapshot != null)
+                    canvasMergedBack.drawBitmap(cf.bodyViewBack.snapshot, 0f, 0f, null);
+                long endTime = SystemClock.elapsedRealtime();
+                long elapsedMilliSeconds = endTime - startTime;
+                double elapsedSeconds = elapsedMilliSeconds / 1000.0;
+                Log.e("UPDATE", "Particular canvas storage elapsed time: " + elapsedSeconds);
+            }
+
+            // Update the general view of each fragment
+            for (int i = 0; i < createdWindows; i++) {
+                if (viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i) == null) continue;
+                CanvasFragment cf =
+                        (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
+                assert cf != null;
+                cf.generalViewFront = merged_f;
+                cf.generalViewBack = merged_b;
+                // set front or back image
+                if (cf.current_state_front) {
+                    Bitmap background = cf.bodyViewFront.backgroundImage;
+                    Bitmap full_picture = Bitmap.createBitmap(background.getWidth(),
+                            background.getHeight() + 100, background.getConfig());
+                    Canvas canvas = new Canvas(full_picture);
+                    canvas.drawBitmap(background, 0f, 0f, null);
+                    canvas.drawBitmap(merged_f, 0f, 0f, null);
+                    cf.imageViewComplete.setImageBitmap(Bitmap.createScaledBitmap(full_picture, 149, 220, true));
+                } else {
+                    Bitmap background = cf.bodyViewBack.backgroundImage;
+                    Bitmap full_picture = Bitmap.createBitmap(background.getWidth(),
+                            background.getHeight() + 100, background.getConfig());
+                    Canvas canvas = new Canvas(full_picture);
+                    canvas.drawBitmap(background, 0f, 0f, null);
+                    canvas.drawBitmap(merged_b, 0f, 0f, null);
+                    cf.imageViewComplete.setImageBitmap(Bitmap.createScaledBitmap(full_picture, 149, 220, true));
+                }
+            }
+        }
+    }
 
     @SuppressWarnings("deprecation")
     abstract static class SaveSnapshotTask extends AsyncTask<Bitmap, String, Void> {
@@ -328,7 +421,7 @@ public class DrawFragment extends Fragment {
         }
     }
 
-    Bitmap make_full_picture(Bitmap sensations, Bitmap background, String text_sensations) {
+    Bitmap makeFullPicture(Bitmap sensations, Bitmap background, String text_sensations) {
         ArrayList<String> list_sensations = new ArrayList<>(Arrays.asList(text_sensations.split(";")));
         Bitmap full_picture = Bitmap.createBitmap(background.getWidth(),
                 background.getHeight() + 100 * list_sensations.size(), background.getConfig());
@@ -438,6 +531,4 @@ public class DrawFragment extends Fragment {
         Log.e("DEBUG", "OnAttach of DrawFragment");
         super.onAttach(context);
     }
-
-
 }

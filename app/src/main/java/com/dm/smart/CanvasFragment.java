@@ -1,19 +1,22 @@
 package com.dm.smart;
 
-import static com.dm.smart.ui.elements.CustomToasts.showToast;
 import static com.dm.smart.DrawFragment.dampen;
 import static com.dm.smart.DrawFragment.define_min_max_colors;
+import static com.dm.smart.ui.elements.CustomAlertDialogs.showGeneralView;
+import static com.dm.smart.ui.elements.CustomToasts.showToast;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
@@ -52,13 +55,19 @@ public class CanvasFragment extends Fragment {
 
     public BodyDrawingView bodyViewFront;
     public BodyDrawingView bodyViewBack;
+
+    public Bitmap generalViewFront;
+
+    public Bitmap generalViewBack;
+
+    ImageView imageViewComplete;
     TypedArray body_figures;
     private BodyDrawingView currentBodyView;
     private BodyDrawingView hiddenBodyView;
     private Brush currentBrush;
     private List<Brush> brushes;
     private int currentIntensity;
-    private boolean current_state_front;
+    boolean current_state_front;
     private boolean tagsVisible = true;
     private int dampenedColor;
     private View mCanvas = null;
@@ -87,7 +96,7 @@ public class CanvasFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
+        current_state_front = true;
         body_figures = getResources().obtainTypedArray(R.array.body_figures_neutral);
         switch (MainActivity.currentlySelectedSubject.getGender()) {
             case 0:
@@ -109,8 +118,6 @@ public class CanvasFragment extends Fragment {
         final LinearLayout tagContainerSensations = mCanvas.findViewById(R.id.drawn_sensations);
 
         // Init body figures for drawing
-
-
         bodyViewFront = mCanvas.findViewById(R.id.drawing_view_front);
         bodyViewFront.setBGImage(setBodyImage(body_figures.getResourceId(0, 0), false));
         bodyViewFront.setMaskImage(setBodyImage(body_figures.getResourceId(1, 0), false));
@@ -182,6 +189,48 @@ public class CanvasFragment extends Fragment {
             animSet.start();
         });
 
+        // Init the complete image view
+        imageViewComplete = mCanvas.findViewById(R.id.button_general_view);
+        if (current_state_front) {
+            imageViewComplete.setImageBitmap(setBodyImage(body_figures.getResourceId(0, 0), true));
+        } else {
+            imageViewComplete.setImageBitmap(setBodyImage(body_figures.getResourceId(2, 0), true));
+        }
+        imageViewComplete.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        generalViewFront = Bitmap.createBitmap(bodyViewFront.backgroundImage.getWidth(),
+                bodyViewFront.backgroundImage.getHeight(), Bitmap.Config.ARGB_8888);
+        generalViewBack = Bitmap.createBitmap(bodyViewBack.backgroundImage.getWidth(),
+                bodyViewBack.backgroundImage.getHeight(), Bitmap.Config.ARGB_8888);
+        imageViewComplete.setOnClickListener(v -> {
+            if (current_state_front) {
+                Bitmap generalViewFrontBitmap =
+                        Bitmap.createBitmap(bodyViewFront.backgroundImage.getWidth(), bodyViewFront.backgroundImage.getHeight(),
+                                Bitmap.Config.ARGB_8888);
+                Canvas generalViewFrontCanvas = new Canvas(generalViewFrontBitmap);
+                generalViewFrontCanvas.drawBitmap(setBodyImage(
+                        body_figures.getResourceId(0, 0), false), 0, 0, null);
+                generalViewFrontCanvas.drawBitmap(generalViewFront, 0, 0, null);
+                if (bodyViewFront.snapshot != null) {
+                    generalViewFrontCanvas.drawBitmap(bodyViewFront.snapshot, 0, 0, null);
+                }
+                AlertDialog alertDialog = showGeneralView(getContext(), generalViewFrontBitmap);
+                alertDialog.show();
+            } else {
+                Bitmap generalViewBackBitmap =
+                        Bitmap.createBitmap(bodyViewBack.backgroundImage.getWidth(), bodyViewBack.backgroundImage.getHeight(),
+                                Bitmap.Config.ARGB_8888);
+                Canvas generalViewBackCanvas = new Canvas(generalViewBackBitmap);
+                generalViewBackCanvas.drawBitmap(setBodyImage(
+                        body_figures.getResourceId(2, 0), false), 0, 0, null);
+                generalViewBackCanvas.drawBitmap(generalViewBack, 0, 0, null);
+                if (bodyViewBack.snapshot != null) {
+                    generalViewBackCanvas.drawBitmap(bodyViewBack.snapshot, 0, 0, null);
+                }
+                AlertDialog alertDialog = showGeneralView(getContext(), generalViewBackBitmap);
+                alertDialog.show();
+            }
+        });
+
         // Init switch of front and back body images
         mLongAnimationDuration = getResources().getInteger(android.R.integer.config_longAnimTime);
         final ImageButton btnSwitchBody = mCanvas.findViewById(R.id.button_switch_bodyview);
@@ -189,7 +238,6 @@ public class CanvasFragment extends Fragment {
         btnSwitchBody.setImageBitmap(setBodyImage(body_figures.getResourceId(3, 0), true));
         btnSwitchBody.setScaleType(ImageView.ScaleType.FIT_CENTER);
         textViewSwitchBody.setText(getResources().getString(R.string.back_view));
-        current_state_front = true;
         TypedArray finalBody_figures = body_figures;
         btnSwitchBody.setOnClickListener(v -> {
             if (!current_state_front) {
@@ -198,12 +246,14 @@ public class CanvasFragment extends Fragment {
                 current_state_front = true;
                 currentBodyView = bodyViewBack;
                 hiddenBodyView = bodyViewFront;
+                updateGeneralView(generalViewFront, bodyViewFront.backgroundImage);
             } else {
                 btnSwitchBody.setImageBitmap(setBodyImage(finalBody_figures.getResourceId(1, 0), true));
                 textViewSwitchBody.setText(getResources().getString(R.string.front_view));
                 current_state_front = false;
                 currentBodyView = bodyViewFront;
                 hiddenBodyView = bodyViewBack;
+                updateGeneralView(generalViewBack, bodyViewBack.backgroundImage);
             }
             v.setEnabled(false);
             hiddenBodyView.setAlpha(0f);
@@ -313,7 +363,6 @@ public class CanvasFragment extends Fragment {
             return true;
         };
 
-
         for (Brush brush : brushes) {
             ImageButton btn = new ImageButton(getContext());
             btn.setBackground(requireContext().getDrawable(R.drawable.listitem_selector));
@@ -388,7 +437,6 @@ public class CanvasFragment extends Fragment {
         return mCanvas;
     }
 
-
     private float dp2px(int dp) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
                 getResources().getDisplayMetrics());
@@ -433,6 +481,16 @@ public class CanvasFragment extends Fragment {
             tempBrush.paint = tempPaint;
             brushes.add(tempBrush);
         }
+    }
+
+
+    private void updateGeneralView(Bitmap merged, Bitmap background) {
+        Bitmap full_picture = Bitmap.createBitmap(background.getWidth(),
+                background.getHeight() + 100, background.getConfig());
+        Canvas canvas = new Canvas(full_picture);
+        canvas.drawBitmap(background, 0f, 0f, null);
+        canvas.drawBitmap(merged, 0f, 0f, null);
+        imageViewComplete.setImageBitmap(Bitmap.createScaledBitmap(full_picture, 149, 220, true));
     }
 
     @Override

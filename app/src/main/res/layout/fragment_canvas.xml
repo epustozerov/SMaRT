@@ -58,6 +58,40 @@
                         android:animateLayoutChanges="false"
                         tools:ignore="NestedWeights">
 
+                        <FrameLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="top|start"
+                            android:layout_marginStart="32dp"
+                            android:background="@drawable/switch_bodyview_roundcorner"
+                            android:elevation="8dp"
+                            android:orientation="vertical">
+
+                            <ImageButton
+                                android:id="@+id/button_general_view"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center|top"
+                                android:background="@null"
+                                android:contentDescription="@string/switch_bodyview"
+                                android:paddingLeft="10dp"
+                                android:paddingTop="10dp"
+                                android:paddingRight="10dp"
+                                android:paddingBottom="40dp"
+                                android:scaleType="center" />
+
+                            <TextView
+                                android:id="@+id/textview_general_view"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center|bottom"
+                                android:clickable="false"
+                                android:gravity="center"
+                                android:textAllCaps="true"
+                                android:text="@string/textview_general_view"
+                                android:textStyle="bold" />
+                        </FrameLayout>
+
                         <com.dm.smart.BodyDrawingView
                             android:id="@+id/drawing_view_front"
                             android:layout_width="match_parent"

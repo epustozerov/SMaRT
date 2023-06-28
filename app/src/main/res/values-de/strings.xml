@@ -31,6 +31,7 @@
     <string name="to_drawing">Zur Zeichnung</string>
     <string name="to_tags">Zur den Begriffen</string>
     <string name="new_subject">Neuer Proband</string>
+    <string name="textview_general_view">Gesamtansicht</string>
 
     <!-- Dialogs -->
     <string name="dialog_drawing_completed">Haben Sie wirklich <b>alle Befunde</b> eingezeichnet?
@@ -46,6 +47,8 @@
     <string name="dialog_yes">Ja</string>
     <string name="dialog_continue">Fortfahren</string>
     <string name="dialog_no">Nein</string>
+    <string name="dialog_password_title">Geben Sie das Passwort ein</string>
+    <string name="dialog_password_hint">Passwort</string>
 
     <!-- Menu -->
     <string name="menu_remove_subject">Ausgewählte Probanden und ihre Daten entfernen</string>
@@ -105,8 +108,7 @@
     <string name="gender_male">männlich</string>
     <string name="gender_female">weiblich</string>
     <string name="password">1985</string>
-    <string name="dialog_password_title">Geben Sie das Passwort ein</string>
-    <string name="dialog_password_hint">Passwort</string>
+
 
     <string-array name="genders">
         <item>@string/gender_neutral</item>
