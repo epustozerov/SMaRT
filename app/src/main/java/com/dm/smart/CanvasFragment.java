@@ -60,7 +60,9 @@ public class CanvasFragment extends Fragment {
 
     public Bitmap generalViewBack;
 
-    ImageView imageViewComplete;
+    ImageView buttonCompleteView;
+
+    ImageView buttonBackView;
     TypedArray body_figures;
     private BodyDrawingView currentBodyView;
     private BodyDrawingView hiddenBodyView;
@@ -190,18 +192,18 @@ public class CanvasFragment extends Fragment {
         });
 
         // Init the complete image view
-        imageViewComplete = mCanvas.findViewById(R.id.button_general_view);
+        buttonCompleteView = mCanvas.findViewById(R.id.button_general_view);
         if (current_state_front) {
-            imageViewComplete.setImageBitmap(setBodyImage(body_figures.getResourceId(0, 0), true));
+            buttonCompleteView.setImageBitmap(setBodyImage(body_figures.getResourceId(0, 0), true));
         } else {
-            imageViewComplete.setImageBitmap(setBodyImage(body_figures.getResourceId(2, 0), true));
+            buttonCompleteView.setImageBitmap(setBodyImage(body_figures.getResourceId(2, 0), true));
         }
-        imageViewComplete.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        buttonCompleteView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         generalViewFront = Bitmap.createBitmap(bodyViewFront.backgroundImage.getWidth(),
                 bodyViewFront.backgroundImage.getHeight(), Bitmap.Config.ARGB_8888);
         generalViewBack = Bitmap.createBitmap(bodyViewBack.backgroundImage.getWidth(),
                 bodyViewBack.backgroundImage.getHeight(), Bitmap.Config.ARGB_8888);
-        imageViewComplete.setOnClickListener(v -> {
+        buttonCompleteView.setOnClickListener(v -> {
             if (current_state_front) {
                 Bitmap generalViewFrontBitmap =
                         Bitmap.createBitmap(bodyViewFront.backgroundImage.getWidth(), bodyViewFront.backgroundImage.getHeight(),
@@ -233,27 +235,29 @@ public class CanvasFragment extends Fragment {
 
         // Init switch of front and back body images
         mLongAnimationDuration = getResources().getInteger(android.R.integer.config_longAnimTime);
-        final ImageButton btnSwitchBody = mCanvas.findViewById(R.id.button_switch_bodyview);
+        buttonBackView = mCanvas.findViewById(R.id.button_switch_bodyview);
         final TextView textViewSwitchBody = mCanvas.findViewById(R.id.textview_switch_bodyview);
-        btnSwitchBody.setImageBitmap(setBodyImage(body_figures.getResourceId(3, 0), true));
-        btnSwitchBody.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        buttonBackView.setImageBitmap(setBodyImage(body_figures.getResourceId(3, 0), true));
+        buttonBackView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         textViewSwitchBody.setText(getResources().getString(R.string.back_view));
         TypedArray finalBody_figures = body_figures;
-        btnSwitchBody.setOnClickListener(v -> {
+        buttonBackView.setOnClickListener(v -> {
             if (!current_state_front) {
-                btnSwitchBody.setImageBitmap(setBodyImage(finalBody_figures.getResourceId(3, 0), true));
+                buttonBackView.setImageBitmap(setBodyImage(finalBody_figures.getResourceId(3, 0), true));
                 textViewSwitchBody.setText(getResources().getString(R.string.back_view));
                 current_state_front = true;
                 currentBodyView = bodyViewBack;
                 hiddenBodyView = bodyViewFront;
                 updateGeneralView(generalViewFront, bodyViewFront.backgroundImage);
+                updateBackView(bodyViewBack.snapshot, bodyViewBack.backgroundImage);
             } else {
-                btnSwitchBody.setImageBitmap(setBodyImage(finalBody_figures.getResourceId(1, 0), true));
+                buttonBackView.setImageBitmap(setBodyImage(finalBody_figures.getResourceId(1, 0), true));
                 textViewSwitchBody.setText(getResources().getString(R.string.front_view));
                 current_state_front = false;
                 currentBodyView = bodyViewFront;
                 hiddenBodyView = bodyViewBack;
                 updateGeneralView(generalViewBack, bodyViewBack.backgroundImage);
+                updateBackView(bodyViewFront.snapshot, bodyViewFront.backgroundImage);
             }
             v.setEnabled(false);
             hiddenBodyView.setAlpha(0f);
@@ -490,7 +494,16 @@ public class CanvasFragment extends Fragment {
         Canvas canvas = new Canvas(full_picture);
         canvas.drawBitmap(background, 0f, 0f, null);
         canvas.drawBitmap(merged, 0f, 0f, null);
-        imageViewComplete.setImageBitmap(Bitmap.createScaledBitmap(full_picture, 149, 220, true));
+        buttonCompleteView.setImageBitmap(Bitmap.createScaledBitmap(full_picture, 149, 220, true));
+    }
+
+    private void updateBackView(Bitmap sensations, Bitmap background) {
+        Bitmap full_picture = Bitmap.createBitmap(background.getWidth(),
+                background.getHeight() + 100, background.getConfig());
+        Canvas canvas = new Canvas(full_picture);
+        canvas.drawBitmap(background, 0f, 0f, null);
+        canvas.drawBitmap(sensations, 0f, 0f, null);
+        buttonBackView.setImageBitmap(Bitmap.createScaledBitmap(full_picture, 149, 220, true));
     }
 
     @Override

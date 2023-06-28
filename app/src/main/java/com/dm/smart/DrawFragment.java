@@ -384,7 +384,7 @@ public class DrawFragment extends Fragment {
                     Canvas canvas = new Canvas(full_picture);
                     canvas.drawBitmap(background, 0f, 0f, null);
                     canvas.drawBitmap(merged_f, 0f, 0f, null);
-                    cf.imageViewComplete.setImageBitmap(Bitmap.createScaledBitmap(full_picture, 149, 220, true));
+                    cf.buttonCompleteView.setImageBitmap(Bitmap.createScaledBitmap(full_picture, 149, 220, true));
                 } else {
                     Bitmap background = cf.bodyViewBack.backgroundImage;
                     Bitmap full_picture = Bitmap.createBitmap(background.getWidth(),
@@ -392,7 +392,7 @@ public class DrawFragment extends Fragment {
                     Canvas canvas = new Canvas(full_picture);
                     canvas.drawBitmap(background, 0f, 0f, null);
                     canvas.drawBitmap(merged_b, 0f, 0f, null);
-                    cf.imageViewComplete.setImageBitmap(Bitmap.createScaledBitmap(full_picture, 149, 220, true));
+                    cf.buttonCompleteView.setImageBitmap(Bitmap.createScaledBitmap(full_picture, 149, 220, true));
                 }
             }
         }
