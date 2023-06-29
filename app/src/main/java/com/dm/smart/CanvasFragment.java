@@ -74,7 +74,7 @@ public class CanvasFragment extends Fragment {
     private int dampenedColor;
     private View mCanvas = null;
     private int currentBrushId, eraserId, lastBrushId;
-    private int mLongAnimationDuration;
+    private int mShortAnimationDuration;
 
     private boolean allowOutsideDrawing = false;
 
@@ -234,7 +234,7 @@ public class CanvasFragment extends Fragment {
         });
 
         // Init switch of front and back body images
-        mLongAnimationDuration = getResources().getInteger(android.R.integer.config_longAnimTime);
+        mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         buttonBackView = mCanvas.findViewById(R.id.button_switch_bodyview);
         final TextView textViewSwitchBody = mCanvas.findViewById(R.id.textview_switch_bodyview);
         buttonBackView.setImageBitmap(setBodyImage(body_figures.getResourceId(3, 0), true));
@@ -267,7 +267,7 @@ public class CanvasFragment extends Fragment {
             // listener set on the view
             hiddenBodyView.animate()
                     .alpha(1f)
-                    .setDuration(mLongAnimationDuration)
+                    .setDuration(mShortAnimationDuration)
                     .setListener(null);
 
             // Animate the loading view to 0% opacity. After the animation ends,
@@ -275,7 +275,7 @@ public class CanvasFragment extends Fragment {
             // (it won't participate in layout passes, etc.)
             currentBodyView.animate()
                     .alpha(0f)
-                    .setDuration(mLongAnimationDuration)
+                    .setDuration(mShortAnimationDuration)
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
@@ -502,7 +502,8 @@ public class CanvasFragment extends Fragment {
                 background.getHeight() + 100, background.getConfig());
         Canvas canvas = new Canvas(full_picture);
         canvas.drawBitmap(background, 0f, 0f, null);
-        canvas.drawBitmap(sensations, 0f, 0f, null);
+        if (sensations != null)
+            canvas.drawBitmap(sensations, 0f, 0f, null);
         buttonBackView.setImageBitmap(Bitmap.createScaledBitmap(full_picture, 149, 220, true));
     }
 
@@ -560,6 +561,7 @@ public class CanvasFragment extends Fragment {
         public Drawable icon;
         public String type;
         public boolean drawByMove;
+        public boolean drawOutside;
         public int thickness;
         public Paint paint;
 
@@ -571,6 +573,7 @@ public class CanvasFragment extends Fragment {
             this.icon = brush.icon;
             this.type = brush.type;
             this.drawByMove = brush.drawByMove;
+            this.drawOutside = brush.drawOutside;
             this.thickness = brush.thickness;
             this.paint = new Paint(brush.paint);
         }

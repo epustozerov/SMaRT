@@ -164,13 +164,14 @@ public class BodyDrawingView extends View {
         Paint paint = new Paint(step.brush.paint);
         paint.setStrokeWidth(step.brush.thickness);
         paint.setColor(step.brush.paint.getColor());
+        boolean drawOutside = step.brush.drawOutside;
         if (step.brush.type.equals("erase")) {
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
             drawImageCanvas.drawPath(step.path, paint);
         } else {
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_ATOP));
             tempCanvas.drawPath(step.path, paint);
-            if (!allowOutsideDrawing) {
+            if (!drawOutside) {
                 paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
                 tempCanvas.drawBitmap(maskImage, 0, 0, paint);
             }
@@ -361,6 +362,7 @@ public class BodyDrawingView extends View {
                 step.brush = new CanvasFragment.Brush(brush);
 
                 step.brush.paint.setColor(intensity);
+                step.brush.drawOutside = allowOutsideDrawing;
                 step.path = new Path(freshPath);
                 freshPath = null;
                 step.path.transform(mInvertMatrix);
