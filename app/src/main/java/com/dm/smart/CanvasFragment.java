@@ -51,37 +51,29 @@ import java.util.List;
 public class CanvasFragment extends Fragment {
 
     public ArrayList<String> selectedSensations;
-    private List<String> sortedChoices = new ArrayList<>();
     public int color;
-
     public LinearLayout tagContainerSensations;
-
     public BodyDrawingView bodyViewFront;
     public BodyDrawingView bodyViewBack;
-
     public Bitmap generalViewFront;
-
     public Bitmap generalViewBack;
-
     ImageView buttonCompleteView;
-
     ImageView buttonBackView;
     TypedArray body_figures;
+    boolean current_state_front;
+    Toast showedToast = null;
+    private List<String> sortedChoices = new ArrayList<>();
     private BodyDrawingView currentBodyView;
     private BodyDrawingView hiddenBodyView;
     private Brush currentBrush;
     private List<Brush> brushes;
     private int currentIntensity;
-    boolean current_state_front;
     private boolean tagsVisible = true;
     private int dampenedColor;
     private View mCanvas = null;
     private int currentBrushId, eraserId, lastBrushId;
     private int mShortAnimationDuration;
-
     private boolean allowOutsideDrawing = false;
-
-    Toast showedToast = null;
 
     public CanvasFragment(Bundle b) {
         color = b.getInt("color");

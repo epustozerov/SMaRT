@@ -48,8 +48,8 @@
                     android:layout_height="0dp"
                     android:layout_marginBottom="8sp"
                     android:layout_weight="5"
-                    android:orientation="horizontal"
-                    android:baselineAligned="false">
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
 
                     <FrameLayout
                         android:layout_width="0dp"
@@ -87,8 +87,8 @@
                                 android:layout_gravity="center|bottom"
                                 android:clickable="false"
                                 android:gravity="center"
-                                android:textAllCaps="true"
                                 android:text="@string/textview_general_view"
+                                android:textAllCaps="true"
                                 android:textStyle="bold" />
                         </FrameLayout>
 
@@ -138,29 +138,29 @@
                     </FrameLayout>
 
                     <LinearLayout
-                        android:orientation="vertical"
                         android:layout_width="60sp"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="16sp"
                         android:layout_marginTop="6sp"
                         android:layout_marginRight="16sp"
-                        android:layout_marginBottom="6sp">
+                        android:layout_marginBottom="6sp"
+                        android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/textview_max"
-                            android:text="@string/textview_max"
                             android:layout_width="wrap_content"
                             android:layout_height="20sp"
-                            android:minHeight="20sp"
                             android:layout_gravity="top|center"
                             android:clickable="false"
+                            android:minHeight="20sp"
+                            android:text="@string/textview_max"
                             android:textAllCaps="true"
                             android:textStyle="bold" />
 
                         <com.rtugeek.android.colorseekbar.ColorSeekBar
                             android:id="@+id/color_seek_bar"
-                            android:layout_height="700sp"
                             android:layout_width="match_parent"
+                            android:layout_height="700sp"
                             app:colorSeekBarBarHeight="40sp"
                             app:colorSeekBarProgress="0"
                             app:colorSeekBarRadius="3sp"
@@ -168,12 +168,12 @@
 
                         <TextView
                             android:id="@+id/textview_min"
-                            android:text="@string/textview_min"
                             android:layout_width="wrap_content"
                             android:layout_height="20sp"
-                            android:minHeight="20sp"
                             android:layout_gravity="bottom|center"
                             android:clickable="false"
+                            android:minHeight="20sp"
+                            android:text="@string/textview_min"
                             android:textAllCaps="true"
                             android:textStyle="bold" />
 

@@ -1,10 +1,10 @@
 package com.dm.smart.items;
 
 public class Subject {
-    private int id;
     private final String name;
     private final int gender;
     private final long timestamp;
+    private int id;
 
     public Subject(int id, String name, int gender, long timestamp) {
         this.id = id;
@@ -24,6 +24,10 @@ public class Subject {
         return id;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
@@ -34,9 +38,5 @@ public class Subject {
 
     public long getTimestamp() {
         return timestamp;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 }

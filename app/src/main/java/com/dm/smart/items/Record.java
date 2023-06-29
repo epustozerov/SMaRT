@@ -3,10 +3,9 @@ package com.dm.smart.items;
 public class Record {
     private final int id;
     private final int patient_id;
-    private int n;
-
     private final String sensations;
     private final long timestamp;
+    private int n;
 
     public Record(int id, int patient_id, int n, String sensations, long timestamp) {
         this.id = id;
@@ -36,15 +35,15 @@ public class Record {
         return n;
     }
 
+    public void setN(int n) {
+        this.n = n;
+    }
+
     public long getTimestamp() {
         return timestamp;
     }
 
     public String getSensations() {
         return sensations;
-    }
-
-    public void setN(int n) {
-        this.n = n;
     }
 }

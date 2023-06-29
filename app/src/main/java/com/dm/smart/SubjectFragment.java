@@ -52,11 +52,23 @@ public class SubjectFragment extends Fragment {
 
     RecyclerViewAdapterSubjects adapter_subjects;
     RecyclerViewAdapterRecords adapter_records;
+    boolean currentViewFront;
     private ArrayList<Subject> subjects;
     private ArrayList<Record> records;
 
-    boolean current_view_front;
-
+    static Subject extractSubjectFromTheDB(Cursor cursor) {
+        @SuppressLint("Range") int id = cursor.getInt(cursor.
+                getColumnIndex(DBAdapter.SUBJECT_ID));
+        @SuppressLint("Range") String name =
+                cursor.getString(cursor.
+                        getColumnIndex(com.dm.smart.DBAdapter.SUBJECT_NAME));
+        @SuppressLint("Range") int gender =
+                cursor.getInt(cursor.
+                        getColumnIndex(DBAdapter.SUBJECT_GENDER));
+        @SuppressLint("Range") long timestamp = cursor.getLong(cursor.
+                getColumnIndex(DBAdapter.SUBJECT_TIMESTAMP));
+        return new Subject(id, name, gender, timestamp);
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -129,20 +141,6 @@ public class SubjectFragment extends Fragment {
         populateListSubjects();
         populateListRecords();
         return mView;
-    }
-
-    static Subject extractSubjectFromTheDB(Cursor cursor) {
-        @SuppressLint("Range") int id = cursor.getInt(cursor.
-                getColumnIndex(DBAdapter.SUBJECT_ID));
-        @SuppressLint("Range") String name =
-                cursor.getString(cursor.
-                        getColumnIndex(com.dm.smart.DBAdapter.SUBJECT_NAME));
-        @SuppressLint("Range") int gender =
-                cursor.getInt(cursor.
-                        getColumnIndex(DBAdapter.SUBJECT_GENDER));
-        @SuppressLint("Range") long timestamp = cursor.getLong(cursor.
-                getColumnIndex(DBAdapter.SUBJECT_TIMESTAMP));
-        return new Subject(id, name, gender, timestamp);
     }
 
     private void populateListSubjects() {
@@ -229,21 +227,21 @@ public class SubjectFragment extends Fragment {
         Record selectedRecord =
                 adapter_records.getItem(adapter_records.selectedRecordPosition);
         Subject selectedSubject = subjects.get(adapter_subjects.selectedSubjectPosition);
-        File image_sensations_front = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId() + " " +
-                selectedSubject.getName() + "/" + selectedRecord.getId() + "/complete_picture_f.png");
-        File image_sensations_back = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId() + " " +
-                selectedSubject.getName() + "/" + selectedRecord.getId() + "/complete_picture_b.png");
-        Uri image_sensations_front_uri = FileProvider.getUriForFile(requireActivity(),
+        File imageSensationsFront = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
+                + "/" + selectedRecord.getN() + "/complete_picture_f.png");
+        File imageSensationsBack = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
+                + "/" + selectedRecord.getN() + "/complete_picture_b.png");
+        Uri imageSensationsFrontUri = FileProvider.getUriForFile(requireActivity(),
                 BuildConfig.APPLICATION_ID + ".provider",
-                image_sensations_front);
-        Uri image_sensations_back_uri = FileProvider.getUriForFile(requireActivity(),
+                imageSensationsFront);
+        Uri imageSensationsBackUri = FileProvider.getUriForFile(requireActivity(),
                 BuildConfig.APPLICATION_ID + ".provider",
-                image_sensations_back);
+                imageSensationsBack);
         ArrayList<Uri> imageUris = new ArrayList<>();
-        imageUris.add(image_sensations_front_uri);
-        imageUris.add(image_sensations_back_uri);
+        imageUris.add(imageSensationsFrontUri);
+        imageUris.add(imageSensationsBackUri);
         Intent shareIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         // shareIntent.setType("message/rfc822");
         shareIntent.setType("image/png");
@@ -259,8 +257,8 @@ public class SubjectFragment extends Fragment {
         // Write the colored list of sensations to email text
         List<Integer> colors = Arrays.stream(requireActivity().getResources().
                 getIntArray(R.array.colors_symptoms)).boxed().collect(Collectors.toList());
-        String text_sensations = selectedRecord.getSensations();
-        ArrayList<String> list_sensations = new ArrayList<>(Arrays.asList(text_sensations.split(";")));
+        String textSensations = selectedRecord.getSensations();
+        ArrayList<String> list_sensations = new ArrayList<>(Arrays.asList(textSensations.split(";")));
         StringBuilder text_sensations_colored = new StringBuilder();
         for (int i = 0; i < list_sensations.size(); i++) {
             list_sensations.set(i, "<font color=" + colors.get(i) + ">" + list_sensations.get(i) + "</font>");
@@ -320,7 +318,7 @@ public class SubjectFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         @SuppressLint("InflateParams") View alertView =
                 getLayoutInflater().inflate(R.layout.alert_image, null);
-        ImageView image_view_body = alertView.findViewById(R.id.image_view_body);
+        ImageView imageViewBody = alertView.findViewById(R.id.image_view_body);
         Record selectedRecord =
                 adapter_records.getItem(adapter_records.selectedRecordPosition);
         DBAdapter DBAdapter = new DBAdapter(requireActivity());
@@ -330,30 +328,30 @@ public class SubjectFragment extends Fragment {
         cursorSingleSubject.moveToFirst();
         Subject selected_subject = subjects.get(adapter_subjects.selectedSubjectPosition);
         cursorSingleSubject.close();
-        File image_sensations_front = new File(Environment.getExternalStoragePublicDirectory(
+        File imageSensationsFront = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selected_subject.getId()
-                + "/" + selectedRecord.getId() + "/complete_picture_f.png");
-        File image_sensations_back = new File(Environment.getExternalStoragePublicDirectory(
+                + "/" + selectedRecord.getN() + "/complete_picture_f.png");
+        File imageSensationsBack = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selected_subject.getId()
-                + "/" + selectedRecord.getId() + "/complete_picture_b.png");
-        Bitmap sensations_front = BitmapFactory.decodeFile(image_sensations_front.getAbsolutePath());
-        Bitmap sensations_back = BitmapFactory.decodeFile(image_sensations_back.getAbsolutePath());
-        current_view_front = true;
-        image_view_body.setImageBitmap(sensations_front);
-        image_view_body.setOnClickListener(v -> reverse_body_view(image_view_body, sensations_front, sensations_back));
+                + "/" + selectedRecord.getN() + "/complete_picture_b.png");
+        Bitmap sensationsFront = BitmapFactory.decodeFile(imageSensationsFront.getAbsolutePath());
+        Bitmap sensationsBack = BitmapFactory.decodeFile(imageSensationsBack.getAbsolutePath());
+        currentViewFront = true;
+        imageViewBody.setImageBitmap(sensationsFront);
+        imageViewBody.setOnClickListener(v -> reverseBodyView(imageViewBody, sensationsFront, sensationsBack));
         builder.setView(alertView);
         AlertDialog dialog = builder.create();
         alertView.findViewById(R.id.button_close).setOnClickListener(v -> dialog.dismiss());
         dialog.show();
     }
 
-    private void reverse_body_view(ImageView image_view_body, Bitmap sensations_front, Bitmap sensations_back) {
-        if (current_view_front) {
-            image_view_body.setImageBitmap(sensations_front);
-            current_view_front = false;
+    private void reverseBodyView(ImageView imageViewBody, Bitmap sensationsFront, Bitmap sensationsBack) {
+        if (currentViewFront) {
+            imageViewBody.setImageBitmap(sensationsFront);
+            currentViewFront = false;
         } else {
-            image_view_body.setImageBitmap(sensations_back);
-            current_view_front = true;
+            imageViewBody.setImageBitmap(sensationsBack);
+            currentViewFront = true;
         }
     }
 

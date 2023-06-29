@@ -6,9 +6,9 @@
 
     <ImageView
         android:id="@+id/image_view_body"
-        android:layout_centerInParent="true"
         android:layout_width="441sp"
         android:layout_height="650sp"
+        android:layout_centerInParent="true"
         android:contentDescription="@string/dialog_image" />
 
     <Button
@@ -16,8 +16,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/image_view_body"
-        android:layout_margin="10dp"
         android:layout_centerHorizontal="true"
+        android:layout_margin="10dp"
         android:text="@string/dialog_close" />
 
 </RelativeLayout>

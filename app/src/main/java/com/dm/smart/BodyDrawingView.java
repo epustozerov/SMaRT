@@ -35,6 +35,8 @@ public class BodyDrawingView extends View {
     private final Paint snapshotPaint = new Paint();
     public Bitmap snapshot = null;
     Canvas drawImageCanvas;
+    Bitmap backgroundImage = null;
+    Toast showedToast = null;
     private Point mBGSizeZoomed;
     private Rect mBGZoomedRect;
     private Matrix mZoomingMatrix, mInvertMatrix;
@@ -42,12 +44,9 @@ public class BodyDrawingView extends View {
     private Bitmap freshSnapshot = null;
     private Path freshPath = null;
     private Paint freshPaint = null;
-    Bitmap backgroundImage = null;
     private Bitmap maskImage = null;
     private int intensity = -1;
     private CanvasFragment.Brush brush = null;
-
-    Toast showedToast = null;
     private boolean allowOutsideDrawing;
 
 

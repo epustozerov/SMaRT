@@ -27,12 +27,10 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
     private final List<Subject> mSubjects;
     private final LayoutInflater mInflater;
     private final Context mContext;
+    private final String string_subject;
     public int selectedSubjectPosition = 0;
     private ItemClickListener mClickListener;
-
     private boolean show_names;
-
-    private final String string_subject;
 
     // data is passed into the constructor
     RecyclerViewAdapterSubjects(Context context, List<Subject> subjects, boolean show_names) {

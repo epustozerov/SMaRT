@@ -57,7 +57,7 @@ public class DrawFragment extends Fragment {
     // create an array with all steps from all canvases
     // public static ArrayList<BodyDrawingView.Step> allSteps = new ArrayList<>();
 
-    Map<String, ArrayList<String>> allSelectedSensations = new HashMap<>();
+    final Map<String, ArrayList<String>> allSelectedSensations = new HashMap<>();
 
     static int dampen(int color) {
         float[] hsv = new float[3];
@@ -308,9 +308,6 @@ public class DrawFragment extends Fragment {
                     canvasMergedFront.drawBitmap(cf.bodyViewFront.snapshot, 0f, 0f, null);
                 if (cf.bodyViewBack.snapshot != null)
                     canvasMergedBack.drawBitmap(cf.bodyViewBack.snapshot, 0f, 0f, null);
-                endTime = SystemClock.elapsedRealtime();
-                elapsedMilliSeconds = endTime - startTime;
-                elapsedSeconds = elapsedMilliSeconds / 1000.0;
             }
             SaveSnapshotTask.doInBackground(merged_f, directory, "merged_sensations_f.png");
             SaveSnapshotTask.doInBackground(merged_b, directory, "merged_sensations_b.png");
@@ -404,29 +401,6 @@ public class DrawFragment extends Fragment {
         }
     }
 
-    @SuppressWarnings("deprecation")
-    abstract static class SaveSnapshotTask extends AsyncTask<Bitmap, String, Void> {
-        protected static void doInBackground(Bitmap figure, File directory, String name) {
-            File photo = new File(directory, name);
-            try {
-                FileOutputStream fos = new FileOutputStream(photo.getPath());
-                if (figure != null) {
-                    figure.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                    fos.close();
-                    Log.i("SAVE_FILE", "YES");
-                } else {
-                    // Save the empty image
-                    Bitmap empty = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-                    empty.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                    fos.close();
-                    Log.i("SAVE_FILE", "NO");
-                }
-            } catch (java.io.IOException e) {
-                Log.e("ERROR_SAVING", "Exception in SaveSnapshotTask", e);
-            }
-        }
-    }
-
     Bitmap makeFullPicture(Bitmap sensations, Bitmap background, String text_sensations) {
         ArrayList<String> list_sensations = new ArrayList<>(Arrays.asList(text_sensations.split(";")));
         Bitmap full_picture = Bitmap.createBitmap(background.getWidth(),
@@ -444,7 +418,6 @@ public class DrawFragment extends Fragment {
         }
         return full_picture;
     }
-
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
@@ -554,5 +527,28 @@ public class DrawFragment extends Fragment {
     public void onAttach(@NonNull Context context) {
         Log.e("DEBUG", "OnAttach of DrawFragment");
         super.onAttach(context);
+    }
+
+    @SuppressWarnings("deprecation")
+    abstract static class SaveSnapshotTask extends AsyncTask<Bitmap, String, Void> {
+        protected static void doInBackground(Bitmap figure, File directory, String name) {
+            File photo = new File(directory, name);
+            try {
+                FileOutputStream fos = new FileOutputStream(photo.getPath());
+                if (figure != null) {
+                    figure.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                    fos.close();
+                    Log.i("SAVE_FILE", "YES");
+                } else {
+                    // Save the empty image
+                    Bitmap empty = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+                    empty.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                    fos.close();
+                    Log.i("SAVE_FILE", "NO");
+                }
+            } catch (java.io.IOException e) {
+                Log.e("ERROR_SAVING", "Exception in SaveSnapshotTask", e);
+            }
+        }
     }
 }
