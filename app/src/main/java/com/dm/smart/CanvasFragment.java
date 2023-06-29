@@ -407,16 +407,16 @@ public class CanvasFragment extends Fragment {
 
         // Out of body button
         btnOutOfBody.setBackground(requireContext().getDrawable(R.drawable.listitem_selector));
-        btnOutOfBody.setImageDrawable(requireContext().getDrawable(R.drawable.icon_no_out));
+        btnOutOfBody.setImageDrawable(requireContext().getDrawable(R.drawable.icon_out));
         btnOutOfBody.setCropToPadding(false);
         btnOutOfBody.setScaleType(ImageButton.ScaleType.FIT_CENTER);
         btnOutOfBody.setOnClickListener(view -> {
             allowOutsideDrawing = !allowOutsideDrawing;
             currentBodyView.setAllowOutsideDrawing(allowOutsideDrawing);
             if (allowOutsideDrawing) {
-                btnOutOfBody.setImageDrawable(requireContext().getDrawable(R.drawable.icon_out));
-            } else {
                 btnOutOfBody.setImageDrawable(requireContext().getDrawable(R.drawable.icon_no_out));
+            } else {
+                btnOutOfBody.setImageDrawable(requireContext().getDrawable(R.drawable.icon_out));
             }
 
         });
