@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -426,6 +427,16 @@ public class CanvasFragment extends Fragment {
         ColorSeekBar intensityScale = mCanvas.findViewById(R.id.color_seek_bar);
         intensityScale.setColorSeeds(define_min_max_colors(color));
         intensityScale.setThumbDrawer(new CustomThumbDrawer(65, Color.WHITE, Color.BLACK));
+
+        // set intenstityScale on touch listener to process only stylised touch events
+        intensityScale.setOnTouchListener((v, event) -> {
+            boolean isPen = event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS;
+            if (isPen) {
+                currentBodyView.setIntensity(currentIntensity);
+                return false;
+            }
+            return true;
+        });
 
         intensityScale.setOnColorChangeListener((progress, color) -> {
             currentBodyView.setIntensity(color);
