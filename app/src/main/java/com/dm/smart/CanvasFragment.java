@@ -143,7 +143,7 @@ public class CanvasFragment extends Fragment {
                     if (showedToast != null) {
                         showedToast.cancel();
                     }
-                    showedToast = showToast(this.getContext(), getResources().getString(R.string.toast_select_intensity));
+                    showedToast = showToast(this.getContext(), getResources().getString(R.string.toast_select_tag));
                     showedToast.show();
                     return;
                 }
@@ -175,7 +175,7 @@ public class CanvasFragment extends Fragment {
                     if (showedToast != null) {
                         showedToast.cancel();
                     }
-                    showedToast = showToast(this.getContext(), getResources().getString(R.string.toast_select_intensity));
+                    showedToast = showToast(this.getContext(), getResources().getString(R.string.toast_select_tag));
                     showedToast.show();
                     return;
                 }

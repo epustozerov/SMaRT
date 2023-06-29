@@ -72,21 +72,24 @@ public class MainActivity extends AppCompatActivity {
                     }
                     return NavigationUI.onNavDestinationSelected(item, navController);
                 case R.id.navigation_subject:
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setMessage(R.string.dialog_save_images);
-                    builder.setPositiveButton(R.string.dialog_continue, (dialog, id) -> {
-                        NavigationUI.onNavDestinationSelected(item, navController);
-                        if (sharedPref.getBoolean(getString(R.string.sp_request_password), false)) {
-                            AlertDialog alertDialog = CustomAlertDialogs.requestPassword(
-                                    MainActivity.this, null, null, null);
-                            alertDialog.show();
-                        }
-                    });
-                    builder.setNegativeButton(R.string.dialog_no, (dialog, id) -> {
-                    });
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                    return false;
+                    // if we are not at th subject fragment, we can go there
+                    if (Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.navigation_subject) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        builder.setMessage(R.string.dialog_save_images);
+                        builder.setPositiveButton(R.string.dialog_continue, (dialog, id) -> {
+                            NavigationUI.onNavDestinationSelected(item, navController);
+                            if (sharedPref.getBoolean(getString(R.string.sp_request_password), false)) {
+                                AlertDialog alertDialog = CustomAlertDialogs.requestPassword(
+                                        MainActivity.this, null, null, null);
+                                alertDialog.show();
+                            }
+                        });
+                        builder.setNegativeButton(R.string.dialog_no, (dialog, id) -> {
+                        });
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                        return false;
+                    }
             }
             return false;
         });
