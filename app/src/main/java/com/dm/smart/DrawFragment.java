@@ -41,7 +41,9 @@ import java.io.FileOutputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DrawFragment extends Fragment {
@@ -51,6 +53,11 @@ public class DrawFragment extends Fragment {
 
     List<Integer> colors;
     Lifecycle lifecycle;
+
+    // create an array with all steps from all canvases
+    // public static ArrayList<BodyDrawingView.Step> allSteps = new ArrayList<>();
+
+    Map<String, ArrayList<String>> allSelectedSensations = new HashMap<>();
 
     static int dampen(int color) {
         float[] hsv = new float[3];
@@ -304,7 +311,6 @@ public class DrawFragment extends Fragment {
                 endTime = SystemClock.elapsedRealtime();
                 elapsedMilliSeconds = endTime - startTime;
                 elapsedSeconds = elapsedMilliSeconds / 1000.0;
-                Log.e("STORAGE", "Particular canvas storage elapsed time: " + elapsedSeconds);
             }
             SaveSnapshotTask.doInBackground(merged_f, directory, "merged_sensations_f.png");
             SaveSnapshotTask.doInBackground(merged_b, directory, "merged_sensations_b.png");
@@ -513,11 +519,29 @@ public class DrawFragment extends Fragment {
         }
     }
 
+    public void restoreAllDrawings() {
+        // iterate over all the fragments and restore the selected sensations
+        for (int i = 0; i < viewPagerAdapter.getItemCount(); i++) {
+            CanvasFragment cf =
+                    (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
+            Log.e("RESTORE", "Fragment " + i + " is " + cf);
+            Log.e("SENSATIONS", "Fragment " + i + " has " + allSelectedSensations.get("f" + i));
+            if (cf != null) {
+                cf.selectedSensations = allSelectedSensations.get("f" + i);
+                cf.restoreSensations();
+                // update the select sensation tab with the list of cf.selectedSensations
+
+
+            }
+        }
+    }
+
     @Override
     public void onResume() {
         Log.e("DEBUG", "OnResume of DrawFragment");
         super.onResume();
         viewPager.setAdapter(viewPagerAdapter);
+        restoreAllDrawings();
     }
 
     @Override

@@ -50,9 +50,11 @@ import java.util.List;
 
 public class CanvasFragment extends Fragment {
 
-    public final ArrayList<String> selectedSensations = new ArrayList<>();
-    private final List<String> sortedChoices = new ArrayList<>();
+    public ArrayList<String> selectedSensations;
+    private List<String> sortedChoices = new ArrayList<>();
     public int color;
+
+    public LinearLayout tagContainerSensations;
 
     public BodyDrawingView bodyViewFront;
     public BodyDrawingView bodyViewBack;
@@ -117,8 +119,15 @@ public class CanvasFragment extends Fragment {
         }
         mCanvas = inflater.inflate(R.layout.fragment_canvas, container, false);
 
+        // Show current fragment tag
+        Log.e("RECREATION", "CanvasFragment");
+        Log.e("SELECTED SENSATIONS", selectedSensations + "");
+        if (selectedSensations == null) {
+            selectedSensations = new ArrayList<>();
+        }
+
         // Init container with drawn sensations
-        final LinearLayout tagContainerSensations = mCanvas.findViewById(R.id.drawn_sensations);
+        tagContainerSensations = mCanvas.findViewById(R.id.drawn_sensations);
 
         // Init body figures for drawing
         bodyViewFront = mCanvas.findViewById(R.id.drawing_view_front);
@@ -305,25 +314,25 @@ public class CanvasFragment extends Fragment {
                 ((LinearLayout) mCanvas.findViewById(R.id.drawn_sensations)).removeAllViews();
             }
             int bid = ((ViewGroup) v.getParent()).indexOfChild(v);
-            String seletected_sensation_type =
+            String selectedSensation =
                     Arrays.asList(getResources().getStringArray(R.array.sensation_types)).get(bid);
-            if (selectedSensations.contains(seletected_sensation_type)) {
-                selectedSensations.remove(seletected_sensation_type);
+            if (selectedSensations.contains(selectedSensation)) {
+                selectedSensations.remove(selectedSensation);
             } else {
-                selectedSensations.add(seletected_sensation_type);
+                selectedSensations.add(selectedSensation);
             }
-            int index = sortedChoices.indexOf(seletected_sensation_type);
+            int index = sortedChoices.indexOf(selectedSensation);
             if (index < 0) {
                 v.setBackgroundTintList(ColorStateList.valueOf(dampenedColor));
-                sortedChoices.add(seletected_sensation_type);
+                sortedChoices.add(selectedSensation);
                 TextView txt = new TextView(getContext());
-                txt.setText(seletected_sensation_type);
+                txt.setText(selectedSensation);
                 txt.setPadding(Math.round(dp2px(6)), Math.round(dp2px(6)),
                         Math.round(dp2px(6)), Math.round(dp2px(6)));
                 tagContainerSensations.addView(txt);
             } else {
                 v.setBackgroundTintList(null);
-                sortedChoices.remove(seletected_sensation_type);
+                sortedChoices.remove(selectedSensation);
                 tagContainerSensations.removeViewAt(index);
             }
         };
@@ -518,9 +527,28 @@ public class CanvasFragment extends Fragment {
         buttonBackView.setImageBitmap(Bitmap.createScaledBitmap(full_picture, 149, 220, true));
     }
 
+    public void restoreSensations() {
+        // update the select sensation tab with the list of cf.selectedSensations
+        sortedChoices = new ArrayList<>(selectedSensations);
+        tagContainerSensations = mCanvas.findViewById(R.id.drawn_sensations);
+        for (String sensation : sortedChoices) {
+            TextView txt = new TextView(getContext());
+            txt.setText(sensation);
+            txt.setPadding(Math.round(dp2px(6)), Math.round(dp2px(6)),
+                    Math.round(dp2px(6)), Math.round(dp2px(6)));
+            tagContainerSensations.addView(txt);
+        }
+        tagContainerSensations.invalidate();
+        Log.e("TAG CONTAINER RESTORED", sortedChoices.toString());
+    }
+
     @Override
     public void onPause() {
         Log.e("DEBUG", "OnPause of CanvasFragment " + this.getTag());
+        DrawFragment drawFragment = (DrawFragment) getParentFragment();
+        assert drawFragment != null;
+        drawFragment.allSelectedSensations.put(this.getTag(), selectedSensations);
+        Log.e("SAVING", "Saving sensations for " + this.getTag() + " " + selectedSensations.size());
         super.onPause();
     }
 
@@ -589,7 +617,4 @@ public class CanvasFragment extends Fragment {
             this.paint = new Paint(brush.paint);
         }
     }
-
-
 }
-

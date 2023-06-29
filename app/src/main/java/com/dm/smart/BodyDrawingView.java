@@ -388,7 +388,7 @@ public class BodyDrawingView extends View {
     }
 
 
-    private static class Step {
+    static class Step {
 
         CanvasFragment.Brush brush;
         Path path;
