@@ -59,8 +59,8 @@ public class CanvasFragment extends Fragment {
     public Bitmap generalViewBack;
     ImageView buttonCompleteView;
     ImageView buttonBackView;
-    TypedArray body_figures;
-    boolean current_state_front;
+    TypedArray bodyFigures;
+    boolean currentStateIsFront;
     Toast showedToast = null;
     private List<String> sortedChoices = new ArrayList<>();
     private BodyDrawingView currentBodyView;
@@ -93,17 +93,17 @@ public class CanvasFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        current_state_front = true;
-        body_figures = getResources().obtainTypedArray(R.array.body_figures_neutral);
+        currentStateIsFront = true;
+        bodyFigures = getResources().obtainTypedArray(R.array.body_figures_neutral);
         switch (MainActivity.currentlySelectedSubject.getGender()) {
             case 0:
-                body_figures = getResources().obtainTypedArray(R.array.body_figures_neutral);
+                bodyFigures = getResources().obtainTypedArray(R.array.body_figures_neutral);
                 break;
             case 1:
-                body_figures = getResources().obtainTypedArray(R.array.body_figures_female);
+                bodyFigures = getResources().obtainTypedArray(R.array.body_figures_female);
                 break;
             case 2:
-                body_figures = getResources().obtainTypedArray(R.array.body_figures_male);
+                bodyFigures = getResources().obtainTypedArray(R.array.body_figures_male);
         }
 
         if (mCanvas != null) {
@@ -123,12 +123,12 @@ public class CanvasFragment extends Fragment {
 
         // Init body figures for drawing
         bodyViewFront = mCanvas.findViewById(R.id.drawing_view_front);
-        bodyViewFront.setBGImage(setBodyImage(body_figures.getResourceId(0, 0), false));
-        bodyViewFront.setMaskImage(setBodyImage(body_figures.getResourceId(1, 0), false));
+        bodyViewFront.setBGImage(setBodyImage(bodyFigures.getResourceId(0, 0), false));
+        bodyViewFront.setMaskImage(setBodyImage(bodyFigures.getResourceId(1, 0), false));
 
         bodyViewBack = mCanvas.findViewById(R.id.drawing_view_back);
-        bodyViewBack.setBGImage(setBodyImage(body_figures.getResourceId(2, 0), false));
-        bodyViewBack.setMaskImage(setBodyImage(body_figures.getResourceId(3, 0), false));
+        bodyViewBack.setBGImage(setBodyImage(bodyFigures.getResourceId(2, 0), false));
+        bodyViewBack.setMaskImage(setBodyImage(bodyFigures.getResourceId(3, 0), false));
 
         // Init gray overlay
         final LinearLayout viewA = mCanvas.findViewById(R.id.viewA);
@@ -195,10 +195,10 @@ public class CanvasFragment extends Fragment {
 
         // Init the complete image view
         buttonCompleteView = mCanvas.findViewById(R.id.button_general_view);
-        if (current_state_front) {
-            buttonCompleteView.setImageBitmap(setBodyImage(body_figures.getResourceId(0, 0), true));
+        if (currentStateIsFront) {
+            buttonCompleteView.setImageBitmap(setBodyImage(bodyFigures.getResourceId(0, 0), true));
         } else {
-            buttonCompleteView.setImageBitmap(setBodyImage(body_figures.getResourceId(2, 0), true));
+            buttonCompleteView.setImageBitmap(setBodyImage(bodyFigures.getResourceId(2, 0), true));
         }
         buttonCompleteView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         generalViewFront = Bitmap.createBitmap(bodyViewFront.backgroundImage.getWidth(),
@@ -206,13 +206,13 @@ public class CanvasFragment extends Fragment {
         generalViewBack = Bitmap.createBitmap(bodyViewBack.backgroundImage.getWidth(),
                 bodyViewBack.backgroundImage.getHeight(), Bitmap.Config.ARGB_8888);
         buttonCompleteView.setOnClickListener(v -> {
-            if (current_state_front) {
+            if (currentStateIsFront) {
                 Bitmap generalViewFrontBitmap =
                         Bitmap.createBitmap(bodyViewFront.backgroundImage.getWidth(), bodyViewFront.backgroundImage.getHeight(),
                                 Bitmap.Config.ARGB_8888);
                 Canvas generalViewFrontCanvas = new Canvas(generalViewFrontBitmap);
                 generalViewFrontCanvas.drawBitmap(setBodyImage(
-                        body_figures.getResourceId(0, 0), false), 0, 0, null);
+                        bodyFigures.getResourceId(0, 0), false), 0, 0, null);
                 generalViewFrontCanvas.drawBitmap(generalViewFront, 0, 0, null);
                 if (bodyViewFront.snapshot != null) {
                     generalViewFrontCanvas.drawBitmap(bodyViewFront.snapshot, 0, 0, null);
@@ -225,7 +225,7 @@ public class CanvasFragment extends Fragment {
                                 Bitmap.Config.ARGB_8888);
                 Canvas generalViewBackCanvas = new Canvas(generalViewBackBitmap);
                 generalViewBackCanvas.drawBitmap(setBodyImage(
-                        body_figures.getResourceId(2, 0), false), 0, 0, null);
+                        bodyFigures.getResourceId(2, 0), false), 0, 0, null);
                 generalViewBackCanvas.drawBitmap(generalViewBack, 0, 0, null);
                 if (bodyViewBack.snapshot != null) {
                     generalViewBackCanvas.drawBitmap(bodyViewBack.snapshot, 0, 0, null);
@@ -239,15 +239,15 @@ public class CanvasFragment extends Fragment {
         mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         buttonBackView = mCanvas.findViewById(R.id.button_switch_bodyview);
         final TextView textViewSwitchBody = mCanvas.findViewById(R.id.textview_switch_bodyview);
-        buttonBackView.setImageBitmap(setBodyImage(body_figures.getResourceId(3, 0), true));
+        buttonBackView.setImageBitmap(setBodyImage(bodyFigures.getResourceId(3, 0), true));
         buttonBackView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         textViewSwitchBody.setText(getResources().getString(R.string.back_view));
-        TypedArray finalBody_figures = body_figures;
+        TypedArray finalBody_figures = bodyFigures;
         buttonBackView.setOnClickListener(v -> {
-            if (!current_state_front) {
+            if (!currentStateIsFront) {
                 buttonBackView.setImageBitmap(setBodyImage(finalBody_figures.getResourceId(3, 0), true));
                 textViewSwitchBody.setText(getResources().getString(R.string.back_view));
-                current_state_front = true;
+                currentStateIsFront = true;
                 currentBodyView = bodyViewBack;
                 hiddenBodyView = bodyViewFront;
                 updateGeneralView(generalViewFront, bodyViewFront.backgroundImage);
@@ -255,7 +255,7 @@ public class CanvasFragment extends Fragment {
             } else {
                 buttonBackView.setImageBitmap(setBodyImage(finalBody_figures.getResourceId(1, 0), true));
                 textViewSwitchBody.setText(getResources().getString(R.string.front_view));
-                current_state_front = false;
+                currentStateIsFront = false;
                 currentBodyView = bodyViewFront;
                 hiddenBodyView = bodyViewBack;
                 updateGeneralView(generalViewBack, bodyViewBack.backgroundImage);
@@ -329,8 +329,8 @@ public class CanvasFragment extends Fragment {
             }
         };
 
-        String[] sensation_types = getResources().getStringArray(R.array.sensation_types);
-        for (String choice : sensation_types) {
+        String[] sensationTypes = getResources().getStringArray(R.array.sensation_types);
+        for (String choice : sensationTypes) {
             ToggleButton b = new ToggleButton(getContext());
             b.setBackground(requireContext().getDrawable(R.drawable.custom_radio));
             b.setTextColor(Color.BLACK);
@@ -405,9 +405,8 @@ public class CanvasFragment extends Fragment {
         btnUndo.setOnClickListener(view -> currentBodyView.undoLastStep());
         toolContainer.addView(btnUndo, lp2);
 
-        ImageButton btnOutOfBody = new ImageButton(getContext());
-
         // Out of body button
+        ImageButton btnOutOfBody = new ImageButton(getContext());
         btnOutOfBody.setBackground(requireContext().getDrawable(R.drawable.listitem_selector));
         btnOutOfBody.setImageDrawable(requireContext().getDrawable(R.drawable.icon_out));
         btnOutOfBody.setCropToPadding(false);
@@ -415,6 +414,7 @@ public class CanvasFragment extends Fragment {
         btnOutOfBody.setOnClickListener(view -> {
             allowOutsideDrawing = !allowOutsideDrawing;
             currentBodyView.setAllowOutsideDrawing(allowOutsideDrawing);
+            hiddenBodyView.setAllowOutsideDrawing(allowOutsideDrawing);
             if (allowOutsideDrawing) {
                 btnOutOfBody.setImageDrawable(requireContext().getDrawable(R.drawable.icon_no_out));
             } else {

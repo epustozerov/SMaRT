@@ -380,7 +380,7 @@ public class DrawFragment extends Fragment {
                 cf.generalViewFront = merged_f;
                 cf.generalViewBack = merged_b;
                 // set front or back image
-                if (cf.current_state_front) {
+                if (cf.currentStateIsFront) {
                     Bitmap background = cf.bodyViewFront.backgroundImage;
                     Bitmap full_picture = Bitmap.createBitmap(background.getWidth(),
                             background.getHeight() + 100, background.getConfig());
@@ -501,10 +501,9 @@ public class DrawFragment extends Fragment {
             Log.e("SENSATIONS", "Fragment " + i + " has " + allSelectedSensations.get("f" + i));
             if (cf != null) {
                 cf.selectedSensations = allSelectedSensations.get("f" + i);
-                cf.restoreSensations();
-                // update the select sensation tab with the list of cf.selectedSensations
-
-
+                if (cf.selectedSensations != null) {
+                    cf.restoreSensations();
+                }
             }
         }
     }
