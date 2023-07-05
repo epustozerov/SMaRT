@@ -49,7 +49,6 @@
     <string name="dialog_password_title">Enter the password</string>
     <string name="dialog_password_hint">Password</string>
 
-
     <!-- Menu -->
     <string name="menu_remove_subject">Remove selected subject and their records</string>
     <string name="menu_remove_record">Remove selected record</string>
@@ -60,11 +59,15 @@
     <string name="menu_show_instructions">Show instructions before recordings</string>
     <string name="menu_request_password">Request password after recording</string>
     <string name="menu_show_names">Show subject names</string>
-    <string name="sp_show_names">sp_show_names</string>
+    <string name="menu_imprint">Imprint</string>
+    <string name="menu_privacy">Privacy Policy</string>
+    <string name="menu_info">Information page</string>
+    <string name="menu_copyright">Copyright notice</string>
 
     <!-- Shared Preferences -->
     <string name="sp_show_instructions">show_instructions</string>
     <string name="sp_request_password">request_password</string>
+    <string name="sp_show_names">sp_show_names</string>
 
     <!-- List of sensation types -->
     <string name="sensation_type_1">Burning</string>
@@ -108,6 +111,7 @@
     <string name="gender_neutral">Neutral</string>
     <string name="gender_male">Male</string>
     <string name="gender_female">Female</string>
+
     <string-array name="genders">
         <item>@string/gender_neutral</item>
         <item>@string/gender_female</item>

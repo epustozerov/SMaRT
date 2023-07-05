@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
         menu.findItem(R.id.menu_show_instructions).setChecked(show_instructions);
         menu.findItem(R.id.menu_request_password).setChecked(request_password);
         menu.findItem(R.id.menu_show_names).setChecked(show_names);
+        menu.setGroupDividerEnabled(true);
         return true;
     }
 
@@ -151,6 +152,36 @@ public class MainActivity extends AppCompatActivity {
             NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
             if (Objects.requireNonNull(navController.getCurrentDestination()).getId() == R.id.navigation_subject)
                 navController.navigate(R.id.navigation_subject);
+        } else if (item.getItemId() == R.id.menu_imprint) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.imprint);
+            builder.setPositiveButton(R.string.dialog_ok, (dialog, id) -> {
+            });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        } else if (item.getItemId() == R.id.menu_privacy) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.privacy);
+            builder.setPositiveButton(R.string.dialog_ok, (dialog, id) -> {
+            });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        } else if (item.getItemId() == R.id.menu_info) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.info);
+            builder.setPositiveButton(R.string.dialog_ok, (dialog, id) -> {
+            });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        } else if (item.getItemId() == R.id.menu_copyright) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.copyright);
+            builder.setPositiveButton(R.string.dialog_ok, (dialog, id) -> {
+            });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        } else {
+            return super.onOptionsItemSelected(item);
         }
         return false;
     }

@@ -1,18 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/menu_instructions"
-        android:title="@string/menu_instructions" />
-    <item
-        android:id="@+id/menu_show_instructions"
-        android:checkable="true"
-        android:title="@string/menu_show_instructions" />
-    <item
-        android:id="@+id/menu_request_password"
-        android:checkable="true"
-        android:title="@string/menu_request_password" />
-    <item
-        android:id="@+id/menu_show_names"
-        android:checkable="true"
-        android:title="@string/menu_show_names" />
+    <group>
+        <item
+            android:id="@+id/menu_instructions"
+            android:title="@string/menu_instructions" />
+        <item
+            android:id="@+id/menu_show_instructions"
+            android:checkable="true"
+            android:title="@string/menu_show_instructions" />
+        <item
+            android:id="@+id/menu_request_password"
+            android:checkable="true"
+            android:title="@string/menu_request_password" />
+        <item
+            android:id="@+id/menu_show_names"
+            android:checkable="true"
+            android:title="@string/menu_show_names" />
+    </group>
+    <group>
+        <item
+            android:id="@+id/menu_info"
+            android:title="@string/menu_info" />
+        <item
+            android:id="@+id/menu_privacy"
+            android:title="@string/menu_privacy" />
+        <item
+            android:id="@+id/menu_copyright"
+            android:title="@string/menu_copyright" />
+        <item
+            android:id="@+id/menu_imprint"
+            android:title="@string/menu_imprint" />
+
+    </group>
 </menu>

@@ -32,6 +32,8 @@
     <string name="to_tags">Zur den Begriffen</string>
     <string name="new_subject">Neuer Proband</string>
     <string name="textview_general_view">Gesamtansicht</string>
+    <string name="wrong_password">Falsches Passwort</string>
+    <string name="password">1985</string>
 
     <!-- Dialogs -->
     <string name="dialog_drawing_completed">Haben Sie wirklich <b>alle Befunde</b> eingezeichnet?
@@ -59,11 +61,16 @@
     <string name="menu_instructions">Anweisungen</string>
     <string name="menu_show_instructions">Anweisungen vor den Aufnahmen anzeigen</string>
     <string name="menu_request_password">Passwort nach der Aufnahme anfordern</string>
-    <string name="wrong_password">Falsches Passwort</string>
+    <string name="menu_show_names">Probandennamen anzeigen</string>
+    <string name="menu_imprint">Impressum</string>
+    <string name="menu_privacy">Datenschutz</string>
+    <string name="menu_info">Informationsseite</string>
+    <string name="menu_copyright">Copyright notice</string>
 
     <!-- Shared Preferences -->
     <string name="sp_show_instructions">show_instructions</string>
     <string name="sp_request_password">request_password</string>
+    <string name="sp_show_names">sp_show_names</string>
 
     <!-- List of sensation types -->
     <string name="sensation_type_1">Ausstrahlend</string>
@@ -107,10 +114,6 @@
     <string name="gender_neutral">neutral</string>
     <string name="gender_male">männlich</string>
     <string name="gender_female">weiblich</string>
-    <string name="password">1985</string>
-    <string name="menu_show_names">Probandennamen anzeigen</string>
-    <string name="sp_show_names">sp_show_names</string>
-
     <string-array name="genders">
         <item>@string/gender_neutral</item>
         <item>@string/gender_female</item>
