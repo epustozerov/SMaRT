@@ -50,14 +50,11 @@ public class DrawFragment extends Fragment {
 
     public ViewPager2 viewPager;
     public ViewPagerAdapter viewPagerAdapter;
-
     List<Integer> colors;
     Lifecycle lifecycle;
-
-    // create an array with all steps from all canvases
-    // public static ArrayList<BodyDrawingView.Step> allSteps = new ArrayList<>();
-
     final Map<String, ArrayList<String>> allSelectedSensations = new HashMap<>();
+    final Map<String, ArrayList<BodyDrawingView.Step>> allStepsFront = new HashMap<>();
+    final Map<String, ArrayList<BodyDrawingView.Step>> allStepsBack = new HashMap<>();
 
     static int dampen(int color) {
         float[] hsv = new float[3];
@@ -213,7 +210,6 @@ public class DrawFragment extends Fragment {
     }
 
     void storeData() {
-
         // Create a new record in the database
         long startTime = SystemClock.elapsedRealtime();
         DBAdapter DBAdapter = new DBAdapter(requireActivity());
@@ -443,7 +439,6 @@ public class DrawFragment extends Fragment {
                 viewPagerAdapter.fragmentManager.beginTransaction().detach(cf).commit();
             }
         }
-        // getChildFragmentManager().beginTransaction().detach(this).commit();
         Log.e("DEBUG", "OnPause of DrawFragment before super");
         super.onPause();
         Log.e("DEBUG", "OnPause of DrawFragment after super");
@@ -492,6 +487,7 @@ public class DrawFragment extends Fragment {
         }
     }
 
+    @SuppressWarnings("unused")
     public void restoreAllDrawings() {
         // iterate over all the fragments and restore the selected sensations
         for (int i = 0; i < viewPagerAdapter.getItemCount(); i++) {
@@ -504,6 +500,22 @@ public class DrawFragment extends Fragment {
                 if (cf.selectedSensations != null) {
                     cf.restoreSensations();
                 }
+                Log.e("STEPS", "Fragment " + i + " has " + allStepsFront.get("f" + i) + " and " + allStepsBack.get("f" + i));
+                if (cf.currentStateIsFront) {
+                    if (cf.currentBodyView.snapshot == null) {
+                        cf.currentBodyView.snapshot = Bitmap.createBitmap(cf.currentBodyView.mBGRect.width(),
+                                cf.currentBodyView.mBGRect.height(), Bitmap.Config.ARGB_8888);
+                    }
+                    cf.currentBodyView.steps = allStepsFront.get("f" + i);
+                    cf.hiddenBodyView.steps = allStepsBack.get("f" + i);
+                } else {
+                    cf.currentBodyView.steps = allStepsBack.get("f" + i);
+                    cf.hiddenBodyView.steps = allStepsFront.get("f" + i);
+                }
+                cf.bodyViewFront.steps = allStepsFront.get("f" + i);
+                cf.bodyViewBack.steps = allStepsBack.get("f" + i);
+                cf.bodyViewFront.paintAllSavedSteps();
+                cf.bodyViewBack.paintAllSavedSteps();
             }
         }
     }
@@ -513,7 +525,6 @@ public class DrawFragment extends Fragment {
         Log.e("DEBUG", "OnResume of DrawFragment");
         super.onResume();
         viewPager.setAdapter(viewPagerAdapter);
-        restoreAllDrawings();
     }
 
     @Override

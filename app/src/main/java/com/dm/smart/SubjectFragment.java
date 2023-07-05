@@ -50,8 +50,8 @@ import java.util.stream.Collectors;
 
 public class SubjectFragment extends Fragment {
 
-    RecyclerViewAdapterSubjects adapter_subjects;
-    RecyclerViewAdapterRecords adapter_records;
+    RecyclerViewAdapterSubjects adapterSubjects;
+    RecyclerViewAdapterRecords adapterRecords;
     boolean currentViewFront;
     private ArrayList<Subject> subjects;
     private ArrayList<Record> records;
@@ -76,7 +76,7 @@ public class SubjectFragment extends Fragment {
 
         // Read shared preference to shown subjects' names
         SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
-        boolean show_names = sharedPref.getBoolean(getString(R.string.sp_show_names), false);
+        boolean showNames = sharedPref.getBoolean(getString(R.string.sp_show_names), false);
         View mView = inflater.inflate(R.layout.fragment_subject, container, false);
 
         // Spinner for Gender selection
@@ -87,20 +87,20 @@ public class SubjectFragment extends Fragment {
         spinner.setAdapter(adapter_gender);
 
         // RecyclerView for Subjects
-        RecyclerView list_view_subjects = mView.findViewById(R.id.list_view_subjects);
-        list_view_subjects.setLayoutManager(new LinearLayoutManager(requireActivity()));
+        RecyclerView listViewSubjects = mView.findViewById(R.id.list_view_subjects);
+        listViewSubjects.setLayoutManager(new LinearLayoutManager(requireActivity()));
         subjects = new ArrayList<>();
-        adapter_subjects = new RecyclerViewAdapterSubjects(requireActivity(), subjects, show_names);
-        list_view_subjects.setAdapter(adapter_subjects);
-        adapter_subjects.setClickListener((int position) -> {
-            int previousSelectedSubjectId = adapter_subjects.selectedSubjectPosition;
-            adapter_subjects.selectedSubjectPosition = position;
-            adapter_subjects.notifyItemChanged(position);
-            adapter_subjects.notifyItemChanged(previousSelectedSubjectId);
+        adapterSubjects = new RecyclerViewAdapterSubjects(requireActivity(), subjects, showNames);
+        listViewSubjects.setAdapter(adapterSubjects);
+        adapterSubjects.setClickListener((int position) -> {
+            int previousSelectedSubjectId = adapterSubjects.selectedSubjectPosition;
+            adapterSubjects.selectedSubjectPosition = position;
+            adapterSubjects.notifyItemChanged(position);
+            adapterSubjects.notifyItemChanged(previousSelectedSubjectId);
             DBAdapter DBAdapter = new DBAdapter(requireActivity());
             DBAdapter.open();
             Cursor cursorSingleSubject =
-                    DBAdapter.getSubjectById(adapter_subjects.getItem(position).getId());
+                    DBAdapter.getSubjectById(adapterSubjects.getItem(position).getId());
             cursorSingleSubject.moveToFirst();
             MainActivity.currentlySelectedSubject = extractSubjectFromTheDB(cursorSingleSubject);
             cursorSingleSubject.close();
@@ -110,17 +110,17 @@ public class SubjectFragment extends Fragment {
         });
 
         // RecyclerView for Records
-        RecyclerView list_view_records = mView.findViewById(R.id.list_view_records);
-        list_view_records.setLayoutManager(new LinearLayoutManager(requireActivity()));
+        RecyclerView listViewRecords = mView.findViewById(R.id.list_view_records);
+        listViewRecords.setLayoutManager(new LinearLayoutManager(requireActivity()));
         records = new ArrayList<>();
-        adapter_records = new RecyclerViewAdapterRecords(requireActivity(), records);
-        list_view_records.setAdapter(adapter_records);
+        adapterRecords = new RecyclerViewAdapterRecords(requireActivity(), records);
+        listViewRecords.setAdapter(adapterRecords);
 
         // EditText and Button for adding new Subjects
-        EditText edittext_patient_name = mView.findViewById(R.id.edittext_subject_name);
-        Button button_add_patients = mView.findViewById(R.id.button_add_subject);
-        button_add_patients.setOnClickListener((View view) -> {
-            if (edittext_patient_name.getText().toString().equals("")) {
+        EditText edittextPatientName = mView.findViewById(R.id.edittext_subject_name);
+        Button buttonAddPatients = mView.findViewById(R.id.button_add_subject);
+        buttonAddPatients.setOnClickListener((View view) -> {
+            if (edittextPatientName.getText().toString().equals("")) {
                 Toast toast = Toast.makeText(getContext(), getString(R.string.toast_empty_name), Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.CENTER, 0, 0);
                 toast.show();
@@ -128,12 +128,12 @@ public class SubjectFragment extends Fragment {
                 DBAdapter DBAdapter = new DBAdapter(requireActivity());
                 DBAdapter.open();
                 Subject new_subject =
-                        new Subject(edittext_patient_name.getText().toString(),
+                        new Subject(edittextPatientName.getText().toString(),
                                 (int) spinner.getSelectedItemId());
                 new_subject.setId((int) DBAdapter.insertSubject(new_subject));
                 DBAdapter.close();
                 MainActivity.currentlySelectedSubject = new_subject;
-                edittext_patient_name.setText("");
+                edittextPatientName.setText("");
                 populateListSubjects();
                 populateListRecords();
             }
@@ -169,11 +169,11 @@ public class SubjectFragment extends Fragment {
                 Subject newSubject = extractSubjectFromTheDB(cursorSubjects);
                 subjects.add(newSubject);
             } while (cursorSubjects.moveToNext());
-        Integer id_to_select = MainActivity.currentlySelectedSubject.getId();
+        Integer idToSelect = MainActivity.currentlySelectedSubject.getId();
         Subject selected = subjects.stream().filter(carnet ->
-                id_to_select.equals(carnet.getId())).findFirst().orElse(null);
-        adapter_subjects.selectedSubjectPosition = subjects.indexOf(selected);
-        adapter_subjects.notifyDataSetChanged();
+                idToSelect.equals(carnet.getId())).findFirst().orElse(null);
+        adapterSubjects.selectedSubjectPosition = subjects.indexOf(selected);
+        adapterSubjects.notifyDataSetChanged();
         cursorSubjects.close();
     }
 
@@ -194,7 +194,7 @@ public class SubjectFragment extends Fragment {
                         getColumnIndex(DBAdapter.RECORD_TIMESTAMP));
                 records.add(0, new Record(id, subject_id, n, sensations, timestamp));
             } while (cursorRecords.moveToNext());
-        adapter_records.notifyDataSetChanged();
+        adapterRecords.notifyDataSetChanged();
         cursorRecords.close();
     }
 
@@ -225,8 +225,8 @@ public class SubjectFragment extends Fragment {
 
         // Load front and back sensations images
         Record selectedRecord =
-                adapter_records.getItem(adapter_records.selectedRecordPosition);
-        Subject selectedSubject = subjects.get(adapter_subjects.selectedSubjectPosition);
+                adapterRecords.getItem(adapterRecords.selectedRecordPosition);
+        Subject selectedSubject = subjects.get(adapterSubjects.selectedSubjectPosition);
         File imageSensationsFront = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
                 + "/" + selectedRecord.getN() + "/complete_picture_f.png");
@@ -258,14 +258,14 @@ public class SubjectFragment extends Fragment {
         List<Integer> colors = Arrays.stream(requireActivity().getResources().
                 getIntArray(R.array.colors_symptoms)).boxed().collect(Collectors.toList());
         String textSensations = selectedRecord.getSensations();
-        ArrayList<String> list_sensations = new ArrayList<>(Arrays.asList(textSensations.split(";")));
-        StringBuilder text_sensations_colored = new StringBuilder();
-        for (int i = 0; i < list_sensations.size(); i++) {
-            list_sensations.set(i, "<font color=" + colors.get(i) + ">" + list_sensations.get(i) + "</font>");
-            text_sensations_colored.append(list_sensations.get(i)).append("<br/>");
+        ArrayList<String> listSensations = new ArrayList<>(Arrays.asList(textSensations.split(";")));
+        StringBuilder textSensationsColored = new StringBuilder();
+        for (int i = 0; i < listSensations.size(); i++) {
+            listSensations.set(i, "<font color=" + colors.get(i) + ">" + listSensations.get(i) + "</font>");
+            textSensationsColored.append(listSensations.get(i)).append("<br/>");
         }
         shareIntent.putExtra(Intent.EXTRA_TEXT,
-                Html.fromHtml(text_sensations_colored.toString(), Html.FROM_HTML_MODE_LEGACY));
+                Html.fromHtml(textSensationsColored.toString(), Html.FROM_HTML_MODE_LEGACY));
         shareIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         shareIntent.putExtra(Intent.EXTRA_SUBJECT,
                 getResources().getString(R.string.menu_export_title, selectedSubject.getName(), dateString));
@@ -279,7 +279,7 @@ public class SubjectFragment extends Fragment {
                 setPositiveButton(getResources().getString(R.string.dialog_yes),
                         (dialog, id) -> {
                             Subject selectedSubject =
-                                    adapter_subjects.getItem(adapter_subjects.selectedSubjectPosition);
+                                    adapterSubjects.getItem(adapterSubjects.selectedSubjectPosition);
                             DBAdapter DBAdapter = new DBAdapter(requireActivity());
                             DBAdapter.open();
                             DBAdapter.deleteSubject(selectedSubject.getId());
@@ -299,7 +299,7 @@ public class SubjectFragment extends Fragment {
                 setPositiveButton(getResources().getString(R.string.dialog_yes),
                         (dialog, id) -> {
                             Record selectedRecord =
-                                    adapter_records.getItem(adapter_records.selectedRecordPosition);
+                                    adapterRecords.getItem(adapterRecords.selectedRecordPosition);
                             DBAdapter DBAdapter = new DBAdapter(requireActivity());
                             DBAdapter.open();
                             DBAdapter.deleteRecord(selectedRecord.getId());
@@ -320,13 +320,13 @@ public class SubjectFragment extends Fragment {
                 getLayoutInflater().inflate(R.layout.alert_image, null);
         ImageView imageViewBody = alertView.findViewById(R.id.image_view_body);
         Record selectedRecord =
-                adapter_records.getItem(adapter_records.selectedRecordPosition);
+                adapterRecords.getItem(adapterRecords.selectedRecordPosition);
         DBAdapter DBAdapter = new DBAdapter(requireActivity());
         DBAdapter.open();
         Cursor cursorSingleSubject =
                 DBAdapter.getSubjectById(selectedRecord.getSubjectId());
         cursorSingleSubject.moveToFirst();
-        Subject selected_subject = subjects.get(adapter_subjects.selectedSubjectPosition);
+        Subject selected_subject = subjects.get(adapterSubjects.selectedSubjectPosition);
         cursorSingleSubject.close();
         File imageSensationsFront = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selected_subject.getId()
@@ -360,7 +360,7 @@ public class SubjectFragment extends Fragment {
         super.onResume();
         SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
         boolean show_names = sharedPref.getBoolean(getString(R.string.sp_show_names), false);
-        adapter_subjects.setShowNames(show_names);
+        adapterSubjects.setShowNames(show_names);
         populateListSubjects();
         populateListRecords();
     }

@@ -104,12 +104,12 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
-        boolean show_instructions = sharedPref.getBoolean(getString(R.string.sp_show_instructions), false);
-        boolean request_password = sharedPref.getBoolean(getString(R.string.sp_request_password), false);
-        boolean show_names = sharedPref.getBoolean(getString(R.string.sp_show_names), false);
-        menu.findItem(R.id.menu_show_instructions).setChecked(show_instructions);
-        menu.findItem(R.id.menu_request_password).setChecked(request_password);
-        menu.findItem(R.id.menu_show_names).setChecked(show_names);
+        boolean showInstructions = sharedPref.getBoolean(getString(R.string.sp_show_instructions), false);
+        boolean requestPassword = sharedPref.getBoolean(getString(R.string.sp_request_password), false);
+        boolean showNames = sharedPref.getBoolean(getString(R.string.sp_show_names), false);
+        menu.findItem(R.id.menu_show_instructions).setChecked(showInstructions);
+        menu.findItem(R.id.menu_request_password).setChecked(requestPassword);
+        menu.findItem(R.id.menu_show_names).setChecked(showNames);
         menu.setGroupDividerEnabled(true);
         return true;
     }

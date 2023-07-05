@@ -16,6 +16,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -28,10 +29,10 @@ import java.util.List;
 
 public class BodyDrawingView extends View {
 
-    private final List<Step> steps = new ArrayList<>();
+    public List<Step> steps = new ArrayList<>();
     private final GestureDetector mGestureDetector;
     private final ScaleGestureDetector mScaleDetector;
-    private final Rect mBGRect = new Rect();
+    final Rect mBGRect = new Rect();
     private final Paint snapshotPaint = new Paint();
     public Bitmap snapshot = null;
     Canvas drawImageCanvas;
@@ -151,7 +152,7 @@ public class BodyDrawingView extends View {
     }
 
     // After lifting the pen this method draws the step to the snapshot
-    private void drawStep(Step step) {
+    void drawStep(Step step) {
         if (freshSnapshot == null) {
             freshSnapshot = Bitmap.createBitmap(mBGRect.width(), mBGRect.height(),
                     Bitmap.Config.ARGB_8888);
@@ -215,6 +216,16 @@ public class BodyDrawingView extends View {
                 snapshot = freshSnapshot;
                 invalidate();
             }
+        }
+    }
+
+    void paintAllSavedSteps() {
+        Log.e("WE HAVE STEPS", "paintAllSavedSteps: " + steps.size());
+        if (steps.size() > 0) {
+            for (Step step : steps) {
+                drawStep(step);
+            }
+            invalidate();
         }
     }
 

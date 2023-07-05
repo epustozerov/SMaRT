@@ -27,7 +27,7 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
     private final List<Subject> mSubjects;
     private final LayoutInflater mInflater;
     private final Context mContext;
-    private final String string_subject;
+    private final String stringSubject;
     public int selectedSubjectPosition = 0;
     private ItemClickListener mClickListener;
     private boolean show_names;
@@ -38,7 +38,7 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
         this.mSubjects = subjects;
         this.mContext = context;
         this.show_names = show_names;
-        this.string_subject = context.getResources().getString(R.string.subject);
+        this.stringSubject = context.getResources().getString(R.string.subject);
     }
 
     public void setShowNames(boolean show_names) {
@@ -60,7 +60,7 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
         if (show_names)
             holder.myTextView.setText(String.format("%s", subject.getName()));
         else
-            holder.myTextView.setText(String.format(string_subject + " %s", subject.getId()));
+            holder.myTextView.setText(String.format(stringSubject + " %s", subject.getId()));
         if (selectedSubjectPosition == position) {
             holder.myTextView.setTextColor(ContextCompat.getColor(mContext, R.color.gray_dark));
             holder.myTextView.setTypeface(null, Typeface.BOLD);
@@ -125,15 +125,15 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
         public void onCreateContextMenu(ContextMenu contextMenu, View view,
                                         ContextMenu.ContextMenuInfo contextMenuInfo) {
             selectedSubjectPosition = getBindingAdapterPosition();
-            String patient_name = mSubjects.get(selectedSubjectPosition).getName();
-            int patient_gender = mSubjects.get(selectedSubjectPosition).getGender();
-            String string_gender = mContext.getResources().getStringArray(R.array.genders)[patient_gender];
+            String patientName = mSubjects.get(selectedSubjectPosition).getName();
+            int patientGender = mSubjects.get(selectedSubjectPosition).getGender();
+            String stringGender = mContext.getResources().getStringArray(R.array.genders)[patientGender];
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(mSubjects.get(selectedSubjectPosition).getTimestamp());
             SimpleDateFormat formatter =
                     new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
             String dateString = formatter.format(cal.getTime());
-            contextMenu.setHeaderTitle(patient_name + ", " + string_gender +
+            contextMenu.setHeaderTitle(patientName + ", " + stringGender +
                     ",\n created: " + dateString);
             contextMenu.add(0, SUBJECT_DELETE, Menu.NONE,
                     mContext.getString(R.string.menu_remove_subject));

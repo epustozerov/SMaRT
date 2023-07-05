@@ -63,8 +63,8 @@ public class CanvasFragment extends Fragment {
     boolean currentStateIsFront;
     Toast showedToast = null;
     private List<String> sortedChoices = new ArrayList<>();
-    private BodyDrawingView currentBodyView;
-    private BodyDrawingView hiddenBodyView;
+    public BodyDrawingView currentBodyView;
+    public BodyDrawingView hiddenBodyView;
     private Brush currentBrush;
     private List<Brush> brushes;
     private int currentIntensity;
@@ -110,14 +110,11 @@ public class CanvasFragment extends Fragment {
             return mCanvas;
         }
         mCanvas = inflater.inflate(R.layout.fragment_canvas, container, false);
+        selectedSensations = new ArrayList<>();
 
         // Show current fragment tag
         Log.e("RECREATION", "CanvasFragment");
         Log.e("SELECTED SENSATIONS", selectedSensations + "");
-        if (selectedSensations == null) {
-            selectedSensations = new ArrayList<>();
-        }
-
         // Init container with drawn sensations
         tagContainerSensations = mCanvas.findViewById(R.id.drawn_sensations);
 
@@ -450,6 +447,7 @@ public class CanvasFragment extends Fragment {
                 currentBodyView.setBrush(currentBrush);
             }
         });
+
         return mCanvas;
     }
 
@@ -467,7 +465,6 @@ public class CanvasFragment extends Fragment {
             return BitmapFactory.decodeResource(getResources(), body_type_id);
         }
     }
-
 
     @SuppressLint("ResourceType")
     private void initBrushes() {
@@ -510,13 +507,13 @@ public class CanvasFragment extends Fragment {
     }
 
     private void updateBackView(Bitmap sensations, Bitmap background) {
-        Bitmap full_picture = Bitmap.createBitmap(background.getWidth(),
+        Bitmap fullPicture = Bitmap.createBitmap(background.getWidth(),
                 background.getHeight() + 100, background.getConfig());
-        Canvas canvas = new Canvas(full_picture);
+        Canvas canvas = new Canvas(fullPicture);
         canvas.drawBitmap(background, 0f, 0f, null);
         if (sensations != null)
             canvas.drawBitmap(sensations, 0f, 0f, null);
-        buttonBackView.setImageBitmap(Bitmap.createScaledBitmap(full_picture, 149, 220, true));
+        buttonBackView.setImageBitmap(Bitmap.createScaledBitmap(fullPicture, 149, 220, true));
     }
 
     public void restoreSensations() {
@@ -531,7 +528,6 @@ public class CanvasFragment extends Fragment {
             tagContainerSensations.addView(txt);
         }
         tagContainerSensations.invalidate();
-        Log.e("TAG CONTAINER RESTORED", sortedChoices.toString());
     }
 
     @Override
@@ -540,6 +536,14 @@ public class CanvasFragment extends Fragment {
         DrawFragment drawFragment = (DrawFragment) getParentFragment();
         assert drawFragment != null;
         drawFragment.allSelectedSensations.put(this.getTag(), selectedSensations);
+        if (this.currentStateIsFront) {
+            drawFragment.allStepsFront.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.currentBodyView.steps);
+            drawFragment.allStepsBack.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.hiddenBodyView.steps);
+        } else {
+            drawFragment.allStepsBack.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.currentBodyView.steps);
+            drawFragment.allStepsFront.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.hiddenBodyView.steps);
+        }
+        drawFragment.allStepsFront.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.currentBodyView.steps);
         Log.e("SAVING", "Saving sensations for " + this.getTag() + " " + selectedSensations.size());
         super.onPause();
     }
@@ -572,6 +576,15 @@ public class CanvasFragment extends Fragment {
     public void onResume() {
         Log.e("DEBUG", "OnResume of CanvasFragment " + this.getTag());
         super.onResume();
+        assert getParentFragment() != null;
+        ArrayList<BodyDrawingView.Step> savedStepsFront = ((DrawFragment) getParentFragment()).allStepsFront.get(this.getTag());
+        ArrayList<BodyDrawingView.Step> savedStepsBack = ((DrawFragment) getParentFragment()).allStepsBack.get(this.getTag());
+        if (savedStepsFront != null) {
+            this.currentBodyView.steps = savedStepsFront;
+            this.hiddenBodyView.steps = savedStepsBack;
+            this.currentBodyView.invalidate();
+            this.hiddenBodyView.invalidate();
+        }
     }
 
     @Override
