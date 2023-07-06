@@ -19,8 +19,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="6dp"
-                android:text="@string/select_condition" />
+                android:layout_margin="6dp" />
 
         </LinearLayout>
 
@@ -81,7 +80,6 @@
                                 android:scaleType="center" />
 
                             <TextView
-                                android:id="@+id/textview_general_view"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center|bottom"
@@ -147,7 +145,6 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/textview_max"
                             android:layout_width="wrap_content"
                             android:layout_height="20sp"
                             android:layout_gravity="top|center"
@@ -167,7 +164,6 @@
                             app:colorSeekBarVertical="true" />
 
                         <TextView
-                            android:id="@+id/textview_min"
                             android:layout_width="wrap_content"
                             android:layout_height="20sp"
                             android:layout_gravity="bottom|center"

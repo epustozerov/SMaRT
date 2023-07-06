@@ -21,7 +21,6 @@ public class DBAdapter {
     public static final String SUBJECT_TIMESTAMP = "timestamp";
     public static final String RECORD_ID = "id";
     public static final String RECORD_SUBJECT_ID = "subject_id";
-
     public static final String RECORD_N = "n";
     public static final String RECORD_SENSATIONS = "sensations";
     public static final String RECORD_DELETED = "deleted";
@@ -49,10 +48,6 @@ public class DBAdapter {
             db = dbHelper.getReadableDatabase();
         }
     }
-
-    // ///////////////////////////////////
-    // Insert new records to the DataBase
-    // ///////////////////////////////////
 
     void deleteSubject(long subject_id) {
         ContentValues updateSubject = new ContentValues();

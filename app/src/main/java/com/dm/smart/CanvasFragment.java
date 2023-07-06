@@ -1,7 +1,7 @@
 package com.dm.smart;
 
 import static com.dm.smart.DrawFragment.dampen;
-import static com.dm.smart.DrawFragment.define_min_max_colors;
+import static com.dm.smart.DrawFragment.defineMinMaxColors;
 import static com.dm.smart.ui.elements.CustomAlertDialogs.showGeneralView;
 import static com.dm.smart.ui.elements.CustomToasts.showToast;
 
@@ -50,6 +50,7 @@ import java.util.List;
 
 public class CanvasFragment extends Fragment {
 
+    private final List<String> sortedChoices = new ArrayList<>();
     public ArrayList<String> selectedSensations;
     public int color;
     public LinearLayout tagContainerSensations;
@@ -57,14 +58,13 @@ public class CanvasFragment extends Fragment {
     public BodyDrawingView bodyViewBack;
     public Bitmap generalViewFront;
     public Bitmap generalViewBack;
+    public BodyDrawingView currentBodyView;
+    public BodyDrawingView hiddenBodyView;
     ImageView buttonCompleteView;
     ImageView buttonBackView;
     TypedArray bodyFigures;
     boolean currentStateIsFront;
     Toast showedToast = null;
-    private List<String> sortedChoices = new ArrayList<>();
-    public BodyDrawingView currentBodyView;
-    public BodyDrawingView hiddenBodyView;
     private Brush currentBrush;
     private List<Brush> brushes;
     private int currentIntensity;
@@ -75,12 +75,13 @@ public class CanvasFragment extends Fragment {
     private int mShortAnimationDuration;
     private boolean allowOutsideDrawing = false;
 
+
+    public CanvasFragment() {
+    }
+
     public CanvasFragment(Bundle b) {
         color = b.getInt("color");
         dampenedColor = dampen(color);
-    }
-
-    public CanvasFragment() {
     }
 
     @Override
@@ -93,6 +94,9 @@ public class CanvasFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.e("DEBUG", "onCreateView of CanvasFragment " + getTag());
+        DrawFragment drawFragment = (DrawFragment) getParentFragment();
+
         currentStateIsFront = true;
         bodyFigures = getResources().obtainTypedArray(R.array.body_figures_neutral);
         switch (MainActivity.currentlySelectedSubject.getGender()) {
@@ -110,13 +114,21 @@ public class CanvasFragment extends Fragment {
             return mCanvas;
         }
         mCanvas = inflater.inflate(R.layout.fragment_canvas, container, false);
-        selectedSensations = new ArrayList<>();
+        assert getParentFragment() != null;
+        ArrayList<String> savedSendations = ((DrawFragment) getParentFragment()).persSensations.get(getTag());
+        if (savedSendations != null) {
+            selectedSensations = savedSendations;
+        } else {
+            selectedSensations = new ArrayList<>();
+        }
+        tagContainerSensations = mCanvas.findViewById(R.id.drawn_sensations);
 
         // Show current fragment tag
         Log.e("RECREATION", "CanvasFragment");
         Log.e("SELECTED SENSATIONS", selectedSensations + "");
         // Init container with drawn sensations
-        tagContainerSensations = mCanvas.findViewById(R.id.drawn_sensations);
+
+        // Don't show the default text if there are more than 0 sensations
 
         // Init body figures for drawing
         bodyViewFront = mCanvas.findViewById(R.id.drawing_view_front);
@@ -247,6 +259,7 @@ public class CanvasFragment extends Fragment {
                 currentStateIsFront = true;
                 currentBodyView = bodyViewBack;
                 hiddenBodyView = bodyViewFront;
+                assert drawFragment != null;
                 updateGeneralView(generalViewFront, bodyViewFront.backgroundImage);
                 updateBackView(bodyViewBack.snapshot, bodyViewBack.backgroundImage);
             } else {
@@ -255,6 +268,7 @@ public class CanvasFragment extends Fragment {
                 currentStateIsFront = false;
                 currentBodyView = bodyViewFront;
                 hiddenBodyView = bodyViewBack;
+                assert drawFragment != null;
                 updateGeneralView(generalViewBack, bodyViewBack.backgroundImage);
                 updateBackView(bodyViewFront.snapshot, bodyViewFront.backgroundImage);
             }
@@ -338,6 +352,19 @@ public class CanvasFragment extends Fragment {
                     Math.round(dp2px(8)), Math.round(dp2px(8)));
             b.setOnClickListener(choiceClickListener);
             sensationsContainer.addView(b, lp);
+        }
+        // go through the list of sensations and select the ones that were selected before
+        for (String selectedSensation : selectedSensations) {
+            int index = Arrays.asList(sensationTypes).indexOf(selectedSensation);
+            ToggleButton b = (ToggleButton) sensationsContainer.getChildAt(index);
+            b.setChecked(true);
+            b.setBackgroundTintList(ColorStateList.valueOf(dampenedColor));
+            sortedChoices.add(selectedSensation);
+            TextView txt = new TextView(getContext());
+            txt.setText(selectedSensation);
+            txt.setPadding(Math.round(dp2px(6)), Math.round(dp2px(6)),
+                    Math.round(dp2px(6)), Math.round(dp2px(6)));
+            tagContainerSensations.addView(txt);
         }
 
         // Init the bottom tool bar
@@ -423,10 +450,10 @@ public class CanvasFragment extends Fragment {
 
         // Init intensity scale
         ColorSeekBar intensityScale = mCanvas.findViewById(R.id.color_seek_bar);
-        intensityScale.setColorSeeds(define_min_max_colors(color));
+        intensityScale.setColorSeeds(defineMinMaxColors(color));
         intensityScale.setThumbDrawer(new CustomThumbDrawer(65, Color.WHITE, Color.BLACK));
 
-        // set intenstityScale on touch listener to process only stylised touch events
+        // Set intenstityScale on touch listener to process only stylised touch events
         intensityScale.setOnTouchListener((v, event) -> {
             boolean isPen = event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS;
             if (isPen) {
@@ -496,19 +523,20 @@ public class CanvasFragment extends Fragment {
         }
     }
 
-
     private void updateGeneralView(Bitmap merged, Bitmap background) {
-        Bitmap full_picture = Bitmap.createBitmap(background.getWidth(),
+        Log.e("RESTORE GENERAL VIEW 1", "updateGeneralView: " + merged + " " + background);
+        Bitmap fullPicture = Bitmap.createBitmap(background.getWidth(),
                 background.getHeight() + 100, background.getConfig());
-        Canvas canvas = new Canvas(full_picture);
+        Canvas canvas = new Canvas(fullPicture);
         canvas.drawBitmap(background, 0f, 0f, null);
         canvas.drawBitmap(merged, 0f, 0f, null);
-        buttonCompleteView.setImageBitmap(Bitmap.createScaledBitmap(full_picture, 149, 220, true));
+        buttonCompleteView.setImageBitmap(Bitmap.createScaledBitmap(fullPicture, 149, 220, true));
+        buttonCompleteView.invalidate();
     }
 
     private void updateBackView(Bitmap sensations, Bitmap background) {
         Bitmap fullPicture = Bitmap.createBitmap(background.getWidth(),
-                background.getHeight() + 100, background.getConfig());
+                background.getHeight(), background.getConfig());
         Canvas canvas = new Canvas(fullPicture);
         canvas.drawBitmap(background, 0f, 0f, null);
         if (sensations != null)
@@ -516,18 +544,28 @@ public class CanvasFragment extends Fragment {
         buttonBackView.setImageBitmap(Bitmap.createScaledBitmap(fullPicture, 149, 220, true));
     }
 
-    public void restoreSensations() {
-        // update the select sensation tab with the list of cf.selectedSensations
-        sortedChoices = new ArrayList<>(selectedSensations);
-        tagContainerSensations = mCanvas.findViewById(R.id.drawn_sensations);
-        for (String sensation : sortedChoices) {
-            TextView txt = new TextView(getContext());
-            txt.setText(sensation);
-            txt.setPadding(Math.round(dp2px(6)), Math.round(dp2px(6)),
-                    Math.round(dp2px(6)), Math.round(dp2px(6)));
-            tagContainerSensations.addView(txt);
+    public void restoreSteps() {
+        DrawFragment drawFragment = (DrawFragment) getParentFragment();
+        assert getParentFragment() != null;
+        ArrayList<BodyDrawingView.Step> savedStepsFront = drawFragment.persStepsFront.get(getTag());
+        ArrayList<BodyDrawingView.Step> savedStepsBack = drawFragment.persStepsBack.get(getTag());
+        if (savedStepsFront != null) {
+            bodyViewFront.steps = savedStepsFront;
         }
-        tagContainerSensations.invalidate();
+        if (savedStepsBack != null) {
+            bodyViewBack.steps = savedStepsBack;
+        }
+        Log.e("RESTORE STEPS", "Restoring steps for " + getTag() + " " + currentBodyView.steps);
+        bodyViewFront.redrawAllSavedSteps();
+        bodyViewFront.invalidate();
+        bodyViewBack.redrawAllSavedSteps();
+        bodyViewBack.invalidate();
+        // run Update general view global from DrawFragment
+        if (this.currentStateIsFront) {
+            updateBackView(bodyViewBack.snapshot, bodyViewBack.backgroundImage);
+        } else {
+            updateBackView(bodyViewFront.snapshot, bodyViewFront.backgroundImage);
+        }
     }
 
     @Override
@@ -535,16 +573,17 @@ public class CanvasFragment extends Fragment {
         Log.e("DEBUG", "OnPause of CanvasFragment " + this.getTag());
         DrawFragment drawFragment = (DrawFragment) getParentFragment();
         assert drawFragment != null;
-        drawFragment.allSelectedSensations.put(this.getTag(), selectedSensations);
+        drawFragment.persSensations.put(this.getTag(), selectedSensations);
         if (this.currentStateIsFront) {
-            drawFragment.allStepsFront.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.currentBodyView.steps);
-            drawFragment.allStepsBack.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.hiddenBodyView.steps);
+            drawFragment.persStepsFront.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.currentBodyView.steps);
+            drawFragment.persStepsBack.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.hiddenBodyView.steps);
         } else {
-            drawFragment.allStepsBack.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.currentBodyView.steps);
-            drawFragment.allStepsFront.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.hiddenBodyView.steps);
+            drawFragment.persStepsBack.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.currentBodyView.steps);
+            drawFragment.persStepsFront.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.hiddenBodyView.steps);
         }
-        drawFragment.allStepsFront.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.currentBodyView.steps);
+        drawFragment.updateGeneralViewGlobal();
         Log.e("SAVING", "Saving sensations for " + this.getTag() + " " + selectedSensations.size());
+        Log.e("SAVING", "Saving steps for " + this.getTag() + " " + this.currentBodyView.steps.size());
         super.onPause();
     }
 
@@ -576,15 +615,7 @@ public class CanvasFragment extends Fragment {
     public void onResume() {
         Log.e("DEBUG", "OnResume of CanvasFragment " + this.getTag());
         super.onResume();
-        assert getParentFragment() != null;
-        ArrayList<BodyDrawingView.Step> savedStepsFront = ((DrawFragment) getParentFragment()).allStepsFront.get(this.getTag());
-        ArrayList<BodyDrawingView.Step> savedStepsBack = ((DrawFragment) getParentFragment()).allStepsBack.get(this.getTag());
-        if (savedStepsFront != null) {
-            this.currentBodyView.steps = savedStepsFront;
-            this.hiddenBodyView.steps = savedStepsBack;
-            this.currentBodyView.invalidate();
-            this.hiddenBodyView.invalidate();
-        }
+        restoreSteps();
     }
 
     @Override

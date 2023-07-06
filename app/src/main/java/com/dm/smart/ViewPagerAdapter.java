@@ -10,7 +10,6 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import java.util.ArrayList;
 
-
 public class ViewPagerAdapter extends FragmentStateAdapter {
 
     public final ArrayList<Bundle> bundles = new ArrayList<>();

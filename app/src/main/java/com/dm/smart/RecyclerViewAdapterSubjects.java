@@ -32,7 +32,6 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
     private ItemClickListener mClickListener;
     private boolean show_names;
 
-    // data is passed into the constructor
     RecyclerViewAdapterSubjects(Context context, List<Subject> subjects, boolean show_names) {
         this.mInflater = LayoutInflater.from(context);
         this.mSubjects = subjects;
@@ -45,7 +44,6 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
         this.show_names = show_names;
     }
 
-    // inflates the row layout from xml when needed
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -53,7 +51,7 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
         return new ViewHolder(view);
     }
 
-    // binds the data to the TextView in each row
+    // Bind the data to the TextView in each row
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Subject subject = mSubjects.get(position);
@@ -70,14 +68,12 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
         }
     }
 
-    // total number of rows
     @Override
     public int getItemCount() {
         return mSubjects.size();
     }
 
-    // allows clicks events to be caught
-    @SuppressWarnings("unused")
+    // Allows clicks events to be caught
     void setClickListener(ItemClickListener itemClickListener) {
         this.mClickListener = itemClickListener;
     }
@@ -87,12 +83,12 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
     }
 
 
-    // parent activity will implement this method to respond to click events
+    // Parent activity implements this method to respond to click events
     public interface ItemClickListener {
         void onItemClick(int position);
     }
 
-    // stores and recycles views as they are scrolled off screen
+    // Store and recycle views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
             View.OnCreateContextMenuListener {
         final TextView myTextView;
@@ -104,7 +100,6 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
             itemView.setLongClickable(true);
             itemView.setOnCreateContextMenuListener(this);
         }
-
 
         @Override
         public void onClick(View view) {

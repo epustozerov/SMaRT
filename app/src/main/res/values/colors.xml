@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Initial list of base app colors -->
-    <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
@@ -12,7 +11,6 @@
     <color name="accent_material_light">#f03c14</color>
     <color name="primary_dark_material_light">#786e64</color>
     <color name="primary_material_light">#edeae6</color>
-    <color name="gray">#b1aa9e</color>
     <color name="background_material_light">#fafafa</color>
 
     <!-- Customized app colors -->
@@ -21,64 +19,8 @@
     <color name="gray_lighter">#eeeeee</color>
 
     <!-- List of symptom colors old -->
-    <color name="symptom_old_1">#ed3b00</color>
-    <color name="symptom_old_2">#00ff00</color>
-    <color name="symptom_old_3">#f3cb00</color>
-    <color name="symptom_old_4">#ff0000</color>
-    <color name="symptom_old_5">#0000ff</color>
-    <color name="symptom_old_6">#008000</color>
-    <color name="symptom_old_7">#ff8c00</color>
-    <color name="symptom_old_8">#00b2ee</color>
-    <color name="symptom_old_9">#8acd00</color>
-    <color name="symptom_old_10">#0080ff</color>
-    <color name="symptom_old_11">#aa00ff</color>
-    <color name="symptom_old_12">#ffff00</color>
-    <color name="symptom_old_13">#fa1a00</color>
-    <color name="symptom_old_14">#8b2500</color>
-    <color name="symptom_old_15">#00ff70</color>
-    <color name="symptom_old_16">#ff00ff</color>
-    <color name="symptom_old_17">#0055ed</color>
-    <string-array name="colors_symptoms_old">
-        <item>@color/symptom_old_1</item>
-        <item>@color/symptom_old_2</item>
-        <item>@color/symptom_old_3</item>
-        <item>@color/symptom_old_4</item>
-        <item>@color/symptom_old_5</item>
-        <item>@color/symptom_old_6</item>
-        <item>@color/symptom_old_7</item>
-        <item>@color/symptom_old_8</item>
-        <item>@color/symptom_old_9</item>
-        <item>@color/symptom_old_10</item>
-        <item>@color/symptom_old_11</item>
-        <item>@color/symptom_old_12</item>
-        <item>@color/symptom_old_13</item>
-        <item>@color/symptom_old_14</item>
-        <item>@color/symptom_old_15</item>
-        <item>@color/symptom_old_16</item>
-        <item>@color/symptom_old_17</item>
-    </string-array>
-
-    <color name="symptom_indigo">#7858FF</color>
-    <color name="symptom_green">#188918</color>
-    <color name="symptom_pink">#CC00DC</color>
-    <color name="symptom_teal">#07838F</color>
-    <color name="symptom_red">#D20A0A</color>
-    <color name="symptom_blue">#0070F2</color>
-    <color name="symptom_mango">#C35500</color>
-    <color name="symptom_grey">#5B738B</color>
-    <string-array name="colors_symptoms_bright">
-        <item>@color/symptom_indigo</item>
-        <item>@color/symptom_green</item>
-        <item>@color/symptom_pink</item>
-        <item>@color/symptom_teal</item>
-        <item>@color/symptom_red</item>
-        <item>@color/symptom_blue</item>
-        <item>@color/symptom_mango</item>
-        <item>@color/symptom_grey</item>
-    </string-array>
 
 
-    <color name="okabe_black">#000000</color>
     <color name="okabe_orange">#E69F00</color>
     <color name="okabe_sky_blue">#56B4E9</color>
     <color name="okabe_bluish_green">#009E73</color>

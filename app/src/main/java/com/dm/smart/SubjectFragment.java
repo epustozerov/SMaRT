@@ -179,7 +179,6 @@ public class SubjectFragment extends Fragment {
 
     @SuppressLint("NotifyDataSetChanged")
     private void updateArrayRecords(Cursor cursorRecords) {
-
         if (cursorRecords.moveToFirst())
             do {
                 @SuppressLint("Range") int id = cursorRecords.getInt(cursorRecords.
@@ -243,7 +242,6 @@ public class SubjectFragment extends Fragment {
         imageUris.add(imageSensationsFrontUri);
         imageUris.add(imageSensationsBackUri);
         Intent shareIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-        // shareIntent.setType("message/rfc822");
         shareIntent.setType("image/png");
         shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
 
@@ -271,7 +269,6 @@ public class SubjectFragment extends Fragment {
                 getResources().getString(R.string.menu_export_title, selectedSubject.getName(), dateString));
         startActivity(Intent.createChooser(shareIntent, "SEND IMAGE"));
     }
-
 
     public void showDeleteSubjectDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
@@ -326,13 +323,13 @@ public class SubjectFragment extends Fragment {
         Cursor cursorSingleSubject =
                 DBAdapter.getSubjectById(selectedRecord.getSubjectId());
         cursorSingleSubject.moveToFirst();
-        Subject selected_subject = subjects.get(adapterSubjects.selectedSubjectPosition);
+        Subject selectedSubject = subjects.get(adapterSubjects.selectedSubjectPosition);
         cursorSingleSubject.close();
         File imageSensationsFront = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selected_subject.getId()
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
                 + "/" + selectedRecord.getN() + "/complete_picture_f.png");
         File imageSensationsBack = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selected_subject.getId()
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
                 + "/" + selectedRecord.getN() + "/complete_picture_b.png");
         Bitmap sensationsFront = BitmapFactory.decodeFile(imageSensationsFront.getAbsolutePath());
         Bitmap sensationsBack = BitmapFactory.decodeFile(imageSensationsBack.getAbsolutePath());

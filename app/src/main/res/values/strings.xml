@@ -1,18 +1,13 @@
 <resources>
     <string name="app_name">SMaRT</string>
     <string name="body_scheme">Body scheme</string>
-    <string name="description_of_measurement_procedure">Description of measurement procedure</string>
     <string name="back_view">Back view</string>
     <string name="front_view">Front view</string>
     <string name="brush_erase">Clear</string>
     <string name="brush_line">Line</string>
     <string name="brush_region">Region</string>
-    <string name="brush_line_out">Line Extracorporeal</string>
-    <string name="brush_region_out">Region Extracorporeal</string>
     <string name="subject">Subject</string>
     <string name="title_add_sense">New drawing</string>
-    <string name="title_settings">Settings</string>
-    <string name="select_condition">Start making a record</string>
     <string name="new_record">New record</string>
     <string name="complete_recording">Complete recording</string>
     <string name="switch_bodyview">Switch body view</string>
@@ -20,7 +15,6 @@
     <string name="toast_select_tag">⇚ Please first select a sensation tag(s)</string>
     <string name="toast_select_intensity">⇛ Please first select an intensity on the scale</string>
     <string name="toast_empty_name">Please first enter a name for the subject</string>
-    <string name="toast_no_back_sensations">No records were made on the back side</string>
     <string name="textview_max">max</string>
     <string name="textview_min">min</string>
     <string name="to_drawing">To drawing</string>

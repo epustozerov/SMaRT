@@ -21,24 +21,19 @@ import java.util.Locale;
 public class RecyclerViewAdapterRecords extends RecyclerView.Adapter<RecyclerViewAdapterRecords.ViewHolder> {
 
     static final int RECORD_SHOW_IMAGE = Menu.FIRST + 1;
-
     static final int RECORD_SHARE = Menu.FIRST + 2;
     static final int RECORD_DELETE = Menu.FIRST + 3;
     private final List<Record> mRecords;
     private final LayoutInflater mInflater;
     private final Context mContext;
     public int selectedRecordPosition = 0;
-    private ItemClickListener mClickListener;
 
-
-    // data is passed into the constructor
     RecyclerViewAdapterRecords(Context context, List<Record> data) {
         this.mInflater = LayoutInflater.from(context);
         this.mRecords = data;
         this.mContext = context;
     }
 
-    // inflates the row layout from xml when needed
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -46,7 +41,7 @@ public class RecyclerViewAdapterRecords extends RecyclerView.Adapter<RecyclerVie
         return new ViewHolder(view);
     }
 
-    // binds the data to the TextView in each row
+    // Bind the data to the TextView in each row
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Record record = mRecords.get(position);
@@ -58,29 +53,16 @@ public class RecyclerViewAdapterRecords extends RecyclerView.Adapter<RecyclerVie
         holder.myTextView.setText(String.format("%s | Nr. %s", dateString, record.getN()));
     }
 
-    // total number of rows
     @Override
     public int getItemCount() {
         return mRecords.size();
-    }
-
-    // allows clicks events to be caught
-    @SuppressWarnings("unused")
-    void setClickListener(ItemClickListener itemClickListener) {
-        this.mClickListener = itemClickListener;
     }
 
     public Record getItem(int position) {
         return mRecords.get(position);
     }
 
-
-    // parent activity will implement this method to respond to click events
-    public interface ItemClickListener {
-        void onItemClick(View view, int position);
-    }
-
-    // stores and recycles views as they are scrolled off screen
+    // Stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
             View.OnCreateContextMenuListener {
         final TextView myTextView;
@@ -93,10 +75,8 @@ public class RecyclerViewAdapterRecords extends RecyclerView.Adapter<RecyclerVie
             itemView.setOnCreateContextMenuListener(this);
         }
 
-
         @Override
         public void onClick(View view) {
-            if (mClickListener != null) mClickListener.onItemClick(view, getBindingAdapterPosition());
         }
 
         @Override

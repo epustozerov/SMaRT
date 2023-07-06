@@ -16,7 +16,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -29,12 +28,12 @@ import java.util.List;
 
 public class BodyDrawingView extends View {
 
-    public List<Step> steps = new ArrayList<>();
+    final Rect mBGRect = new Rect();
     private final GestureDetector mGestureDetector;
     private final ScaleGestureDetector mScaleDetector;
-    final Rect mBGRect = new Rect();
     private final Paint snapshotPaint = new Paint();
-    public Bitmap snapshot = null;
+    public List<Step> steps = new ArrayList<>();
+    public Bitmap snapshot;
     Canvas drawImageCanvas;
     Bitmap backgroundImage = null;
     Toast showedToast = null;
@@ -42,18 +41,13 @@ public class BodyDrawingView extends View {
     private Rect mBGZoomedRect;
     private Matrix mZoomingMatrix, mInvertMatrix;
     private float mZoomingScale = 1.0f, minZoomingScale = 1.0f, maxZoomingScale = 7.0f;
-    private Bitmap freshSnapshot = null;
+    private Bitmap freshSnapshot;
     private Path freshPath = null;
     private Paint freshPaint = null;
     private Bitmap maskImage = null;
     private int intensity = -1;
     private CanvasFragment.Brush brush = null;
     private boolean allowOutsideDrawing;
-
-
-    public BodyDrawingView(Context context) {
-        this(context, null);
-    }
 
     public BodyDrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -152,14 +146,23 @@ public class BodyDrawingView extends View {
     }
 
     // After lifting the pen this method draws the step to the snapshot
-    void drawStep(Step step) {
+    void drawStep(Step step, int width, int height) {
         if (freshSnapshot == null) {
-            freshSnapshot = Bitmap.createBitmap(mBGRect.width(), mBGRect.height(),
-                    Bitmap.Config.ARGB_8888);
+            if (width != 0 && height != 0) {
+                freshSnapshot = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            } else {
+                freshSnapshot = Bitmap.createBitmap(mBGRect.width(), mBGRect.height(),
+                        Bitmap.Config.ARGB_8888);
+            }
             drawImageCanvas = new Canvas(freshSnapshot);
         }
-        Bitmap currentSnapshot = Bitmap.createBitmap(mBGRect.width(), mBGRect.height(),
-                Bitmap.Config.ARGB_8888);
+        Bitmap currentSnapshot;
+        if (width != 0 && height != 0) {
+            currentSnapshot = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        } else {
+            currentSnapshot = Bitmap.createBitmap(mBGRect.width(), mBGRect.height(),
+                    Bitmap.Config.ARGB_8888);
+        }
         Canvas tempCanvas = new Canvas(currentSnapshot);
         Paint paint = new Paint(step.brush.paint);
         paint.setStrokeWidth(step.brush.thickness);
@@ -205,7 +208,7 @@ public class BodyDrawingView extends View {
             }
             if (steps.size() > 0) {
                 for (Step step : steps) {
-                    drawStep(step);
+                    drawStep(step, 0, 0);
                 }
                 invalidate();
             } else {
@@ -219,18 +222,16 @@ public class BodyDrawingView extends View {
         }
     }
 
-    void paintAllSavedSteps() {
-        Log.e("WE HAVE STEPS", "paintAllSavedSteps: " + steps.size());
+    void redrawAllSavedSteps() {
         if (steps.size() > 0) {
             for (Step step : steps) {
-                drawStep(step);
+                drawStep(step, 1494, 2200);
             }
             invalidate();
         }
     }
 
     private void setBGImageZooming() {
-
         int imgW = backgroundImage.getWidth();
         int imgH = backgroundImage.getHeight();
         RectF imgRect = new RectF(0, 0, imgW, imgH);
@@ -377,7 +378,7 @@ public class BodyDrawingView extends View {
                 freshPath = null;
                 step.path.transform(mInvertMatrix);
                 steps.add(step);
-                drawStep(step);
+                drawStep(step, 0, 0);
             }
         } else {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -396,7 +397,6 @@ public class BodyDrawingView extends View {
     public void setAllowOutsideDrawing(boolean allowOutsideDrawing) {
         this.allowOutsideDrawing = allowOutsideDrawing;
     }
-
 
     static class Step {
 

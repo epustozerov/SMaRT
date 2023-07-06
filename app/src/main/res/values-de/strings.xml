@@ -7,13 +7,8 @@
     <string name="brush_erase">Löschen</string>
     <string name="brush_line">Linie</string>
     <string name="brush_region">Region</string>
-    <string name="brush_line_out">Linie Außerkörperlich</string>
-    <string name="brush_region_out">Region Außerkörperlich</string>
-    <string name="select_condition">Beginn der Aufzeichnung</string>
     <string name="subject">Proband</string>
     <string name="title_add_sense">Neue Zeichnung</string>
-    <string name="title_settings">Einstellungen</string>
-    <string name="description_of_measurement_procedure">Beschreibung des Messverfahrens</string>
     <string name="complete_recording">Zeichnung beenden</string>
     <string name="new_record">Neue Empfindung</string>
     <string name="add_new_subject">Neuen Probanden erstellen</string>
@@ -24,7 +19,6 @@
     <string name="toast_select_tag">⇚ Bitte wählen Sie zunächst einen/mehrere Begriff(e) für die Empfindung aus</string>
     <string name="toast_select_intensity">⇛ Bitte wählen Sie zunächst eine Intensität auf der Skala aus</string>
     <string name="toast_empty_name">Bitte geben Sie zunächst einen Namen für den Proband ein</string>
-    <string name="toast_no_back_sensations">Auf der Rückseite wurden keine Aufzeichnungen gemacht</string>
     <string name="textview_max">max</string>
     <string name="textview_min">min</string>
     <string name="switch_bodyview">Körperansicht wechseln</string>

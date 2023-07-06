@@ -48,13 +48,16 @@ import java.util.stream.Collectors;
 
 public class DrawFragment extends Fragment {
 
+    final Map<String, ArrayList<String>> persSensations = new HashMap<>();
+    final Map<String, ArrayList<BodyDrawingView.Step>> persStepsFront = new HashMap<>();
+    final Map<String, ArrayList<BodyDrawingView.Step>> persStepsBack = new HashMap<>();
     public ViewPager2 viewPager;
     public ViewPagerAdapter viewPagerAdapter;
     List<Integer> colors;
     Lifecycle lifecycle;
-    final Map<String, ArrayList<String>> allSelectedSensations = new HashMap<>();
-    final Map<String, ArrayList<BodyDrawingView.Step>> allStepsFront = new HashMap<>();
-    final Map<String, ArrayList<BodyDrawingView.Step>> allStepsBack = new HashMap<>();
+
+    public DrawFragment() {
+    }
 
     static int dampen(int color) {
         float[] hsv = new float[3];
@@ -63,7 +66,7 @@ public class DrawFragment extends Fragment {
         return Color.HSVToColor(hsv);
     }
 
-    static int[] define_min_max_colors(int color) {
+    static int[] defineMinMaxColors(int color) {
         float[] hsv = new float[3];
         Color.colorToHSV(color, hsv);
         hsv[1] = 1.0f;
@@ -121,25 +124,11 @@ public class DrawFragment extends Fragment {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                updateGeneralView();
+                updateGeneralViewGlobal();
             }
         });
 
-        for (int i = 0; i < viewPagerAdapter.fragmentManager.getFragments().size(); i++) {
-            Fragment f = viewPagerAdapter.fragmentManager.getFragments().get(i);
-            if (f != null) {
-                Log.e("FRAGMENTS", "Current tag:" + f.getTag() + ", iteration: " + i);
-            }
-        }
-        Log.e("VIEPAGERADAPTER", "tabs" + viewPagerAdapter.getItemCount());
         viewPager.setAdapter(null);
-        for (int i = 0; i < viewPagerAdapter.fragmentManager.getFragments().size(); i++) {
-            Fragment f = viewPagerAdapter.fragmentManager.getFragments().get(i);
-            if (f != null) {
-                Log.e("FRAGMENTS", "Current tag:" + f.getTag() + ", iteration: " + i);
-            }
-        }
-        Log.e("VIEPAGERADAPTER", "tabs" + viewPagerAdapter.getItemCount());
 
         viewPager.setAdapter(viewPagerAdapter);
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
@@ -177,7 +166,7 @@ public class DrawFragment extends Fragment {
         // if this is not the first tab, update the general view
         if (newPageIndex > 0) {
             Runnable runnable = () -> {
-                updateGeneralView();
+                updateGeneralViewGlobal();
                 viewPager.setCurrentItem(newPageIndex);
             };
             viewPager.post(runnable);
@@ -228,7 +217,6 @@ public class DrawFragment extends Fragment {
             }
             sensations.append("; ");
         }
-        Log.e("THESE ARE THE SENSATIONS WE HAVE:", sensations.toString());
         Record record = new Record(patient_id, sensations.toString());
 
         // get the amount of records by patient specified with patient_id
@@ -319,9 +307,7 @@ public class DrawFragment extends Fragment {
         }
     }
 
-    void updateGeneralView() {
-
-        long startTime = SystemClock.elapsedRealtime();
+    void updateGeneralViewGlobal() {
         int createdWindows = viewPagerAdapter.getItemCount();
 
         if (createdWindows > 0) {
@@ -361,10 +347,6 @@ public class DrawFragment extends Fragment {
                     canvasMergedFront.drawBitmap(cf.bodyViewFront.snapshot, 0f, 0f, null);
                 if (cf.bodyViewBack.snapshot != null)
                     canvasMergedBack.drawBitmap(cf.bodyViewBack.snapshot, 0f, 0f, null);
-                long endTime = SystemClock.elapsedRealtime();
-                long elapsedMilliSeconds = endTime - startTime;
-                double elapsedSeconds = elapsedMilliSeconds / 1000.0;
-                Log.e("UPDATE", "Particular canvas storage elapsed time: " + elapsedSeconds);
             }
 
             // Update the general view of each fragment
@@ -378,41 +360,41 @@ public class DrawFragment extends Fragment {
                 // set front or back image
                 if (cf.currentStateIsFront) {
                     Bitmap background = cf.bodyViewFront.backgroundImage;
-                    Bitmap full_picture = Bitmap.createBitmap(background.getWidth(),
+                    Bitmap fullPicture = Bitmap.createBitmap(background.getWidth(),
                             background.getHeight() + 100, background.getConfig());
-                    Canvas canvas = new Canvas(full_picture);
+                    Canvas canvas = new Canvas(fullPicture);
                     canvas.drawBitmap(background, 0f, 0f, null);
                     canvas.drawBitmap(merged_f, 0f, 0f, null);
-                    cf.buttonCompleteView.setImageBitmap(Bitmap.createScaledBitmap(full_picture, 149, 220, true));
+                    cf.buttonCompleteView.setImageBitmap(Bitmap.createScaledBitmap(fullPicture, 149, 220, true));
                 } else {
                     Bitmap background = cf.bodyViewBack.backgroundImage;
-                    Bitmap full_picture = Bitmap.createBitmap(background.getWidth(),
+                    Bitmap fullPicture = Bitmap.createBitmap(background.getWidth(),
                             background.getHeight() + 100, background.getConfig());
-                    Canvas canvas = new Canvas(full_picture);
+                    Canvas canvas = new Canvas(fullPicture);
                     canvas.drawBitmap(background, 0f, 0f, null);
                     canvas.drawBitmap(merged_b, 0f, 0f, null);
-                    cf.buttonCompleteView.setImageBitmap(Bitmap.createScaledBitmap(full_picture, 149, 220, true));
+                    cf.buttonCompleteView.setImageBitmap(Bitmap.createScaledBitmap(fullPicture, 149, 220, true));
                 }
             }
         }
     }
 
     Bitmap makeFullPicture(Bitmap sensations, Bitmap background, String text_sensations) {
-        ArrayList<String> list_sensations = new ArrayList<>(Arrays.asList(text_sensations.split(";")));
-        Bitmap full_picture = Bitmap.createBitmap(background.getWidth(),
-                background.getHeight() + 100 * list_sensations.size(), background.getConfig());
-        Canvas canvas = new Canvas(full_picture);
+        ArrayList<String> listSensations = new ArrayList<>(Arrays.asList(text_sensations.split(";")));
+        Bitmap fullPicture = Bitmap.createBitmap(background.getWidth(),
+                background.getHeight() + 100 * listSensations.size(), background.getConfig());
+        Canvas canvas = new Canvas(fullPicture);
         canvas.drawBitmap(background, 0f, 0f, null);
         canvas.drawBitmap(sensations, 0f, 0f, null);
         Paint paint = new Paint();
         paint.setTextSize(80);
         List<Integer> colors = Arrays.stream(requireActivity().getResources().
                 getIntArray(R.array.colors_symptoms)).boxed().collect(Collectors.toList());
-        for (int i = 0; i < list_sensations.size(); i++) {
+        for (int i = 0; i < listSensations.size(); i++) {
             paint.setColor(colors.get(i));
-            canvas.drawText(list_sensations.get(i).trim(), 0, background.getHeight() + 100 * i, paint);
+            canvas.drawText(listSensations.get(i).trim(), 0, background.getHeight() + 100 * i, paint);
         }
-        return full_picture;
+        return fullPicture;
     }
 
     @Override
@@ -423,7 +405,6 @@ public class DrawFragment extends Fragment {
     @Override
     public void onPause() {
         Log.e("DEBUG", "OnPause of DrawFragment");
-
         for (int i = 0; i < viewPagerAdapter.fragmentManager.getFragments().size(); i++) {
             Fragment f = viewPagerAdapter.fragmentManager.getFragments().get(i);
             if (f != null) {
@@ -439,9 +420,7 @@ public class DrawFragment extends Fragment {
                 viewPagerAdapter.fragmentManager.beginTransaction().detach(cf).commit();
             }
         }
-        Log.e("DEBUG", "OnPause of DrawFragment before super");
         super.onPause();
-        Log.e("DEBUG", "OnPause of DrawFragment after super");
     }
 
     @Override
@@ -470,7 +449,6 @@ public class DrawFragment extends Fragment {
 
     @Override
     public void onStop() {
-
         Log.e("DEBUG", "OnStop of DrawFragment");
         for (int i = 0; i < viewPagerAdapter.fragmentManager.getFragments().size(); i++) {
             Fragment f = viewPagerAdapter.fragmentManager.getFragments().get(i);
@@ -483,39 +461,6 @@ public class DrawFragment extends Fragment {
             Fragment f = viewPagerAdapter.fragmentManager.getFragments().get(i);
             if (f != null) {
                 Log.e("FRAGMENTS", "Current tag:" + f.getTag() + ", iteration: " + i);
-            }
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public void restoreAllDrawings() {
-        // iterate over all the fragments and restore the selected sensations
-        for (int i = 0; i < viewPagerAdapter.getItemCount(); i++) {
-            CanvasFragment cf =
-                    (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
-            Log.e("RESTORE", "Fragment " + i + " is " + cf);
-            Log.e("SENSATIONS", "Fragment " + i + " has " + allSelectedSensations.get("f" + i));
-            if (cf != null) {
-                cf.selectedSensations = allSelectedSensations.get("f" + i);
-                if (cf.selectedSensations != null) {
-                    cf.restoreSensations();
-                }
-                Log.e("STEPS", "Fragment " + i + " has " + allStepsFront.get("f" + i) + " and " + allStepsBack.get("f" + i));
-                if (cf.currentStateIsFront) {
-                    if (cf.currentBodyView.snapshot == null) {
-                        cf.currentBodyView.snapshot = Bitmap.createBitmap(cf.currentBodyView.mBGRect.width(),
-                                cf.currentBodyView.mBGRect.height(), Bitmap.Config.ARGB_8888);
-                    }
-                    cf.currentBodyView.steps = allStepsFront.get("f" + i);
-                    cf.hiddenBodyView.steps = allStepsBack.get("f" + i);
-                } else {
-                    cf.currentBodyView.steps = allStepsBack.get("f" + i);
-                    cf.hiddenBodyView.steps = allStepsFront.get("f" + i);
-                }
-                cf.bodyViewFront.steps = allStepsFront.get("f" + i);
-                cf.bodyViewBack.steps = allStepsBack.get("f" + i);
-                cf.bodyViewFront.paintAllSavedSteps();
-                cf.bodyViewBack.paintAllSavedSteps();
             }
         }
     }
@@ -561,4 +506,5 @@ public class DrawFragment extends Fragment {
             }
         }
     }
+
 }

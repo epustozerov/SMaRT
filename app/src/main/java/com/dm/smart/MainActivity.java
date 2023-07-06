@@ -28,7 +28,6 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
 
     static Subject currentlySelectedSubject;
-
     static SharedPreferences sharedPref;
 
     @SuppressLint("NonConstantResourceId")
@@ -60,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
-
         BottomNavigationView navigationView = findViewById(R.id.nav_view);
 
         navigationView.setOnItemSelectedListener(item -> {
@@ -117,7 +115,6 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
         if (item.getItemId() == R.id.menu_instructions) {
             android.app.AlertDialog alertDialog = CustomAlertDialogs.showInstructions(this);
             alertDialog.show();
