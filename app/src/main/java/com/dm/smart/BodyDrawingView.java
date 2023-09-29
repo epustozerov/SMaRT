@@ -22,6 +22,8 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,47 +56,47 @@ public class BodyDrawingView extends View {
 
         mGestureDetector = new GestureDetector(context, new GestureDetector.OnGestureListener() {
             @Override
-            public boolean onDown(MotionEvent motionEvent) {
+            public boolean onDown(@NonNull MotionEvent motionEvent) {
                 return false;
             }
 
             @Override
-            public void onShowPress(MotionEvent motionEvent) {
+            public void onShowPress(@NonNull MotionEvent motionEvent) {
             }
 
             @Override
-            public boolean onSingleTapUp(MotionEvent motionEvent) {
+            public boolean onSingleTapUp(@NonNull MotionEvent motionEvent) {
                 return false;
             }
 
             @Override
-            public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+            public boolean onScroll(@NonNull MotionEvent motionEvent, @NonNull MotionEvent motionEvent1, float v, float v1) {
                 moveXY(-v, -v1);
                 return true;
             }
 
             @Override
-            public void onLongPress(MotionEvent motionEvent) {
+            public void onLongPress(@NonNull MotionEvent motionEvent) {
             }
 
             @Override
-            public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+            public boolean onFling(@NonNull MotionEvent motionEvent, @NonNull MotionEvent motionEvent1, float v, float v1) {
                 return false;
             }
         });
 
         mScaleDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.OnScaleGestureListener() {
             @Override
-            public void onScaleEnd(ScaleGestureDetector detector) {
+            public void onScaleEnd(@NonNull ScaleGestureDetector detector) {
             }
 
             @Override
-            public boolean onScaleBegin(ScaleGestureDetector detector) {
+            public boolean onScaleBegin(@NonNull ScaleGestureDetector detector) {
                 return true;
             }
 
             @Override
-            public boolean onScale(ScaleGestureDetector detector) {
+            public boolean onScale(@NonNull ScaleGestureDetector detector) {
                 float tmpZoomingScale = mZoomingScale * detector.getScaleFactor();
                 if (tmpZoomingScale >= minZoomingScale && tmpZoomingScale <= maxZoomingScale) {
                     mZoomingMatrix.postScale(detector.getScaleFactor(), detector.getScaleFactor(),

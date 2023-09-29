@@ -81,7 +81,7 @@ public class SubjectFragment extends Fragment {
 
         // Spinner for Gender selection
         Spinner spinner = mView.findViewById(R.id.spinner_gender);
-        ArrayAdapter<CharSequence> adapter_gender = ArrayAdapter.createFromResource(getContext(),
+        ArrayAdapter<CharSequence> adapter_gender = ArrayAdapter.createFromResource(requireContext(),
                 R.array.genders, android.R.layout.simple_spinner_item);
         adapter_gender.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter_gender);

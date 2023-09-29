@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -108,7 +109,9 @@ public class MainActivity extends AppCompatActivity {
         menu.findItem(R.id.menu_show_instructions).setChecked(showInstructions);
         menu.findItem(R.id.menu_request_password).setChecked(requestPassword);
         menu.findItem(R.id.menu_show_names).setChecked(showNames);
-        menu.setGroupDividerEnabled(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            menu.setGroupDividerEnabled(true);
+        }
         return true;
     }
 

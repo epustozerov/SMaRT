@@ -20,8 +20,12 @@
     <string name="to_drawing">To drawing</string>
     <string name="to_tags">To tags</string>
     <string name="add_new_subject">Create new subject</string>
-    <string name="subjects"><b>Subjects:</b></string>
-    <string name="records"><b>Records:</b></string>
+    <string name="subjects">
+        <b>Subjects:</b>
+    </string>
+    <string name="records">
+        <b>Records:</b>
+    </string>
     <string name="sensation">Sensation</string>
     <string name="new_subject">New subject name</string>
     <string name="password">1985</string>
@@ -29,8 +33,10 @@
     <string name="textview_general_view">General view</string>
 
     <!-- Dialogs -->
-    <string name="dialog_drawing_completed">"Did you really draw <b>all Symptoms</b>? Subsequent editing is not possible."</string>
-    <string name="dialog_delete_subject">"Do you want to delete the subject and <b>all their Data?</b>?"</string>
+    <string name="dialog_drawing_completed">"Did you really draw <b>all Symptoms</b>? Subsequent editing is not possible."
+    </string>
+    <string name="dialog_delete_subject">"Do you want to delete the subject and <b>all their Data?</b>?"
+    </string>
     <string name="dialog_delete_record">"Do you want to delete selected record?"</string>
     <string name="dialog_drawing_confirmed">"Finish Drawing"</string>
     <string name="dialog_save_images">"The unsaved images will be deleted. Would you like to proceed to subject overview?"</string>
@@ -53,6 +59,7 @@
     <string name="menu_show_instructions">Show instructions before recordings</string>
     <string name="menu_request_password">Request password after recording</string>
     <string name="menu_show_names">Show subject names</string>
+    <string name="menu_manual_config">Use manual configuration</string>
     <string name="menu_imprint">Imprint</string>
     <string name="menu_privacy">Privacy Policy</string>
     <string name="menu_info">Information page</string>

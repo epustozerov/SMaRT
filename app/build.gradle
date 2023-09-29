@@ -3,12 +3,12 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.dm.smart"
         minSdk 26
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -30,7 +30,6 @@ android {
         viewBinding true
     }
     namespace 'com.dm.smart'
-    buildToolsVersion '33.0.2'
 }
 
 dependencies {
@@ -38,10 +37,10 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.1'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
-    implementation 'androidx.navigation:navigation-fragment:2.6.0'
-    implementation 'androidx.navigation:navigation-ui:2.6.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.2'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
+    implementation 'androidx.navigation:navigation-fragment:2.7.3'
+    implementation 'androidx.navigation:navigation-ui:2.7.3'
     implementation 'androidx.viewpager2:viewpager2:1.1.0-beta02'
     implementation 'com.github.rtugeek:colorseekbar:2.0.3'
     implementation fileTree(dir: 'libs', include: ['*.aar', '*.jar'], exclude: [])

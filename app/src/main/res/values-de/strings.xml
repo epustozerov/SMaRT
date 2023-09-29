@@ -12,8 +12,12 @@
     <string name="complete_recording">Zeichnung beenden</string>
     <string name="new_record">Neue Empfindung</string>
     <string name="add_new_subject">Neuen Probanden erstellen</string>
-    <string name="subjects"><b>Probanden:</b></string>
-    <string name="records"><b>Aufzeichnungen:</b></string>
+    <string name="subjects">
+        <b>Probanden:</b>
+    </string>
+    <string name="records">
+        <b>Aufzeichnungen:</b>
+    </string>
     <string name="sensation">Empfindung</string>
     <string name="button_sensations_toolkit">Empfindungen zeigen</string>
     <string name="toast_select_tag">⇚ Bitte wählen Sie zunächst einen/mehrere Begriff(e) für die Empfindung aus</string>
@@ -31,8 +35,10 @@
 
     <!-- Dialogs -->
     <string name="dialog_drawing_completed">Haben Sie wirklich <b>alle Befunde</b> eingezeichnet?
-        Eine nachträgliche Bearbeitung ist nicht möglich</string>
-    <string name="dialog_delete_subject">Möchten Sie den Proband und <b>alle ihre Daten löschen</b>?</string>
+        Eine nachträgliche Bearbeitung ist nicht möglich
+    </string>
+    <string name="dialog_delete_subject">Möchten Sie den Proband und <b>alle ihre Daten löschen</b>?
+    </string>
     <string name="dialog_delete_record">"Möchten Sie den ausgewählten Aufzeihnung löschen?"</string>
     <string name="dialog_drawing_confirmed">"Zeichnung beenden"</string>
     <string name="dialog_save_images">"Die nicht gespeicherte Zeichnung wird gelöscht. Möchten Sie zur Probandenübersicht fortfahren?"
@@ -56,6 +62,7 @@
     <string name="menu_show_instructions">Anweisungen vor den Aufnahmen anzeigen</string>
     <string name="menu_request_password">Passwort nach der Aufnahme anfordern</string>
     <string name="menu_show_names">Probandennamen anzeigen</string>
+    <string name="menu_manual_config">Manuelle Konfiguration verwenden</string>
     <string name="menu_imprint">Impressum</string>
     <string name="menu_privacy">Datenschutz</string>
     <string name="menu_info">Informationsseite</string>

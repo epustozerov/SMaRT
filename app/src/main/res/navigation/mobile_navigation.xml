@@ -1,18 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<navigation xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    app:startDestination="@+id/navigation_subject">
+<navigation xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" app:startDestination="@+id/navigation_subject">
 
-    <fragment
-        android:id="@+id/navigation_subject"
-        android:name="com.dm.smart.SubjectFragment"
-        android:label="@string/subject"
+    <fragment android:id="@+id/navigation_subject" android:name="com.dm.smart.SubjectFragment" android:label="@string/subject"
         tools:layout="@layout/fragment_subject" />
 
-    <fragment
-        android:id="@+id/navigation_add_sense"
-        android:name="com.dm.smart.DrawFragment"
-        android:label="@string/title_add_sense"
+    <fragment android:id="@+id/navigation_add_sense" android:name="com.dm.smart.DrawFragment" android:label="@string/title_add_sense"
         tools:layout="@layout/fragment_draw" />
 </navigation>
