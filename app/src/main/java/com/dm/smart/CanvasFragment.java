@@ -12,6 +12,7 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -22,6 +23,7 @@ import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -43,9 +45,13 @@ import androidx.fragment.app.Fragment;
 import com.dm.smart.ui.elements.CustomThumbDrawer;
 import com.rtugeek.android.colorseekbar.ColorSeekBar;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 
 public class CanvasFragment extends Fragment {
@@ -340,7 +346,24 @@ public class CanvasFragment extends Fragment {
             }
         };
 
+        // check if we are in the custom preferences mode
         String[] sensationTypes = getResources().getStringArray(R.array.sensation_types);
+        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
+        if (customConfig) {
+            // open the Documents/SMaRT/config.ini file
+            File configFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+                    "SMaRT/config/config.ini");            //String configurationFile = "config.ini";
+            Properties configuration = new Properties();
+            Log.e("CONFIG FILE", configFile.toString());
+            try {
+                configuration.load(Files.newInputStream(configFile.toPath()));
+            } catch (IOException e) {
+                System.out.println("Configuration error: " + e.getMessage());
+            }
+            sensationTypes = configuration.getProperty("sensations").split(",");
+        }
+
         for (String choice : sensationTypes) {
             ToggleButton b = new ToggleButton(getContext());
             b.setBackground(requireContext().getDrawable(R.drawable.custom_radio));

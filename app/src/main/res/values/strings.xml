@@ -59,7 +59,7 @@
     <string name="menu_show_instructions">Show instructions before recordings</string>
     <string name="menu_request_password">Request password after recording</string>
     <string name="menu_show_names">Show subject names</string>
-    <string name="menu_manual_config">Use manual configuration</string>
+    <string name="menu_custom_config">Use custom configuration</string>
     <string name="menu_imprint">Imprint</string>
     <string name="menu_privacy">Privacy Policy</string>
     <string name="menu_info">Information page</string>
@@ -69,6 +69,7 @@
     <string name="sp_show_instructions">show_instructions</string>
     <string name="sp_request_password">request_password</string>
     <string name="sp_show_names">sp_show_names</string>
+    <string name="sp_custom_config">sp_custom_config</string>
 
     <!-- List of sensation types -->
     <string name="sensation_type_1">Burning</string>

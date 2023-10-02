@@ -38,6 +38,14 @@ public class MainActivity extends AppCompatActivity {
 
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
 
+        // Config
+        Configuration.checkConfigFolder();
+        try {
+            Configuration.checkConfigFile(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         // Add a dafault patient if the database is empty
         DBAdapter db = new DBAdapter(this);
         db.open();
@@ -106,9 +114,11 @@ public class MainActivity extends AppCompatActivity {
         boolean showInstructions = sharedPref.getBoolean(getString(R.string.sp_show_instructions), false);
         boolean requestPassword = sharedPref.getBoolean(getString(R.string.sp_request_password), false);
         boolean showNames = sharedPref.getBoolean(getString(R.string.sp_show_names), false);
+        boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
         menu.findItem(R.id.menu_show_instructions).setChecked(showInstructions);
         menu.findItem(R.id.menu_request_password).setChecked(requestPassword);
         menu.findItem(R.id.menu_show_names).setChecked(showNames);
+        menu.findItem(R.id.menu_custom_config).setChecked(customConfig);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             menu.setGroupDividerEnabled(true);
         }
@@ -149,6 +159,13 @@ public class MainActivity extends AppCompatActivity {
                 editor.putBoolean(pref, item.isChecked());
                 editor.apply();
             }
+        } else if (item.getItemId() == R.id.menu_custom_config) {
+            String pref = getString(R.string.sp_custom_config);
+            item.setChecked(!item.isChecked());
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean(pref, item.isChecked());
+            editor.apply();
+
             NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
             if (Objects.requireNonNull(navController.getCurrentDestination()).getId() == R.id.navigation_subject)
                 navController.navigate(R.id.navigation_subject);

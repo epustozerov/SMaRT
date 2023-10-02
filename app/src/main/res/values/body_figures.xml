@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <array name="schemes">
+        <item>"body_figures_neutral"</item>
+        <item>"body_figures_male"</item>
+        <item>"body_figures_female"</item>
+    </array>
     <array name="body_figures_neutral">
         <item>@drawable/body_neutral_front</item>
         <item>@drawable/body_neutral_front_mask</item>
