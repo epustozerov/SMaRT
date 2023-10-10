@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <array name="schemes">
+    <array name="body_figures">
         <item>"body_figures_neutral"</item>
-        <item>"body_figures_male"</item>
         <item>"body_figures_female"</item>
+        <item>"body_figures_male"</item>
+
     </array>
     <array name="body_figures_neutral">
         <item>@drawable/body_neutral_front</item>
@@ -12,16 +13,17 @@
         <item>@drawable/body_neutral_back</item>
         <item>@drawable/body_neutral_back_mask</item>
     </array>
-    <array name="body_figures_male">
-        <item>@drawable/body_male_front</item>
-        <item>@drawable/body_male_front_mask</item>
-        <item>@drawable/body_male_back</item>
-        <item>@drawable/body_male_back_mask</item>
-    </array>
     <array name="body_figures_female">
         <item>@drawable/body_female_front</item>
         <item>@drawable/body_female_front_mask</item>
         <item>@drawable/body_female_back</item>
         <item>@drawable/body_female_back_mask</item>
     </array>
+    <array name="body_figures_male">
+        <item>@drawable/body_male_front</item>
+        <item>@drawable/body_male_front_mask</item>
+        <item>@drawable/body_male_back</item>
+        <item>@drawable/body_male_back_mask</item>
+    </array>
+
 </resources>

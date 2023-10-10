@@ -40,6 +40,7 @@ import com.dm.smart.items.Record;
 import com.dm.smart.items.Subject;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,12 +63,15 @@ public class SubjectFragment extends Fragment {
         @SuppressLint("Range") String name =
                 cursor.getString(cursor.
                         getColumnIndex(com.dm.smart.DBAdapter.SUBJECT_NAME));
-        @SuppressLint("Range") int gender =
-                cursor.getInt(cursor.
-                        getColumnIndex(DBAdapter.SUBJECT_GENDER));
+        @SuppressLint("Range") String config =
+                cursor.getString(cursor.
+                        getColumnIndex(DBAdapter.SUBJECT_CONFIG));
+        @SuppressLint("Range") String scheme =
+                cursor.getString(cursor.
+                        getColumnIndex(DBAdapter.SUBJECT_SCHEME));
         @SuppressLint("Range") long timestamp = cursor.getLong(cursor.
                 getColumnIndex(DBAdapter.SUBJECT_TIMESTAMP));
-        return new Subject(id, name, gender, timestamp);
+        return new Subject(id, name, config, scheme, timestamp);
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -79,12 +83,31 @@ public class SubjectFragment extends Fragment {
         boolean showNames = sharedPref.getBoolean(getString(R.string.sp_show_names), false);
         View mView = inflater.inflate(R.layout.fragment_subject, container, false);
 
-        // Spinner for Gender selection
-        Spinner spinner = mView.findViewById(R.id.spinner_gender);
-        ArrayAdapter<CharSequence> adapter_gender = ArrayAdapter.createFromResource(requireContext(),
-                R.array.genders, android.R.layout.simple_spinner_item);
-        adapter_gender.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter_gender);
+        // Spinner for body scheme selection
+        Spinner spinner = mView.findViewById(R.id.spinner_body_scheme);
+        ArrayAdapter<CharSequence> adapterBodyScheme = ArrayAdapter.createFromResource(requireContext(),
+                R.array.schemes, android.R.layout.simple_spinner_item);
+        boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
+        String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
+        String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Default");
+        Configuration configuration = new Configuration(configPath, configName);
+        try {
+            configuration.formConfig(requireActivity(), "neutral");
+        } catch (IOException e) {
+            // switch off custom config if it is not found
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean(getString(R.string.sp_custom_config), false);
+            editor.apply();
+            customConfig = false;
+        }
+        if (customConfig) {
+            // get the config path from shared preferences
+            adapterBodyScheme = new ArrayAdapter<>(requireContext(),
+                    android.R.layout.simple_spinner_item, configuration.bodySchemes);
+        }
+
+        adapterBodyScheme.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapterBodyScheme);
 
         // RecyclerView for Subjects
         RecyclerView listViewSubjects = mView.findViewById(R.id.list_view_subjects);
@@ -105,7 +128,6 @@ public class SubjectFragment extends Fragment {
             MainActivity.currentlySelectedSubject = extractSubjectFromTheDB(cursorSingleSubject);
             cursorSingleSubject.close();
             DBAdapter.close();
-            Log.e("SELECTED AFTER CLICK", String.valueOf(MainActivity.currentlySelectedSubject.getId()));
             populateListRecords();
         });
 
@@ -128,8 +150,7 @@ public class SubjectFragment extends Fragment {
                 DBAdapter DBAdapter = new DBAdapter(requireActivity());
                 DBAdapter.open();
                 Subject new_subject =
-                        new Subject(edittextPatientName.getText().toString(),
-                                (int) spinner.getSelectedItemId());
+                        new Subject(edittextPatientName.getText().toString(), configName, (String) spinner.getSelectedItem());
                 new_subject.setId((int) DBAdapter.insertSubject(new_subject));
                 DBAdapter.close();
                 MainActivity.currentlySelectedSubject = new_subject;
@@ -331,6 +352,7 @@ public class SubjectFragment extends Fragment {
         File imageSensationsBack = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
                 + "/" + selectedRecord.getN() + "/complete_picture_b.png");
+        Log.e("PATH", imageSensationsFront.getAbsolutePath());
         Bitmap sensationsFront = BitmapFactory.decodeFile(imageSensationsFront.getAbsolutePath());
         Bitmap sensationsBack = BitmapFactory.decodeFile(imageSensationsBack.getAbsolutePath());
         currentViewFront = true;

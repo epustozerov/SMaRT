@@ -1,5 +1,6 @@
 package com.dm.smart;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -198,6 +199,7 @@ public class DrawFragment extends Fragment {
         dialog.show();
     }
 
+    @SuppressLint("NewApi")
     void storeData() {
         // Create a new record in the database
         long startTime = SystemClock.elapsedRealtime();
@@ -307,6 +309,7 @@ public class DrawFragment extends Fragment {
         }
     }
 
+    @SuppressLint("NewApi")
     void updateGeneralViewGlobal() {
         int createdWindows = viewPagerAdapter.getItemCount();
 

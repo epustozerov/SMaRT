@@ -4,11 +4,16 @@ import static com.dm.smart.SubjectFragment.extractSubjectFromTheDB;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.DocumentsContract;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,7 +29,12 @@ import com.dm.smart.items.Subject;
 import com.dm.smart.ui.elements.CustomAlertDialogs;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import org.ini4j.Ini;
+import org.ini4j.IniPreferences;
+
+import java.io.IOException;
 import java.util.Objects;
+import java.util.prefs.BackingStoreException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         // Config
         Configuration.checkConfigFolder();
         try {
-            Configuration.checkConfigFile(this);
+            Configuration.initConfig(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -54,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         if (cursor.getCount() > 0) {
             currentlySelectedSubject = extractSubjectFromTheDB(cursor);
         } else {
-            currentlySelectedSubject = new Subject("Default Subject", 0);
+            currentlySelectedSubject = new Subject("Default Subject", "Default", "neutral");
         }
         db.close();
 
@@ -122,6 +132,13 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             menu.setGroupDividerEnabled(true);
         }
+        // update the text on the selected config menu item
+        String selectedConfig = sharedPref.getString(getString(R.string.sp_selected_config), "");
+        if (selectedConfig.equals("")) {
+            menu.findItem(R.id.menu_selected_config).setTitle(getString(R.string.menu_selected_config_default));
+        } else {
+            menu.findItem(R.id.menu_selected_config).setTitle(getString(R.string.menu_selected_config) + " " + selectedConfig);
+        }
         return true;
     }
 
@@ -165,10 +182,34 @@ public class MainActivity extends AppCompatActivity {
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putBoolean(pref, item.isChecked());
             editor.apply();
-
-            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-            if (Objects.requireNonNull(navController.getCurrentDestination()).getId() == R.id.navigation_subject)
-                navController.navigate(R.id.navigation_subject);
+            if (item.isChecked()) {
+                // set the uri to Documents folder
+                Uri uri = Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getPath());
+                pickConfig(uri);
+            }
+        } else if (item.getItemId() == R.id.menu_selected_config) {
+            // open the selected config file
+            String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
+            try {
+                ContentResolver contentResolver = getContentResolver();
+                IniPreferences iniPreference = new IniPreferences(new Ini(contentResolver.openInputStream(Uri.parse(configPath))));
+                String[] configNames = iniPreference.childrenNames();
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.dialog_select_config);
+                builder.setItems(configNames, (dialog, which) -> {
+                    String configName = configNames[which];
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString(getString(R.string.sp_selected_config), configName);
+                    editor.apply();
+                    invalidateOptionsMenu();
+                    NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+                    navController.navigate(R.id.navigation_subject);
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            } catch (IOException | BackingStoreException e) {
+                throw new RuntimeException(e);
+            }
         } else if (item.getItemId() == R.id.menu_imprint) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage(R.string.imprint);
@@ -201,5 +242,34 @@ public class MainActivity extends AppCompatActivity {
             return super.onOptionsItemSelected(item);
         }
         return false;
+    }
+
+    private void pickConfig(Uri pickerInitialUri) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        //noinspection deprecation
+        startActivityForResult(intent, 1, null);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode,
+                                 Intent resultData) {
+        super.onActivityResult(requestCode, resultCode, resultData);
+        if (requestCode == 1) {
+            Uri uri;
+            if (resultData != null) {
+                uri = resultData.getData();
+                assert uri != null;
+                // safe the uri to shared preferences
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString(getString(R.string.sp_custom_config_path), uri.toString());
+                editor.apply();
+
+                // grant permissions to read the file
+                getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+        }
     }
 }

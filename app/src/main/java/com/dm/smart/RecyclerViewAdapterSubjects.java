@@ -121,14 +121,14 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
                                         ContextMenu.ContextMenuInfo contextMenuInfo) {
             selectedSubjectPosition = getBindingAdapterPosition();
             String patientName = mSubjects.get(selectedSubjectPosition).getName();
-            int patientGender = mSubjects.get(selectedSubjectPosition).getGender();
-            String stringGender = mContext.getResources().getStringArray(R.array.genders)[patientGender];
+            String bodyScheme = mSubjects.get(selectedSubjectPosition).getBodyScheme();
+            String config = mSubjects.get(selectedSubjectPosition).getConfig();
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(mSubjects.get(selectedSubjectPosition).getTimestamp());
             SimpleDateFormat formatter =
                     new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
             String dateString = formatter.format(cal.getTime());
-            contextMenu.setHeaderTitle(patientName + ", " + stringGender +
+            contextMenu.setHeaderTitle(patientName + ", config: " + config + ", " + bodyScheme +
                     ",\n created: " + dateString);
             contextMenu.add(0, SUBJECT_DELETE, Menu.NONE,
                     mContext.getString(R.string.menu_remove_subject));

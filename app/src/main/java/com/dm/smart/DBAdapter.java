@@ -16,7 +16,8 @@ import java.util.Date;
 public class DBAdapter {
     public static final String SUBJECT_ID = "id";
     public static final String SUBJECT_NAME = "name";
-    public static final String SUBJECT_GENDER = "gender";
+    public static final String SUBJECT_CONFIG = "config";
+    public static final String SUBJECT_SCHEME = "scheme";
     public static final String SUBJECT_DELETED = "deleted";
     public static final String SUBJECT_TIMESTAMP = "timestamp";
     public static final String RECORD_ID = "id";
@@ -26,7 +27,7 @@ public class DBAdapter {
     public static final String RECORD_DELETED = "deleted";
     public static final String RECORD_TIMESTAMP = "timestamp";
     private static final String DATABASE_NAME = "smart.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
     private static final String DATABASE_TABLE_SUBJECTS = "subjects";
     private static final String DATABASE_TABLE_RECORDS = "records";
     private final DBOpenHelper dbHelper;
@@ -69,14 +70,14 @@ public class DBAdapter {
 
     Cursor getSubjectById(long subject_id) {
         return db.query(DATABASE_TABLE_SUBJECTS,
-                new String[]{SUBJECT_ID, SUBJECT_NAME, SUBJECT_GENDER, SUBJECT_TIMESTAMP},
+                new String[]{SUBJECT_ID, SUBJECT_NAME, SUBJECT_CONFIG, SUBJECT_SCHEME, SUBJECT_TIMESTAMP},
                 SUBJECT_ID + "='" + subject_id + "'",
                 null, null, null, RECORD_ID);
     }
 
     Cursor getAllSubjects() {
         return db.query(DATABASE_TABLE_SUBJECTS,
-                new String[]{SUBJECT_ID, SUBJECT_NAME, SUBJECT_GENDER, SUBJECT_TIMESTAMP},
+                new String[]{SUBJECT_ID, SUBJECT_NAME, SUBJECT_CONFIG, SUBJECT_SCHEME, SUBJECT_TIMESTAMP},
                 SUBJECT_DELETED + "='" + 0 + "'", null, null, null, SUBJECT_ID + " DESC");
     }
 
@@ -91,7 +92,8 @@ public class DBAdapter {
     public long insertSubject(Subject new_subject) {
         ContentValues cv_new_subject = new ContentValues();
         cv_new_subject.put(SUBJECT_NAME, new_subject.getName());
-        cv_new_subject.put(SUBJECT_GENDER, new_subject.getGender());
+        cv_new_subject.put(SUBJECT_CONFIG, new_subject.getConfig());
+        cv_new_subject.put(SUBJECT_SCHEME, new_subject.getBodyScheme());
         cv_new_subject.put(SUBJECT_DELETED, 0);
         long timestamp = new Date().getTime();
         cv_new_subject.put(SUBJECT_TIMESTAMP, timestamp);
@@ -114,7 +116,7 @@ public class DBAdapter {
         private static final String DATABASE_CREATE_1 = "create table "
                 + DATABASE_TABLE_SUBJECTS + " (" + SUBJECT_ID
                 + " integer primary key autoincrement, " + SUBJECT_NAME
-                + " string, " + SUBJECT_GENDER + " integer, " + SUBJECT_DELETED + " integer, "
+                + " string, " + SUBJECT_CONFIG + " string, " + SUBJECT_SCHEME + " string, " + SUBJECT_DELETED + " integer, "
                 + SUBJECT_TIMESTAMP + " long);";
 
         private static final String DATABASE_CREATE_2 = "create table " + DATABASE_TABLE_RECORDS +

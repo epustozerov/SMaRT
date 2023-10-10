@@ -5,14 +5,17 @@ import static com.dm.smart.DrawFragment.defineMinMaxColors;
 import static com.dm.smart.ui.elements.CustomAlertDialogs.showGeneralView;
 import static com.dm.smart.ui.elements.CustomToasts.showToast;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -22,6 +25,7 @@ import android.graphics.Color;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -40,6 +44,8 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import com.dm.smart.ui.elements.CustomThumbDrawer;
@@ -47,13 +53,12 @@ import com.rtugeek.android.colorseekbar.ColorSeekBar;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 
+@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 public class CanvasFragment extends Fragment {
 
     private final List<String> sortedChoices = new ArrayList<>();
@@ -102,18 +107,26 @@ public class CanvasFragment extends Fragment {
                              Bundle savedInstanceState) {
         Log.e("DEBUG", "onCreateView of CanvasFragment " + getTag());
         DrawFragment drawFragment = (DrawFragment) getParentFragment();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            verifyStoragePermissions(requireActivity());
+        }
+
+        String selectedSubjectBodyScheme = MainActivity.currentlySelectedSubject.getBodyScheme();
+        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
+        String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
+        String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Default");
+        Configuration configuration = new Configuration(configPath, configName);
+        try {
+            configuration.formConfig(requireActivity(), selectedSubjectBodyScheme);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         currentStateIsFront = true;
-        bodyFigures = getResources().obtainTypedArray(R.array.body_figures_neutral);
-        switch (MainActivity.currentlySelectedSubject.getGender()) {
-            case 0:
-                bodyFigures = getResources().obtainTypedArray(R.array.body_figures_neutral);
-                break;
-            case 1:
-                bodyFigures = getResources().obtainTypedArray(R.array.body_figures_female);
-                break;
-            case 2:
-                bodyFigures = getResources().obtainTypedArray(R.array.body_figures_male);
+        if (!customConfig) {
+            bodyFigures = getResources().obtainTypedArray(getResources().
+                    getIdentifier(selectedSubjectBodyScheme, "array", requireContext().getPackageName()));
         }
 
         if (mCanvas != null) {
@@ -138,12 +151,18 @@ public class CanvasFragment extends Fragment {
 
         // Init body figures for drawing
         bodyViewFront = mCanvas.findViewById(R.id.drawing_view_front);
-        bodyViewFront.setBGImage(setBodyImage(bodyFigures.getResourceId(0, 0), false));
-        bodyViewFront.setMaskImage(setBodyImage(bodyFigures.getResourceId(1, 0), false));
-
         bodyViewBack = mCanvas.findViewById(R.id.drawing_view_back);
-        bodyViewBack.setBGImage(setBodyImage(bodyFigures.getResourceId(2, 0), false));
-        bodyViewBack.setMaskImage(setBodyImage(bodyFigures.getResourceId(3, 0), false));
+        if (customConfig) {
+            bodyViewFront.setBGImage(setBodyImage(configuration.selectedBodySchemes[0], false));
+            bodyViewFront.setMaskImage(setBodyImage(configuration.selectedBodySchemes[1], false));
+            bodyViewBack.setBGImage(setBodyImage(configuration.selectedBodySchemes[2], false));
+            bodyViewBack.setMaskImage(setBodyImage(configuration.selectedBodySchemes[3], false));
+        } else {
+            bodyViewFront.setBGImage(setBodyImage(bodyFigures.getResourceId(0, 0), false));
+            bodyViewFront.setMaskImage(setBodyImage(bodyFigures.getResourceId(1, 0), false));
+            bodyViewBack.setBGImage(setBodyImage(bodyFigures.getResourceId(2, 0), false));
+            bodyViewBack.setMaskImage(setBodyImage(bodyFigures.getResourceId(3, 0), false));
+        }
 
         // Init gray overlay
         final LinearLayout viewA = mCanvas.findViewById(R.id.viewA);
@@ -210,10 +229,19 @@ public class CanvasFragment extends Fragment {
 
         // Init the complete image view
         buttonCompleteView = mCanvas.findViewById(R.id.button_general_view);
-        if (currentStateIsFront) {
-            buttonCompleteView.setImageBitmap(setBodyImage(bodyFigures.getResourceId(0, 0), true));
+        if (customConfig) {
+            if (currentStateIsFront) {
+                bodyViewFront.setBGImage(setBodyImage(configuration.selectedBodySchemes[0], false));
+            } else {
+                bodyViewBack.setBGImage(setBodyImage(configuration.selectedBodySchemes[2], false));
+            }
+
         } else {
-            buttonCompleteView.setImageBitmap(setBodyImage(bodyFigures.getResourceId(2, 0), true));
+            if (currentStateIsFront) {
+                buttonCompleteView.setImageBitmap(setBodyImage(bodyFigures.getResourceId(0, 0), true));
+            } else {
+                buttonCompleteView.setImageBitmap(setBodyImage(bodyFigures.getResourceId(2, 0), true));
+            }
         }
         buttonCompleteView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         generalViewFront = Bitmap.createBitmap(bodyViewFront.backgroundImage.getWidth(),
@@ -226,8 +254,13 @@ public class CanvasFragment extends Fragment {
                         Bitmap.createBitmap(bodyViewFront.backgroundImage.getWidth(), bodyViewFront.backgroundImage.getHeight(),
                                 Bitmap.Config.ARGB_8888);
                 Canvas generalViewFrontCanvas = new Canvas(generalViewFrontBitmap);
-                generalViewFrontCanvas.drawBitmap(setBodyImage(
-                        bodyFigures.getResourceId(0, 0), false), 0, 0, null);
+                if (customConfig) {
+                    generalViewFrontCanvas.drawBitmap(setBodyImage(
+                            configuration.selectedBodySchemes[0], false), 0, 0, null);
+                } else {
+                    generalViewFrontCanvas.drawBitmap(setBodyImage(
+                            bodyFigures.getResourceId(0, 0), false), 0, 0, null);
+                }
                 generalViewFrontCanvas.drawBitmap(generalViewFront, 0, 0, null);
                 if (bodyViewFront.snapshot != null) {
                     generalViewFrontCanvas.drawBitmap(bodyViewFront.snapshot, 0, 0, null);
@@ -239,8 +272,13 @@ public class CanvasFragment extends Fragment {
                         Bitmap.createBitmap(bodyViewBack.backgroundImage.getWidth(), bodyViewBack.backgroundImage.getHeight(),
                                 Bitmap.Config.ARGB_8888);
                 Canvas generalViewBackCanvas = new Canvas(generalViewBackBitmap);
-                generalViewBackCanvas.drawBitmap(setBodyImage(
-                        bodyFigures.getResourceId(2, 0), false), 0, 0, null);
+                if (customConfig) {
+                    generalViewBackCanvas.drawBitmap(setBodyImage(
+                            configuration.selectedBodySchemes[0], false), 0, 0, null);
+                } else {
+                    generalViewBackCanvas.drawBitmap(setBodyImage(
+                            bodyFigures.getResourceId(2, 0), false), 0, 0, null);
+                }
                 generalViewBackCanvas.drawBitmap(generalViewBack, 0, 0, null);
                 if (bodyViewBack.snapshot != null) {
                     generalViewBackCanvas.drawBitmap(bodyViewBack.snapshot, 0, 0, null);
@@ -254,13 +292,23 @@ public class CanvasFragment extends Fragment {
         mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         buttonBackView = mCanvas.findViewById(R.id.button_switch_bodyview);
         final TextView textViewSwitchBody = mCanvas.findViewById(R.id.textview_switch_bodyview);
-        buttonBackView.setImageBitmap(setBodyImage(bodyFigures.getResourceId(3, 0), true));
+
+        if (customConfig) {
+            buttonBackView.setImageBitmap(setBodyImage(configuration.selectedBodySchemes[3], true));
+        } else {
+            buttonBackView.setImageBitmap(setBodyImage(bodyFigures.getResourceId(3, 0), true));
+        }
+
         buttonBackView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         textViewSwitchBody.setText(getResources().getString(R.string.back_view));
         TypedArray finalBody_figures = bodyFigures;
         buttonBackView.setOnClickListener(v -> {
             if (!currentStateIsFront) {
-                buttonBackView.setImageBitmap(setBodyImage(finalBody_figures.getResourceId(3, 0), true));
+                if (customConfig) {
+                    buttonBackView.setImageBitmap(setBodyImage(configuration.selectedBodySchemes[3], true));
+                } else {
+                    buttonBackView.setImageBitmap(setBodyImage(finalBody_figures.getResourceId(3, 0), true));
+                }
                 textViewSwitchBody.setText(getResources().getString(R.string.back_view));
                 currentStateIsFront = true;
                 currentBodyView = bodyViewBack;
@@ -269,7 +317,12 @@ public class CanvasFragment extends Fragment {
                 updateGeneralView(generalViewFront, bodyViewFront.backgroundImage);
                 updateBackView(bodyViewBack.snapshot, bodyViewBack.backgroundImage);
             } else {
-                buttonBackView.setImageBitmap(setBodyImage(finalBody_figures.getResourceId(1, 0), true));
+                if (customConfig) {
+                    buttonBackView.setImageBitmap(setBodyImage(configuration.selectedBodySchemes[1], true));
+                } else {
+                    buttonBackView.setImageBitmap(setBodyImage(finalBody_figures.getResourceId(1, 0), true));
+                }
+
                 textViewSwitchBody.setText(getResources().getString(R.string.front_view));
                 currentStateIsFront = false;
                 currentBodyView = bodyViewFront;
@@ -348,22 +401,6 @@ public class CanvasFragment extends Fragment {
 
         // check if we are in the custom preferences mode
         String[] sensationTypes = getResources().getStringArray(R.array.sensation_types);
-        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
-        boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
-        if (customConfig) {
-            // open the Documents/SMaRT/config.ini file
-            File configFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-                    "SMaRT/config/config.ini");            //String configurationFile = "config.ini";
-            Properties configuration = new Properties();
-            Log.e("CONFIG FILE", configFile.toString());
-            try {
-                configuration.load(Files.newInputStream(configFile.toPath()));
-            } catch (IOException e) {
-                System.out.println("Configuration error: " + e.getMessage());
-            }
-            sensationTypes = configuration.getProperty("sensations").split(",");
-        }
-
         for (String choice : sensationTypes) {
             ToggleButton b = new ToggleButton(getContext());
             b.setBackground(requireContext().getDrawable(R.drawable.custom_radio));
@@ -506,15 +543,53 @@ public class CanvasFragment extends Fragment {
                 getResources().getDisplayMetrics());
     }
 
-    public Bitmap setBodyImage(int body_type_id, boolean thumbed) {
-        if (thumbed) {
-            return Bitmap.createScaledBitmap(
-                    BitmapFactory.decodeResource(getResources(), body_type_id),
-                    149, 220, true);
-        } else {
-            return BitmapFactory.decodeResource(getResources(), body_type_id);
+
+    // Storage Permissions
+    private static final int READ_MEDIA_IMAGES = 1;
+    private static final String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_MEDIA_IMAGES
+    };
+
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_MEDIA_IMAGES);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    READ_MEDIA_IMAGES
+            );
         }
     }
+
+
+    public Bitmap setBodyImage(int bodyTypeId, boolean thumbed) {
+        if (thumbed) {
+            return Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(getResources(), bodyTypeId),
+                    149, 220, true);
+        } else {
+            return BitmapFactory.decodeResource(getResources(), bodyTypeId);
+        }
+    }
+
+    public Bitmap setBodyImage(String bodyTypeId, boolean thumbed) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            verifyStoragePermissions(requireActivity());
+        }
+        File bitmapFile = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/config/body_figures/" + bodyTypeId);
+        Bitmap sensationsFront = BitmapFactory.decodeFile(bitmapFile.getAbsolutePath());
+        if (thumbed) {
+            return Bitmap.createScaledBitmap(sensationsFront, 149, 220, true);
+        } else {
+            return sensationsFront;
+        }
+    }
+
 
     @SuppressLint("ResourceType")
     private void initBrushes() {
