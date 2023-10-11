@@ -376,8 +376,13 @@ public class CanvasFragment extends Fragment {
                 ((LinearLayout) mCanvas.findViewById(R.id.drawn_sensations)).removeAllViews();
             }
             int bid = ((ViewGroup) v.getParent()).indexOfChild(v);
-            String selectedSensation =
-                    Arrays.asList(getResources().getStringArray(R.array.sensation_types)).get(bid);
+            String selectedSensation;
+            if (customConfig) {
+                selectedSensation = configuration.sensationTypes[bid];
+            } else {
+                selectedSensation =
+                        Arrays.asList(getResources().getStringArray(R.array.sensation_types)).get(bid);
+            }
             if (selectedSensations.contains(selectedSensation)) {
                 selectedSensations.remove(selectedSensation);
             } else {
@@ -399,8 +404,14 @@ public class CanvasFragment extends Fragment {
             }
         };
 
-        // check if we are in the custom preferences mode
-        String[] sensationTypes = getResources().getStringArray(R.array.sensation_types);
+        String[] sensationTypes;
+        if (customConfig) {
+            sensationTypes = configuration.sensationTypes;
+        } else {
+            sensationTypes = getResources().getStringArray(R.array.sensation_types);
+        }
+
+
         for (String choice : sensationTypes) {
             ToggleButton b = new ToggleButton(getContext());
             b.setBackground(requireContext().getDrawable(R.drawable.custom_radio));

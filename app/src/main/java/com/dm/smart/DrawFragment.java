@@ -2,6 +2,7 @@ package com.dm.smart;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -39,6 +40,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,8 +104,24 @@ public class DrawFragment extends Fragment {
         };
 
         View mView = inflater.inflate(R.layout.fragment_draw, container, false);
-        colors = Arrays.stream(requireActivity().getResources().
-                getIntArray(R.array.colors_symptoms)).boxed().collect(Collectors.toList());
+
+        String selectedSubjectBodyScheme = MainActivity.currentlySelectedSubject.getBodyScheme();
+        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
+        String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
+        String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Default");
+        Configuration configuration = new Configuration(configPath, configName);
+        try {
+            configuration.formConfig(requireActivity(), selectedSubjectBodyScheme);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if (customConfig) {
+            colors = Arrays.stream(configuration.colorsSymptoms).map(Color::parseColor).collect(Collectors.toList());
+        } else {
+            colors = Arrays.stream(requireActivity().getResources().
+                    getIntArray(R.array.colors_symptoms)).boxed().collect(Collectors.toList());
+        }
         Button button_add_sensation = mView.findViewById(R.id.button_add_sensation);
         button_add_sensation.setOnClickListener(view -> createNewTab());
         Button button_recording_completed = mView.findViewById(R.id.button_recording_completed);
