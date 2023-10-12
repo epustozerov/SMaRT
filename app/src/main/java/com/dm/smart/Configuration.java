@@ -25,12 +25,17 @@ import java.util.stream.Collectors;
 
 public class Configuration {
 
-    String configPath;
-    String configName;
+    private final String configPath;
+    private final String configName;
+
     String[] bodySchemes;
     String[] selectedBodySchemes;
     String[] sensationTypes;
-    String[] colorsSymptoms;
+    private String[] colorsSymptoms;
+
+    public String getConfigName() {
+        return configName;
+    }
 
     public Configuration(String configPath, String configName) {
         this.configPath = configPath;
@@ -41,9 +46,9 @@ public class Configuration {
         IniPreferences iniPreference;
         ContentResolver contentResolver = fragmentActivity.getContentResolver();
         iniPreference = new IniPreferences(new Ini(contentResolver.openInputStream(Uri.parse(this.configPath))));
-        this.bodySchemes = iniPreference.node(this.configName).get("body_schemes", "").split(", ");
         this.sensationTypes = iniPreference.node(this.configName).get("sensation_types", "").split(", ");
         this.colorsSymptoms = iniPreference.node(this.configName).get("colors_symptoms", "").split(", ");
+        this.bodySchemes = iniPreference.node(this.configName).get("body_schemes", "").split(", ");
         this.formBodySchemes(selectedSubjectBodyScheme);
     }
 
@@ -131,5 +136,13 @@ public class Configuration {
             writer.flush();
             writer.close();
         }
+    }
+
+    public String[] getColorSymptoms() {
+        return colorsSymptoms;
+    }
+
+    public String[] getBodySchemes() {
+        return bodySchemes;
     }
 }

@@ -83,11 +83,24 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setOnItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.navigation_add_sense:
-                    if (sharedPref.getBoolean(getString(R.string.sp_show_instructions), false)) {
-                        android.app.AlertDialog alertDialog = CustomAlertDialogs.showInstructions(this);
-                        alertDialog.show();
+                    // check if the config of the selected patient matches the selected config in system preferences
+                    String selectedConfig = sharedPref.getString(getString(R.string.sp_selected_config), "");
+                    String patientConfig = currentlySelectedSubject.getConfig();
+                    if (!selectedConfig.equals("") && !selectedConfig.equals(patientConfig)) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        builder.setMessage(R.string.dialog_config_mismatch);
+                        builder.setPositiveButton(R.string.dialog_ok, (dialog, id) -> {
+                        });
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                        return false;
+                    } else {
+                        if (sharedPref.getBoolean(getString(R.string.sp_show_instructions), false)) {
+                            android.app.AlertDialog alertDialog = CustomAlertDialogs.showInstructions(this);
+                            alertDialog.show();
+                        }
+                        return NavigationUI.onNavDestinationSelected(item, navController);
                     }
-                    return NavigationUI.onNavDestinationSelected(item, navController);
                 case R.id.navigation_subject:
                     // if we are not at th subject fragment, we can go there
                     if (Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.navigation_subject) {

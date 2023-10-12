@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 
 public class DrawFragment extends Fragment {
 
+    Configuration configuration;
     final Map<String, ArrayList<String>> persSensations = new HashMap<>();
     final Map<String, ArrayList<BodyDrawingView.Step>> persStepsFront = new HashMap<>();
     final Map<String, ArrayList<BodyDrawingView.Step>> persStepsBack = new HashMap<>();
@@ -110,14 +111,14 @@ public class DrawFragment extends Fragment {
         boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
         String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
         String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Default");
-        Configuration configuration = new Configuration(configPath, configName);
+        configuration = new Configuration(configPath, configName);
         try {
             configuration.formConfig(requireActivity(), selectedSubjectBodyScheme);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         if (customConfig) {
-            colors = Arrays.stream(configuration.colorsSymptoms).map(Color::parseColor).collect(Collectors.toList());
+            colors = Arrays.stream(configuration.getColorSymptoms()).map(Color::parseColor).collect(Collectors.toList());
         } else {
             colors = Arrays.stream(requireActivity().getResources().
                     getIntArray(R.array.colors_symptoms)).boxed().collect(Collectors.toList());
@@ -237,7 +238,7 @@ public class DrawFragment extends Fragment {
             }
             sensations.append("; ");
         }
-        Record record = new Record(patient_id, sensations.toString());
+        Record record = new Record(patient_id, configuration.getConfigName(), sensations.toString());
 
         // get the amount of records by patient specified with patient_id
         Cursor cursorRecords =

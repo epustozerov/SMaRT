@@ -86,10 +86,8 @@ public class RecyclerViewAdapterRecords extends RecyclerView.Adapter<RecyclerVie
             int recordId = mRecords.get(selectedRecordPosition).getId();
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(mRecords.get(selectedRecordPosition).getTimestamp());
-            SimpleDateFormat formatter =
-                    new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
-            String dateString = formatter.format(cal.getTime());
-            contextMenu.setHeaderTitle("Record: " + recordId + ",\n created: " + dateString);
+            contextMenu.setHeaderTitle(mContext.getString(R.string.menu_record) + ": " + recordId + ", "
+                    + mContext.getString(R.string.menu_config) + ": " + mRecords.get(selectedRecordPosition).getConfig());
             contextMenu.add(0, RECORD_SHOW_IMAGE, Menu.NONE,
                     mContext.getString(R.string.menu_show_image));
             contextMenu.add(1, RECORD_SHARE, Menu.NONE,

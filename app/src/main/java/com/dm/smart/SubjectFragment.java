@@ -103,7 +103,7 @@ public class SubjectFragment extends Fragment {
         if (customConfig) {
             // get the config path from shared preferences
             adapterBodyScheme = new ArrayAdapter<>(requireContext(),
-                    android.R.layout.simple_spinner_item, configuration.bodySchemes);
+                    android.R.layout.simple_spinner_item, configuration.getBodySchemes());
         }
 
         adapterBodyScheme.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -206,13 +206,15 @@ public class SubjectFragment extends Fragment {
                         getColumnIndex(DBAdapter.RECORD_ID));
                 @SuppressLint("Range") int subject_id = cursorRecords.getInt(cursorRecords.
                         getColumnIndex(DBAdapter.RECORD_SUBJECT_ID));
+                @SuppressLint("Range") String config = cursorRecords.getString(cursorRecords.
+                        getColumnIndex(DBAdapter.RECORD_CONFIG));
                 @SuppressLint("Range") int n = cursorRecords.getInt(cursorRecords.
                         getColumnIndex(DBAdapter.RECORD_N));
                 @SuppressLint("Range") String sensations = cursorRecords.getString(cursorRecords.
                         getColumnIndex(DBAdapter.RECORD_SENSATIONS));
                 @SuppressLint("Range") long timestamp = cursorRecords.getLong(cursorRecords.
                         getColumnIndex(DBAdapter.RECORD_TIMESTAMP));
-                records.add(0, new Record(id, subject_id, n, sensations, timestamp));
+                records.add(0, new Record(id, subject_id, config, n, sensations, timestamp));
             } while (cursorRecords.moveToNext());
         adapterRecords.notifyDataSetChanged();
         cursorRecords.close();

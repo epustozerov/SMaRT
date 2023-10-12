@@ -52,6 +52,8 @@
     <string name="dialog_password_title">Geben Sie das Passwort ein</string>
     <string name="dialog_password_hint">Passwort</string>
     <string name="dialog_select_config">Konfiguration auswählen</string>
+    <string name="dialog_config_mismatch">Die gewählte Konfiguration stimmt nicht mit den Einstellungen des Subjekts überein.\n
+        Legen Sie einen neuen Patienten an oder wählen Sie eine andere Konfiguration.</string>
 
     <!-- Menu -->
     <string name="menu_remove_subject">Ausgewählte Probanden und ihre Daten entfernen</string>
@@ -70,6 +72,10 @@
     <string name="menu_privacy">Datenschutz</string>
     <string name="menu_info">Informationsseite</string>
     <string name="menu_copyright">Copyright notice</string>
+    <string name="menu_created">erstellt</string>
+    <string name="menu_first_config">erste Konfig</string>
+    <string name="menu_record">Aufzeichnung</string>
+    <string name="menu_config">Konfig</string>
 
     <!-- Shared Preferences -->
     <string name="sp_show_instructions">show_instructions</string>
@@ -117,14 +123,15 @@
         <item>@string/sensation_type_17</item>
     </string-array>
 
-    <!-- List of genders -->
-    <string name="gender_neutral">neutral</string>
-    <string name="gender_male">männlich</string>
-    <string name="gender_female">weiblich</string>
+    <!-- List of schemes -->
+    <string name="scheme_neutral">neutral</string>
+    <string name="scheme_male">männlich</string>
+    <string name="scheme_female">weiblich</string>
+
     <string-array name="schemes">
-        <item>@string/gender_neutral</item>
-        <item>@string/gender_female</item>
-        <item>@string/gender_male</item>
+        <item>@string/scheme_neutral</item>
+        <item>@string/scheme_female</item>
+        <item>@string/scheme_male</item>
     </string-array>
 
 </resources>

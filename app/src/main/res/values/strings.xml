@@ -49,8 +49,10 @@
     <string name="dialog_password_title">Enter the password</string>
     <string name="dialog_password_hint">Password</string>
     <string name="dialog_select_config">Select configuration</string>
+    <string name="dialog_config_mismatch">The selected config doesn\'t match the subject\'s setting\n
+        Create a new patient or choose another configuration.
+    </string>
 
-    <!-- Menu -->
     <string name="menu_remove_subject">Remove selected subject and their records</string>
     <string name="menu_remove_record">Remove selected record</string>
     <string name="menu_show_image">Display symptom overview</string>
@@ -67,6 +69,10 @@
     <string name="menu_privacy">Privacy Policy</string>
     <string name="menu_info">Information page</string>
     <string name="menu_copyright">Copyright notice</string>
+    <string name="menu_created">created</string>
+    <string name="menu_first_config">first config</string>
+    <string name="menu_record">Record</string>
+    <string name="menu_config">config</string>
 
     <!-- Shared Preferences -->
     <string name="sp_show_instructions">show_instructions</string>
@@ -114,15 +120,16 @@
         <item>@string/sensation_type_17</item>
     </string-array>
 
-    <!-- List of genders -->
-    <string name="gender_neutral">Neutral</string>
-    <string name="gender_male">Male</string>
-    <string name="gender_female">Female</string>
+    <!-- List of schemes -->
+    <string name="scheme_neutral">Neutral</string>
+    <string name="scheme_male">Male</string>
+    <string name="scheme_female">Female</string>
+
 
     <string-array name="schemes">
-        <item>@string/gender_neutral</item>
-        <item>@string/gender_female</item>
-        <item>@string/gender_male</item>
+        <item>@string/scheme_neutral</item>
+        <item>@string/scheme_female</item>
+        <item>@string/scheme_male</item>
     </string-array>
 
 </resources>
