@@ -1,39 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="copyright">
-        /*
-        * Copyright © 2023 Insula Institute for Integrative Therapy Research, Hannover &amp; Bielefeld University
-        * Copyright © 2023 Evgenii Pustozerov, Florian Beissner
-        * Copyright © 2018 Till-Ansgar Neubert, Jorge Manuel Sánchez
-        * Copyright © 2014-2016 Hannover Medical School
-        * Copyright © 2014 Tawfik Moher Alsady, Florian Beissner
-        *
-        * SMaRT is scientific research software. It is not a medical device and should not be considered as such.
-        * It does not provide medical advice or diagnoses and is not intended to replace professional medical advice,
-        * diagnosis, or treatment. Users should always seek the advice of a doctor or other qualified health provider
-        * with any questions they may have regarding a medical condition. Never disregard professional medical advice
-        * or delay in seeking it because of something you have read on this app. It is the sole responsibility of the
-        * user to verify the regulatory requirements for the intended use of the program and to comply with all regulatory
-        * requirements required by the applicable laws governing its use. The provision of information through this app
-        * does not imply a doctor-patient relationship and should not be construed as such. By downloading and/or using
-        * this app or source code, you acknowledge that you have read and understood this disclaimer and agree to be bound by its terms.
-        *
-        * SMaRT uses the Hannover Body Template from Till-Ansgar Neubert &amp; Florian Beissner (2019). Hannover Body Template.
-        * figshare. Dataset. https://doi.org/10.6084/m9.figshare.7637387 under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
-        *
-        * This program is free software: you can redistribute it and/or modify
-        * it under the terms of the GNU General Public License as published by
-        * the Free Software Foundation, either version 3 of the License, or
-        * (at your option) any later version.
-        *
-        * This program is distributed in the hope that it will be useful,
-        * but WITHOUT ANY WARRANTY; without even the implied warranty of
-        * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-        * GNU General Public License for more details.
-        *
-        * You should have received a copy of the GNU General Public License
-        * along with this program.
-        */
-
+     Copyright © 2023 Bielefeld University, Department of Digital Medicine &amp; Insula Institute for Integrative Therapy Research, Hannover\n
+     Copyright © 2023 Urs-Vito Albrecht, Evgenii Pustozerov, Florian Beissner\n
+     Copyright © 2018 Till-Ansgar Neubert, Jorge Manuel Sánchez\n
+     Copyright © 2014-2016 Hannover Medical School\n
+     Copyright © 2014 Tawfik Moher Alsady, Florian Beissner\n
+ \n
+     SMaRT is scientific research software. It is not a medical device and should not be considered as such.
+It does not provide medical advice or diagnoses and is not intended to replace professional medical advice,
+diagnosis, or treatment. Users should always seek the advice of a doctor or other qualified health provider
+with any questions they may have regarding a medical condition. Never disregard professional medical advice
+or delay in seeking it because of something you have read on this app. It is the sole responsibility of the
+user to verify the regulatory requirements for the intended use of the program and to comply with all regulatory
+requirements required by the applicable laws governing its use. The provision of information through this app
+does not imply a doctor-patient relationship and should not be construed as such. By downloading and/or using
+this app or source code, you acknowledge that you have read and understood this disclaimer and agree to be bound by its terms.\n
+\n
+     SMaRT uses the Hannover Body Template from Till-Ansgar Neubert &amp; Florian Beissner (2019). Hannover Body Template.
+figshare. Dataset. https://doi.org/10.6084/m9.figshare.7637387 under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)\n
+\n
+     This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.\n
+\n
+     This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.\n
+\n
+     You should have received a copy of the GNU General Public License
+along with this program. If not, see http://www.gnu.org/licenses/\n
+\n
     </string>
 </resources>

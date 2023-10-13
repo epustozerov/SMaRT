@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="copyright">
-     Copyright © 2023 Insula Institute for Integrative Therapy Research, Hannover &amp; Bielefeld University\n
-     Copyright © 2023 Evgenii Pustozerov, Florian Beissner\n
+     Copyright © 2023 Bielefeld University, Department of Digital Medicine &amp; Insula Institute for Integrative Therapy Research, Hannover\n
+     Copyright © 2023 Urs-Vito Albrecht, Evgenii Pustozerov, Florian Beissner\n
      Copyright © 2018 Till-Ansgar Neubert, Jorge Manuel Sánchez\n
      Copyright © 2014-2016 Hannover Medical School\n
      Copyright © 2014 Tawfik Moher Alsady, Florian Beissner\n
@@ -31,7 +31,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.\n
 \n
      You should have received a copy of the GNU General Public License
-along with this program.\n
+along with this program. If not, see http://www.gnu.org/licenses/\n
 \n
     </string>
 </resources>

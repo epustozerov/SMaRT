@@ -1,4 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="privacy">Datenschutzerklärung</string>
+    <string name="privacy">Datenschutzerklärung\n
+\n
+**1. Name und Kontaktdaten des Verantwortlichen**\n
+\n
+Diese Datenschutzerklärung gilt für die Datenverarbeitung durch:\n
+\n
+Insula-Institut für integrative Therapieforschung gGmbH\n
+Aronstabweg 2\n
+30559 Hannover\n
+Deutschland\n
+E-Mail: smart@insula-institut.org\n
+Vertreten durch Geschäftsführerin: Anna Kristina Beißner\n
+\n
+**2. Erhebung und Speicherung persönlicher Daten sowie Art und Zweck ihrer Verwendung**\n
+\n
+Die Nutzung unserer App ist in der Regel ohne Angabe personenbezogener Daten möglich. Beim Start der App bitten wir Sie jedoch um Angabe eines Namens oder eines Pseudonyms. Zusätzlich speichern wir Zeichnungen und zugehörige Qualitäts-, Intensitäts- und Ortsinformationen sowie die Zeit der Dateneingabe.\n
+\n
+Die Daten werden ausschließlich lokal auf Ihrem Gerät in einer Datenbank und als Bilddateien gespeichert. Es erfolgt keine Übertragung der Daten auf andere Server. Ihre Daten werden nicht mit Dritten geteilt.\n
+\n
+Bitte beachten Sie, dass die Daten nicht automatisch gelöscht werden. Sie können jedoch Ihre Daten jederzeit selbst auf Ihrem Gerät löschen.\n
+\n
+**3. Datenzugriff und -sicherheit**\n
+\n
+Der Zugriff auf Ihre Daten ist durch ein Passwort geschützt, das Sie selbst festlegen. Sie sind dafür verantwortlich, Ihr Passwort sicher und geheim zu halten.\n
+\n
+**4. Ihre Rechte**\n
+\n
+Sie haben das Recht:\n
+\n
+- gemäß Art. 15 DSGVO Auskunft über Ihre von uns verarbeiteten personenbezogenen Daten zu verlangen.\n
+- gemäß Art. 16 DSGVO unverzüglich die Berichtigung unrichtiger oder Vervollständigung Ihrer bei uns gespeicherten personenbezogenen Daten zu verlangen.\n
+- gemäß Art. 17 DSGVO die Löschung Ihrer bei uns gespeicherten personenbezogenen Daten zu verlangen.\n
+- gemäß Art. 18 DSGVO die Einschränkung der Verarbeitung Ihrer personenbezogenen Daten zu verlangen.\n
+\n
+**5. Aktualisierung und Änderung dieser Datenschutzerklärung**\n
+\n
+Diese Datenschutzerklärung ist aktuell gültig und hat den Stand Oktober 2023. Durch die Weiterentwicklung unserer App oder aufgrund geänderter gesetzlicher bzw. behördlicher Vorgaben kann es notwendig werden, diese Datenschutzerklärung zu ändern. Die jeweils aktuelle Datenschutzerklärung kann jederzeit in der App von Ihnen abgerufen und ausgedruckt werden.\n
+</string>
 </resources>

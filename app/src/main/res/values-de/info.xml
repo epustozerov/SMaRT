@@ -1,4 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="info">Informationsseite</string>
+    <string name="info">**Informationsseite**\n
+\n
+**App-Name:** SMaRT\n
+\n
+**Version:** (Version der App eintragen)\n
+\n
+**Herausgeber und Entwickler:**\n
+\n
+Insula-Institut für integrative Therapieforschung gGmbH\n
+Aronstabweg 2\n
+30559 Hannover\n
+Deutschland\n
+E-Mail: smart@insula-institut.org\n
+\n
+**Geschäftsführung:**\n
+\n
+Geschäftsführerin Anna Kristina Beißner\n
+\n
+**Handelsregister:**\n
+\n
+Amtsgericht Hannover, HRB 221051\n
+\n
+**Zweckbestimmung der App:**\n
+\n
+Die App wurde entwickelt, um eine Plattform zur Kartierung und Speicherung menschlicher Empfindungen zu bieten. Nutzer*innen können ihre Empfindungen zeichnen und diese Zeichnungen zusammen mit Informationen über Qualität, Intensität und Ort speichern.\n
+\n
+Es ist wichtig zu betonen, dass die App kein medizinisches Gerät ist und nicht für die Diagnose, Überwachung, Behandlung oder Linderung von Krankheiten vorgesehen ist. Die App dient nicht der Bereitstellung medizinischer oder gesundheitlicher Ratschläge und sollte nicht als solche verwendet werden.\n
+\n
+**Lizenz und Open-Source-Verpflichtungen:**\n
+\n
+Die App ist Open Source und lizenziert unter der GNU General Public License Version 3 (GNU GPL v3). Sie dürfen die App für persönliche Zwecke verwenden, verändern und verteilen, vorausgesetzt, Sie halten sich an die Bestimmungen der GNU GPL v3.\n
+\n
+**Datenschutz und Datenspeicherung:**\n
+\n
+Die Privatsphäre und Sicherheit Ihrer Daten ist uns sehr wichtig. Die App speichert Zeichnungen von Empfindungen, Informationen über die Qualität, Intensität und Ort dieser Empfindungen und den Zeitpunkt der Dateneingabe. Diese Daten werden ausschließlich lokal auf Ihrem Gerät in einer Datenbank und als Bilddateien gespeichert. Es erfolgt keine Übertragung Ihrer Daten auf andere Server oder eine Weitergabe an Dritte. Der Zugriff auf die Daten ist durch ein Passwort geschützt, das Sie selbst festlegen.\n
+\n
+**Nutzungsbedingungen:**\n
+\n
+Indem Sie die App herunterladen und nutzen, stimmen Sie unseren Nutzungsbedingungen zu. Bitte lesen Sie diese sorgfältig durch, um sich über Ihre Rechte und Pflichten zu informieren.\n
+\n
+**Impressum:**\n
+\n
+Informationen zum Anbieter dieser App finden Sie in unserem Impressum.\n
+\n
+**Aktualisierungen und Änderungen:**\n
+\n
+Wir behalten uns das Recht vor, diese Information und die Bedingungen der App zu ändern oder zu aktualisieren. Bitte überprüfen Sie diese Seite regelmäßig, um über Änderungen informiert zu bleiben.\n
+\n
+Stand: Oktober 2023\n</string>
 </resources>

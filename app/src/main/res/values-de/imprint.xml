@@ -1,4 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="imprint">Impressum</string>
+    <string name="imprint">Impressum\n
+\n
+Angaben gemäß § 5 TMG:\n
+\n
+Insula-Institut für integrative Therapieforschung gGmbH\n
+Aronstabweg 2\n
+30559 Hannover\n
+Deutschland\n
+\n
+Kontakt:\n
+E-Mail: smart@insula-institut.org\n
+\n
+Vertretung:\n
+\n
+Die Insula-Institut für integrative Therapieforschung gGmbH wird gesetzlich vertreten durch Geschäftsführerin Anna Kristina Beißner.\n
+\n
+Registereintrag:\n
+\n
+Eintragung im Handelsregister.\n
+Registergericht: Amtsgericht Hannover\n
+Registernummer: HRB 221051\n
+\n
+Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:\n
+Anna Kristina Beißner\n
+Aronstabweg 2\n
+30559 Hannover\n
+Deutschland\n</string>
 </resources>
