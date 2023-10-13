@@ -1,5 +1,6 @@
 package com.dm.smart;
 
+import static com.dm.smart.CanvasFragment.verifyStoragePermissions;
 import static com.dm.smart.SubjectFragment.extractSubjectFromTheDB;
 
 import android.annotation.SuppressLint;
@@ -46,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            verifyStoragePermissions(this);
+        }
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
 
         // Config
@@ -64,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
         if (cursor.getCount() > 0) {
             currentlySelectedSubject = extractSubjectFromTheDB(cursor);
         } else {
-            currentlySelectedSubject = new Subject("Default Subject", "Default", "neutral");
+            currentlySelectedSubject = new Subject("Default Subject", "Built-in", "neutral");
         }
         db.close();
 
@@ -84,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.navigation_add_sense:
                     // check if the config of the selected patient matches the selected config in system preferences
-                    String selectedConfig = sharedPref.getString(getString(R.string.sp_selected_config), "");
+                    String selectedConfig = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
                     String patientConfig = currentlySelectedSubject.getConfig();
                     if (!selectedConfig.equals("") && !selectedConfig.equals(patientConfig)) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -200,6 +204,10 @@ public class MainActivity extends AppCompatActivity {
                 Uri uri = Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getPath());
                 pickConfig(uri);
             }
+
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+            navController.navigate(R.id.navigation_subject);
+
         } else if (item.getItemId() == R.id.menu_selected_config) {
             // open the selected config file
             String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
@@ -282,7 +290,35 @@ public class MainActivity extends AppCompatActivity {
 
                 // grant permissions to read the file
                 getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
+                try {
+                    ContentResolver contentResolver = getContentResolver();
+                    IniPreferences iniPreference = new IniPreferences(new Ini(contentResolver.openInputStream(Uri.parse(configPath))));
+                    String[] configNames = iniPreference.childrenNames();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle(R.string.dialog_select_config);
+                    builder.setItems(configNames, (dialog, which) -> {
+                        String configName = configNames[which];
+                        editor.putString(getString(R.string.sp_selected_config), configName);
+                        editor.apply();
+                        invalidateOptionsMenu();
+                        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+                        navController.navigate(R.id.navigation_subject);
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                } catch (IOException | BackingStoreException e) {
+                    throw new RuntimeException(e);
+                }
             }
+        }
+    }
+
+    // run code before activity is created
+    @Override
+    public void onAttachedToWindow() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            verifyStoragePermissions(this);
         }
     }
 }

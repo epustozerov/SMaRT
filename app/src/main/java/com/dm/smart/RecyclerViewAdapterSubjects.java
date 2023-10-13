@@ -128,7 +128,7 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
             SimpleDateFormat formatter =
                     new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
             String dateString = formatter.format(cal.getTime());
-            contextMenu.setHeaderTitle(patientId + ". " + mContext.getString(R.string.menu_first_config) + ": " + config + ", "
+            contextMenu.setHeaderTitle(patientId + ". " + mContext.getString(R.string.menu_config) + ": " + config + ", "
                     + bodyScheme + ",\n " + mContext.getString(R.string.menu_created) + ": " + dateString);
             contextMenu.add(0, SUBJECT_DELETE, Menu.NONE,
                     mContext.getString(R.string.menu_remove_subject));

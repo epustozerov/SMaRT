@@ -64,7 +64,7 @@
     <string name="menu_show_names">Show subject names</string>
     <string name="menu_custom_config">Use custom configuration</string>
     <string name="menu_selected_config">Config profile:</string>
-    <string name="menu_selected_config_default">Config profile: Default</string>
+    <string name="menu_selected_config_default">Config profile: Built-in</string>
     <string name="menu_imprint">Imprint</string>
     <string name="menu_privacy">Privacy Policy</string>
     <string name="menu_info">Information page</string>

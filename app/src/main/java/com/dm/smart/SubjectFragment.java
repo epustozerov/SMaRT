@@ -85,11 +85,9 @@ public class SubjectFragment extends Fragment {
 
         // Spinner for body scheme selection
         Spinner spinner = mView.findViewById(R.id.spinner_body_scheme);
-        ArrayAdapter<CharSequence> adapterBodyScheme = ArrayAdapter.createFromResource(requireContext(),
-                R.array.schemes, android.R.layout.simple_spinner_item);
         boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
         String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
-        String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Default");
+        String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
         Configuration configuration = new Configuration(configPath, configName);
         try {
             configuration.formConfig(requireActivity(), "neutral");
@@ -100,10 +98,15 @@ public class SubjectFragment extends Fragment {
             editor.apply();
             customConfig = false;
         }
+
+        ArrayAdapter<CharSequence> adapterBodyScheme;
         if (customConfig) {
             // get the config path from shared preferences
             adapterBodyScheme = new ArrayAdapter<>(requireContext(),
                     android.R.layout.simple_spinner_item, configuration.getBodySchemes());
+        } else {
+            adapterBodyScheme = ArrayAdapter.createFromResource(requireContext(),
+                    R.array.schemes, android.R.layout.simple_spinner_item);
         }
 
         adapterBodyScheme.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -141,6 +144,7 @@ public class SubjectFragment extends Fragment {
         // EditText and Button for adding new Subjects
         EditText edittextPatientName = mView.findViewById(R.id.edittext_subject_name);
         Button buttonAddPatients = mView.findViewById(R.id.button_add_subject);
+        boolean finalCustomConfig = customConfig;
         buttonAddPatients.setOnClickListener((View view) -> {
             if (edittextPatientName.getText().toString().equals("")) {
                 Toast toast = Toast.makeText(getContext(), getString(R.string.toast_empty_name), Toast.LENGTH_LONG);
@@ -149,8 +153,15 @@ public class SubjectFragment extends Fragment {
             } else {
                 DBAdapter DBAdapter = new DBAdapter(requireActivity());
                 DBAdapter.open();
-                Subject new_subject =
-                        new Subject(edittextPatientName.getText().toString(), configName, (String) spinner.getSelectedItem());
+                Subject new_subject;
+                if (finalCustomConfig) {
+                    new_subject =
+                            new Subject(edittextPatientName.getText().toString(), configName, (String) spinner.getSelectedItem());
+                } else {
+                    new_subject =
+                            new Subject(edittextPatientName.getText().toString(), "Built-in", (String) spinner.getSelectedItem());
+                }
+
                 new_subject.setId((int) DBAdapter.insertSubject(new_subject));
                 DBAdapter.close();
                 MainActivity.currentlySelectedSubject = new_subject;
@@ -244,7 +255,6 @@ public class SubjectFragment extends Fragment {
     }
 
     private void shareSensations() {
-
         // Load front and back sensations images
         Record selectedRecord =
                 adapterRecords.getItem(adapterRecords.selectedRecordPosition);

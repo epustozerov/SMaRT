@@ -67,7 +67,7 @@
     <string name="menu_show_names">Probandennamen anzeigen</string>
     <string name="menu_custom_config">Benutzerdefinierte Konfiguration verwenden</string>
     <string name="menu_selected_config">Konfig-Profil:</string>
-    <string name="menu_selected_config_default">Konfig-Profil: Default</string>
+    <string name="menu_selected_config_default">Konfig-Profil: Built-in</string>
     <string name="menu_imprint">Impressum</string>
     <string name="menu_privacy">Datenschutz</string>
     <string name="menu_info">Informationsseite</string>

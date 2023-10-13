@@ -114,19 +114,34 @@ public class CanvasFragment extends Fragment {
         String selectedSubjectBodyScheme = MainActivity.currentlySelectedSubject.getBodyScheme();
         SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
         boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
-        String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
-        String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Default");
-        Configuration configuration = new Configuration(configPath, configName);
-        try {
-            configuration.formConfig(requireActivity(), selectedSubjectBodyScheme);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        Configuration configuration;
+        if (customConfig) {
+            String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
+            String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
+            configuration = new Configuration(configPath, configName);
+            try {
+                configuration.formConfig(requireActivity(), selectedSubjectBodyScheme);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            configuration = null;
         }
 
         currentStateIsFront = true;
         if (!customConfig) {
-            bodyFigures = getResources().obtainTypedArray(getResources().
-                    getIdentifier(selectedSubjectBodyScheme, "array", requireContext().getPackageName()));
+            String currentlySelectedSubjectBodyScheme = MainActivity.currentlySelectedSubject.getBodyScheme();
+            switch (currentlySelectedSubjectBodyScheme) {
+                case "männlich":
+                    bodyFigures = getResources().obtainTypedArray(R.array.body_figures_male);
+                    break;
+                case "weiblich":
+                    bodyFigures = getResources().obtainTypedArray(R.array.body_figures_female);
+                    break;
+                default:
+                    bodyFigures = getResources().obtainTypedArray(R.array.body_figures_neutral);
+                    break;
+            }
         }
 
         if (mCanvas != null) {
@@ -146,7 +161,6 @@ public class CanvasFragment extends Fragment {
         Log.e("RECREATION", "CanvasFragment");
         Log.e("SELECTED SENSATIONS", selectedSensations + "");
         // Init container with drawn sensations
-
         // Don't show the default text if there are more than 0 sensations
 
         // Init body figures for drawing

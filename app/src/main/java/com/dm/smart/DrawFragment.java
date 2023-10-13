@@ -1,5 +1,7 @@
 package com.dm.smart;
 
+import static com.dm.smart.MainActivity.sharedPref;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -109,13 +111,15 @@ public class DrawFragment extends Fragment {
         String selectedSubjectBodyScheme = MainActivity.currentlySelectedSubject.getBodyScheme();
         SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
         boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
-        String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
-        String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Default");
-        configuration = new Configuration(configPath, configName);
-        try {
-            configuration.formConfig(requireActivity(), selectedSubjectBodyScheme);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (customConfig) {
+            String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
+            String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
+            configuration = new Configuration(configPath, configName);
+            try {
+                configuration.formConfig(requireActivity(), selectedSubjectBodyScheme);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
         if (customConfig) {
             colors = Arrays.stream(configuration.getColorSymptoms()).map(Color::parseColor).collect(Collectors.toList());
@@ -208,7 +212,7 @@ public class DrawFragment extends Fragment {
                                     navigate(R.id.navigation_subject);
                             Runnable runnable = this::storeData;
                             new Thread(runnable).start();
-                            if (MainActivity.sharedPref.getBoolean(getString(R.string.sp_request_password), false)) {
+                            if (sharedPref.getBoolean(getString(R.string.sp_request_password), false)) {
                                 android.app.AlertDialog alertDialog =
                                         CustomAlertDialogs.requestPassword(getActivity(), null, null, null);
                                 alertDialog.show();
@@ -238,7 +242,14 @@ public class DrawFragment extends Fragment {
             }
             sensations.append("; ");
         }
-        Record record = new Record(patient_id, configuration.getConfigName(), sensations.toString());
+        sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
+        Record record;
+        if (customConfig) {
+            record = new Record(patient_id, configuration.getConfigName(), sensations.toString());
+        } else {
+            record = new Record(patient_id, "Built-in", sensations.toString());
+        }
 
         // get the amount of records by patient specified with patient_id
         Cursor cursorRecords =

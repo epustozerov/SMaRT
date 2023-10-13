@@ -3,12 +3,11 @@ package com.dm.smart;
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.TypedArray;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
-import android.util.Log;
 
 import androidx.fragment.app.FragmentActivity;
 
@@ -20,6 +19,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -73,7 +73,14 @@ public class Configuration {
     public static void initConfig(Context context) throws IOException {
         File configFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
                 "SMaRT/config/config.ini");
-        if (!configFile.exists()) {
+        File folderImages = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+                "SMaRT/config/body_figures");
+        if (!configFile.exists() || !folderImages.exists() || Objects.requireNonNull(folderImages.listFiles()).length == 0) {
+            // remove old config file
+            if (configFile.exists()) {
+                //noinspection ResultOfMethodCallIgnored
+                configFile.delete();
+            }
             FileWriter writer = new FileWriter(configFile);
             StringBuilder config_body = new StringBuilder("[Default]\n" +
                     "sensation_types = ");
@@ -117,25 +124,50 @@ public class Configuration {
                 //noinspection ResultOfMethodCallIgnored
                 body_figures_folder.mkdirs();
             }
-            for (String body_figure : body_figures) {
-                @SuppressLint("DiscouragedApi") List<String> body_figure_parts = Arrays.stream(context.getResources().
-                        getStringArray(context.getResources().getIdentifier(body_figure,
-                                "array", context.getPackageName()))).collect(Collectors.toList());
-                @SuppressLint({"DiscouragedApi", "Recycle"}) TypedArray body_figure_parts2 =
-                        context.getResources().obtainTypedArray(context.getResources().
-                                getIdentifier(body_figure, "array", context.getPackageName()));
-                for (int i = 0; i < body_figure_parts.size(); i++) {
-                    String body_figure_part = body_figure_parts.get(i).substring(body_figure_parts.get(i).lastIndexOf("/") + 1);
-                    int id = body_figure_parts2.getResourceId(i, 0);
-                    Log.e("IDS from resourses", String.valueOf(id));
-                    Bitmap resourceImage = BitmapFactory.decodeResource(context.getResources(), id);
-                    DrawFragment.SaveSnapshotTask.doInBackground(resourceImage, body_figures_folder, body_figure_part);
-                }
-            }
             writer.append(config_body.toString());
             writer.flush();
             writer.close();
+
+            String[] completeListOfBodyFigures = new String[12];
+            completeListOfBodyFigures[0] = "body_female_front";
+            completeListOfBodyFigures[1] = "body_female_front_mask";
+            completeListOfBodyFigures[2] = "body_female_back";
+            completeListOfBodyFigures[3] = "body_female_back_mask";
+            completeListOfBodyFigures[4] = "body_male_front";
+            completeListOfBodyFigures[5] = "body_male_front_mask";
+            completeListOfBodyFigures[6] = "body_male_back";
+            completeListOfBodyFigures[7] = "body_male_back_mask";
+            completeListOfBodyFigures[8] = "body_neutral_front";
+            completeListOfBodyFigures[9] = "body_neutral_front_mask";
+            completeListOfBodyFigures[10] = "body_neutral_back";
+            completeListOfBodyFigures[11] = "body_neutral_back_mask";
+
+            for (String completeListOfBodyFigure : completeListOfBodyFigures) {
+                Resources resources = context.getResources();
+                @SuppressLint("DiscouragedApi") final int resourceId = resources.getIdentifier(completeListOfBodyFigure, "drawable",
+                        context.getPackageName());
+                Bitmap resourceImage = BitmapFactory.decodeResource(context.getResources(), resourceId);
+                DrawFragment.SaveSnapshotTask.doInBackground(resourceImage, body_figures_folder, completeListOfBodyFigure + ".png");
+            }
+
+
+//            for (String body_figure : body_figures) {
+//                @SuppressLint("DiscouragedApi") List<String> body_figure_parts = Arrays.stream(context.getResources().
+//                        getStringArray(context.getResources().getIdentifier(body_figure,
+//                                "array", context.getPackageName()))).collect(Collectors.toList());
+//                @SuppressLint({"DiscouragedApi", "Recycle"}) TypedArray body_figure_parts2 =
+//                        context.getResources().obtainTypedArray(context.getResources().
+//                                getIdentifier(body_figure, "array", context.getPackageName()));
+//                for (int i = 0; i < body_figure_parts.size(); i++) {
+//                    String body_figure_part = body_figure_parts.get(i).substring(body_figure_parts.get(i).lastIndexOf("/") + 1);
+//                    int id = body_figure_parts2.getResourceId(i, 0);
+//                    Log.e("IDS from resourses", String.valueOf(id));
+//                    Bitmap resourceImage = BitmapFactory.decodeResource(context.getResources(), id);
+//                    DrawFragment.SaveSnapshotTask.doInBackground(resourceImage, body_figures_folder, body_figure_part);
+//                }
+//            }
         }
+
     }
 
     public String[] getColorSymptoms() {
