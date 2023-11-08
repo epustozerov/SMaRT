@@ -254,8 +254,14 @@ public class DrawFragment extends Fragment {
         // get the amount of records by patient specified with patient_id
         Cursor cursorRecords =
                 DBAdapter.getRecordsSingleSubject(MainActivity.currentlySelectedSubject.getId());
-        int recordCount = cursorRecords.getCount();
-        cursorRecords.close();
+        // get the largest n
+        int recordCount = 0;
+        if (cursorRecords.moveToFirst()) {
+            do {
+                @SuppressLint("Range") int n = cursorRecords.getInt(cursorRecords.getColumnIndex(com.dm.smart.DBAdapter.RECORD_N));
+                if (n > recordCount) recordCount = n;
+            } while (cursorRecords.moveToNext());
+        }
         record.setN(recordCount + 1);
         DBAdapter.insertRecord(record);
         DBAdapter.close();

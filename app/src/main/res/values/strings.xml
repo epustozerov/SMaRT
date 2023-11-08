@@ -55,8 +55,8 @@
 
     <string name="menu_remove_subject">Remove selected subject and their records</string>
     <string name="menu_remove_record">Remove selected record</string>
-    <string name="menu_show_image">Display symptom overview</string>
-    <string name="menu_share">Share symptom record</string>
+    <string name="menu_show_image">Display overview</string>
+    <string name="menu_share">Share this record</string>
     <string name="menu_export_title">Sensations of %1$s at %2$s</string>
     <string name="menu_instructions">Instructions</string>
     <string name="menu_show_instructions">Show instructions before recordings</string>

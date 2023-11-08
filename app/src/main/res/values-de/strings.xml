@@ -58,8 +58,8 @@
     <!-- Menu -->
     <string name="menu_remove_subject">Ausgewählte Probanden und ihre Daten entfernen</string>
     <string name="menu_remove_record">Ausgewählten Datensatz entfernen</string>
-    <string name="menu_show_image">Symptomübersicht Anzeigen</string>
-    <string name="menu_share">Symptomaufzeichnung teilen</string>
+    <string name="menu_show_image">Übersicht anzeigen</string>
+    <string name="menu_share">Diese Zeichnung teilen</string>
     <string name="menu_export_title">Empfindungen von %1$s um %2$s</string>
     <string name="menu_instructions">Anweisungen</string>
     <string name="menu_show_instructions">Anweisungen vor den Aufnahmen anzeigen</string>

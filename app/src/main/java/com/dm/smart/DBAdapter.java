@@ -28,7 +28,7 @@ public class DBAdapter {
     public static final String RECORD_DELETED = "deleted";
     public static final String RECORD_TIMESTAMP = "timestamp";
     private static final String DATABASE_NAME = "smart.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
     private static final String DATABASE_TABLE_SUBJECTS = "subjects";
     private static final String DATABASE_TABLE_RECORDS = "records";
     private final DBOpenHelper dbHelper;
@@ -117,12 +117,12 @@ public class DBAdapter {
 
         private static final String DATABASE_CREATE_1 = "create table "
                 + DATABASE_TABLE_SUBJECTS + " (" + SUBJECT_ID
-                + " integer primary key autoincrement, " + SUBJECT_NAME
+                + " integer primary key, " + SUBJECT_NAME
                 + " string, " + SUBJECT_CONFIG + " string, " + SUBJECT_SCHEME + " string, " + SUBJECT_DELETED + " integer, "
                 + SUBJECT_TIMESTAMP + " long);";
 
         private static final String DATABASE_CREATE_2 = "create table " + DATABASE_TABLE_RECORDS +
-                " (" + RECORD_ID + " integer primary key autoincrement, " + RECORD_SUBJECT_ID +
+                " (" + RECORD_ID + " integer primary key, " + RECORD_SUBJECT_ID +
                 " integer, " + RECORD_CONFIG + " string, " + RECORD_N + " integer, " + RECORD_SENSATIONS + " string, "
                 + RECORD_DELETED + " integer, " + RECORD_TIMESTAMP + " long, " +
                 "FOREIGN KEY(" + RECORD_SUBJECT_ID + ") REFERENCES " + DATABASE_TABLE_SUBJECTS + "(" + SUBJECT_ID + "));";
