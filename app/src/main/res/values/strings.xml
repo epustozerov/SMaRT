@@ -46,14 +46,18 @@
     <string name="dialog_image">Overview</string>
     <string name="dialog_close">Hide</string>
     <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
     <string name="dialog_password_title">Enter the password</string>
+    <string name="dialog_change_name_title">Enter the new name for the selected subject</string>
     <string name="dialog_password_hint">Password</string>
+    <string name="dialog_change_name_hint">Subject name</string>
     <string name="dialog_select_config">Select configuration</string>
     <string name="dialog_config_mismatch">The selected config doesn\'t match the subject\'s setting\n
         Create a new patient or choose another configuration.
     </string>
 
     <string name="menu_remove_subject">Remove selected subject and their records</string>
+    <string name="menu_change_name">Change subject\'s name</string>
     <string name="menu_remove_record">Remove selected record</string>
     <string name="menu_show_image">Display overview</string>
     <string name="menu_share">Share this record</string>

@@ -1,7 +1,7 @@
 package com.dm.smart.items;
 
 public class Subject {
-    private final String name;
+    private String name;
     private final String config;
     private final String bodyScheme;
     private final long timestamp;
@@ -45,5 +45,9 @@ public class Subject {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

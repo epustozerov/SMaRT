@@ -107,12 +107,8 @@
 
             <ScrollView android:layout_width="wrap_content" android:layout_height="match_parent" android:background="@color/gray_lighter"
                 android:contentDescription="@string/sensation" android:padding="4dp">
-
                 <LinearLayout android:id="@+id/sensations_container" android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:layout_gravity="start" android:orientation="vertical">
-
-                </LinearLayout>
-
+                    android:layout_height="wrap_content" android:layout_gravity="start" android:orientation="horizontal" />
             </ScrollView>
 
             <com.dm.smart.ui.elements.VerticalButton android:id="@+id/button_sensations_tool" android:layout_width="wrap_content"

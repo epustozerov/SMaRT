@@ -18,6 +18,7 @@ import android.provider.DocumentsContract;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.WindowManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -116,6 +117,8 @@ public class MainActivity extends AppCompatActivity {
                                 AlertDialog alertDialog = CustomAlertDialogs.requestPassword(
                                         MainActivity.this, null, null, null);
                                 alertDialog.show();
+                                Objects.requireNonNull(alertDialog.getWindow()).setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                                        WindowManager.LayoutParams.MATCH_PARENT);
                             }
                         });
                         builder.setNegativeButton(R.string.dialog_no, (dialog, id) -> {
@@ -131,6 +134,8 @@ public class MainActivity extends AppCompatActivity {
         if (sharedPref.getBoolean(getString(R.string.sp_request_password), false)) {
             android.app.AlertDialog alertDialog = CustomAlertDialogs.requestPassword(this, null, null, null);
             alertDialog.show();
+            Objects.requireNonNull(alertDialog.getWindow()).setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT);
         }
     }
 
@@ -176,6 +181,8 @@ public class MainActivity extends AppCompatActivity {
             if (item.isChecked()) {
                 android.app.AlertDialog alertDialog = CustomAlertDialogs.requestPassword(this, sharedPref, pref, item);
                 alertDialog.show();
+                Objects.requireNonNull(alertDialog.getWindow()).setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT);
             } else {
                 item.setChecked(!item.isChecked());
                 SharedPreferences.Editor editor = sharedPref.edit();
@@ -187,11 +194,15 @@ public class MainActivity extends AppCompatActivity {
             if (!item.isChecked()) {
                 android.app.AlertDialog alertDialog = CustomAlertDialogs.requestPassword(this, sharedPref, pref, item);
                 alertDialog.show();
+                Objects.requireNonNull(alertDialog.getWindow()).setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT);
             } else {
                 item.setChecked(!item.isChecked());
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putBoolean(pref, item.isChecked());
                 editor.apply();
+                NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+                navController.navigate(R.id.navigation_subject);
             }
         } else if (item.getItemId() == R.id.menu_custom_config) {
             String pref = getString(R.string.sp_custom_config);

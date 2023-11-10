@@ -22,6 +22,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -49,6 +50,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class DrawFragment extends Fragment {
@@ -216,6 +218,8 @@ public class DrawFragment extends Fragment {
                                 android.app.AlertDialog alertDialog =
                                         CustomAlertDialogs.requestPassword(getActivity(), null, null, null);
                                 alertDialog.show();
+                                Objects.requireNonNull(alertDialog.getWindow()).setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                                        WindowManager.LayoutParams.MATCH_PARENT);
                             }
                         });
         AlertDialog dialog = builder.create();

@@ -389,14 +389,7 @@ public class CanvasFragment extends Fragment {
             if (selectedSensations.size() == 0) {
                 ((LinearLayout) mCanvas.findViewById(R.id.drawn_sensations)).removeAllViews();
             }
-            int bid = ((ViewGroup) v.getParent()).indexOfChild(v);
-            String selectedSensation;
-            if (customConfig) {
-                selectedSensation = configuration.sensationTypes[bid];
-            } else {
-                selectedSensation =
-                        Arrays.asList(getResources().getStringArray(R.array.sensation_types)).get(bid);
-            }
+            String selectedSensation = ((ToggleButton) v).getText().toString();
             if (selectedSensations.contains(selectedSensation)) {
                 selectedSensations.remove(selectedSensation);
             } else {
@@ -425,19 +418,31 @@ public class CanvasFragment extends Fragment {
             sensationTypes = getResources().getStringArray(R.array.sensation_types);
         }
 
-
-        for (String choice : sensationTypes) {
-            ToggleButton b = new ToggleButton(getContext());
-            b.setBackground(requireContext().getDrawable(R.drawable.custom_radio));
-            b.setTextColor(Color.BLACK);
-            b.setTextOn(choice);
-            b.setTextOff(choice);
-            b.setText(choice);
-            b.setPadding(Math.round(dp2px(8)), Math.round(dp2px(8)),
-                    Math.round(dp2px(8)), Math.round(dp2px(8)));
-            b.setOnClickListener(choiceClickListener);
-            sensationsContainer.addView(b, lp);
+        int numRows = (int) Math.floor((double) (getResources().getDisplayMetrics().heightPixels - 120) / dp2px(60));
+        int numColumns = (int) Math.ceil((double) sensationTypes.length / numRows);
+        for (int i = 0; i < numColumns; i++) {
+            LinearLayout column = new LinearLayout(getContext());
+            column.setOrientation(LinearLayout.VERTICAL);
+            column.setLayoutParams(lp);
+            sensationsContainer.addView(column);
+            for (int j = 0; j < numRows; j++) {
+                int index = i * numRows + j;
+                if (index >= sensationTypes.length) {
+                    break;
+                }
+                ToggleButton b = new ToggleButton(getContext());
+                b.setBackground(requireContext().getDrawable(R.drawable.custom_radio));
+                b.setTextColor(Color.BLACK);
+                b.setTextOn(sensationTypes[index]);
+                b.setTextOff(sensationTypes[index]);
+                b.setText(sensationTypes[index]);
+                b.setPadding(Math.round(dp2px(8)), Math.round(dp2px(8)),
+                        Math.round(dp2px(8)), Math.round(dp2px(8)));
+                b.setOnClickListener(choiceClickListener);
+                column.addView(b);
+            }
         }
+
         // go through the list of sensations and select the ones that were selected before
         for (String selectedSensation : selectedSensations) {
             int index = Arrays.asList(sensationTypes).indexOf(selectedSensation);

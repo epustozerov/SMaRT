@@ -3,6 +3,7 @@ package com.dm.smart;
 import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_DELETE;
 import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_SHARE;
 import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_SHOW_IMAGE;
+import static com.dm.smart.RecyclerViewAdapterSubjects.SUBJECT_CHANGE_NAME;
 import static com.dm.smart.RecyclerViewAdapterSubjects.SUBJECT_DELETE;
 
 import android.annotation.SuppressLint;
@@ -237,6 +238,9 @@ public class SubjectFragment extends Fragment {
         if (item.getItemId() == SUBJECT_DELETE) {
             showDeleteSubjectDialog();
             return true;
+        } else if (item.getItemId() == SUBJECT_CHANGE_NAME) {
+            showChangeNameDialog();
+            return true;
         } else if (item.getItemId() == RECORD_DELETE) {
             showDeleteRecordDialog();
             return true;
@@ -314,12 +318,38 @@ public class SubjectFragment extends Fragment {
                             DBAdapter.open();
                             DBAdapter.deleteSubject(selectedSubject.getId());
                             DBAdapter.close();
+                            subjects.remove(selectedSubject);
+                            records.clear();
                             populateListSubjects();
+                            populateListRecords();
                         })
                 .setNegativeButton(getResources().getString(R.string.dialog_no),
                         (dialog, id) -> {
                         });
         AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    public void showChangeNameDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+        @SuppressLint("InflateParams") View alertView =
+                getLayoutInflater().inflate(R.layout.alert_change_name, null);
+        EditText editTextName = alertView.findViewById(R.id.edit_text_name);
+        editTextName.setText(adapterSubjects.getItem(adapterSubjects.selectedSubjectPosition).getName());
+        builder.setView(alertView);
+        AlertDialog dialog = builder.create();
+        alertView.findViewById(R.id.button_cancel).setOnClickListener(v -> dialog.dismiss());
+        alertView.findViewById(R.id.button_ok).setOnClickListener(v -> {
+            Subject selectedSubject =
+                    adapterSubjects.getItem(adapterSubjects.selectedSubjectPosition);
+            DBAdapter DBAdapter = new DBAdapter(requireActivity());
+            DBAdapter.open();
+            selectedSubject.setName(editTextName.getText().toString());
+            DBAdapter.updateSubject(selectedSubject);
+            DBAdapter.close();
+            populateListSubjects();
+            dialog.dismiss();
+        });
         dialog.show();
     }
 

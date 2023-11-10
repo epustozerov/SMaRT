@@ -113,6 +113,18 @@ public class DBAdapter {
         db.insert(DATABASE_TABLE_RECORDS, null, cv_new_record);
     }
 
+    public void updateSubject(Subject selectedSubject) {
+        ContentValues updateSubject = new ContentValues();
+        updateSubject.put(SUBJECT_NAME, selectedSubject.getName());
+        updateSubject.put(SUBJECT_CONFIG, selectedSubject.getConfig());
+        updateSubject.put(SUBJECT_SCHEME, selectedSubject.getBodyScheme());
+        updateSubject.put(SUBJECT_DELETED, 0);
+        long timestamp = new Date().getTime();
+        updateSubject.put(SUBJECT_TIMESTAMP, timestamp);
+        db.update(DATABASE_TABLE_SUBJECTS, updateSubject, SUBJECT_ID + "="
+                + selectedSubject.getId(), null);
+    }
+
     private static class DBOpenHelper extends SQLiteOpenHelper {
 
         private static final String DATABASE_CREATE_1 = "create table "

@@ -20,9 +20,9 @@ import java.util.Locale;
 
 public class RecyclerViewAdapterRecords extends RecyclerView.Adapter<RecyclerViewAdapterRecords.ViewHolder> {
 
-    static final int RECORD_SHOW_IMAGE = Menu.FIRST + 1;
-    static final int RECORD_SHARE = Menu.FIRST + 2;
-    static final int RECORD_DELETE = Menu.FIRST + 3;
+    static final int RECORD_SHOW_IMAGE = Menu.FIRST + 2;
+    static final int RECORD_SHARE = Menu.FIRST + 3;
+    static final int RECORD_DELETE = Menu.FIRST + 4;
     private final List<Record> mRecords;
     private final LayoutInflater mInflater;
     private final Context mContext;
