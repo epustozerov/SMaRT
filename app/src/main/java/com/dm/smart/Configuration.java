@@ -33,6 +33,9 @@ public class Configuration {
     String[] sensationTypes;
     private String[] colorsSymptoms;
 
+    String textScaleMax;
+    String textScaleMin;
+
     public String getConfigName() {
         return configName;
     }
@@ -49,6 +52,8 @@ public class Configuration {
         this.sensationTypes = iniPreference.node(this.configName).get("sensation_types", "").split(", ");
         this.colorsSymptoms = iniPreference.node(this.configName).get("colors_symptoms", "").split(", ");
         this.bodySchemes = iniPreference.node(this.configName).get("body_schemes", "").split(", ");
+        this.textScaleMax = iniPreference.node(this.configName).get("text_scale_max", "");
+        this.textScaleMin = iniPreference.node(this.configName).get("text_scale_min", "");
         this.formBodySchemes(selectedSubjectBodyScheme);
     }
 
@@ -125,8 +130,7 @@ public class Configuration {
                 body_figures_folder.mkdirs();
             }
             writer.append(config_body.toString());
-            writer.flush();
-            writer.close();
+
 
             String[] completeListOfBodyFigures = new String[12];
             completeListOfBodyFigures[0] = "body_female_front";
@@ -150,24 +154,14 @@ public class Configuration {
                 DrawFragment.SaveSnapshotTask.doInBackground(resourceImage, body_figures_folder, completeListOfBodyFigure + ".png");
             }
 
+            // Add default text labels for the scale
+            writer.append("\n" +
+                    "text_scale_max = max\n" +
+                    "text_scale_min = min");
 
-//            for (String body_figure : body_figures) {
-//                @SuppressLint("DiscouragedApi") List<String> body_figure_parts = Arrays.stream(context.getResources().
-//                        getStringArray(context.getResources().getIdentifier(body_figure,
-//                                "array", context.getPackageName()))).collect(Collectors.toList());
-//                @SuppressLint({"DiscouragedApi", "Recycle"}) TypedArray body_figure_parts2 =
-//                        context.getResources().obtainTypedArray(context.getResources().
-//                                getIdentifier(body_figure, "array", context.getPackageName()));
-//                for (int i = 0; i < body_figure_parts.size(); i++) {
-//                    String body_figure_part = body_figure_parts.get(i).substring(body_figure_parts.get(i).lastIndexOf("/") + 1);
-//                    int id = body_figure_parts2.getResourceId(i, 0);
-//                    Log.e("IDS from resourses", String.valueOf(id));
-//                    Bitmap resourceImage = BitmapFactory.decodeResource(context.getResources(), id);
-//                    DrawFragment.SaveSnapshotTask.doInBackground(resourceImage, body_figures_folder, body_figure_part);
-//                }
-//            }
+            writer.flush();
+            writer.close();
         }
-
     }
 
     public String[] getColorSymptoms() {
@@ -176,5 +170,13 @@ public class Configuration {
 
     public String[] getBodySchemes() {
         return bodySchemes;
+    }
+
+    public String getTextMin() {
+        return textScaleMin;
+    }
+
+    public String getTextMax() {
+        return textScaleMax;
     }
 }

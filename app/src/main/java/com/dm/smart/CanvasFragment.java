@@ -543,6 +543,14 @@ public class CanvasFragment extends Fragment {
         intensityScale.setColorSeeds(defineMinMaxColors(color));
         intensityScale.setThumbDrawer(new CustomThumbDrawer(65, Color.WHITE, Color.BLACK));
 
+        // if the custom config is in use, set the text for textview_scale_max from the config
+        if (customConfig) {
+            TextView textViewScaleMax = mCanvas.findViewById(R.id.textview_scale_max);
+            textViewScaleMax.setText(configuration.getTextMax());
+            TextView textViewScaleMin = mCanvas.findViewById(R.id.textview_scale_min);
+            textViewScaleMin.setText(configuration.getTextMin());
+        }
+
         // Set intenstityScale on touch listener to process only stylised touch events
         intensityScale.setOnTouchListener((v, event) -> {
             boolean isPen = event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS;

@@ -72,17 +72,19 @@
                         android:layout_marginTop="6sp" android:layout_marginRight="16sp" android:layout_marginBottom="6sp"
                         android:orientation="vertical">
 
-                        <TextView android:layout_width="wrap_content" android:layout_height="20sp" android:layout_gravity="top|center"
-                            android:clickable="false" android:minHeight="20sp" android:text="@string/textview_max"
-                            android:textAllCaps="true" android:textStyle="bold" tools:ignore="TextSizeCheck" />
+                        <TextView android:id="@+id/textview_scale_max" android:layout_width="wrap_content" android:layout_height="20sp"
+                            android:layout_gravity="top|center" android:clickable="false" android:minHeight="20sp"
+                            android:text="@string/textview_max" android:textAllCaps="true" android:textStyle="bold"
+                            tools:ignore="TextSizeCheck" />
 
                         <com.rtugeek.android.colorseekbar.ColorSeekBar android:id="@+id/color_seek_bar" android:layout_width="match_parent"
                             android:layout_height="700sp" app:colorSeekBarBarHeight="40sp" app:colorSeekBarProgress="0"
                             app:colorSeekBarRadius="3sp" app:colorSeekBarVertical="true" tools:ignore="VisualLintBounds" />
 
-                        <TextView android:layout_width="wrap_content" android:layout_height="20sp" android:layout_gravity="bottom|center"
-                            android:clickable="false" android:minHeight="20sp" android:text="@string/textview_min"
-                            android:textAllCaps="true" android:textStyle="bold" tools:ignore="VisualLintBounds" />
+                        <TextView android:id="@+id/textview_scale_min" android:layout_width="wrap_content" android:layout_height="20sp"
+                            android:layout_gravity="bottom|center" android:clickable="false" android:minHeight="20sp"
+                            android:text="@string/textview_min" android:textAllCaps="true" android:textStyle="bold"
+                            tools:ignore="VisualLintBounds" />
 
                     </LinearLayout>
 
