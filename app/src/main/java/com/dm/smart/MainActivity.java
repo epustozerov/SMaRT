@@ -34,6 +34,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import org.ini4j.Ini;
 import org.ini4j.IniPreferences;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.prefs.BackingStoreException;
@@ -60,6 +61,22 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
+        Configuration configuration;
+        if (customConfig) {
+            String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
+            String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
+            configuration = new Configuration(configPath, configName);
+            try {
+                configuration.formConfig(this, "neutral");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            configuration = null;
+        }
+
 
         // Add a dafault patient if the database is empty
         DBAdapter db = new DBAdapter(this);
@@ -101,7 +118,10 @@ public class MainActivity extends AppCompatActivity {
                         return false;
                     } else {
                         if (sharedPref.getBoolean(getString(R.string.sp_show_instructions), false)) {
-                            android.app.AlertDialog alertDialog = CustomAlertDialogs.showInstructions(this);
+                            assert configuration != null;
+                            android.app.AlertDialog alertDialog = CustomAlertDialogs.showInstructions(this, true,
+                                    new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+                                            "SMaRT/config/" + configuration.getInstructionsPath()));
                             alertDialog.show();
                         }
                         return NavigationUI.onNavDestinationSelected(item, navController);
@@ -168,7 +188,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_instructions) {
-            android.app.AlertDialog alertDialog = CustomAlertDialogs.showInstructions(this);
+            String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
+            String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
+            Configuration configuration = new Configuration(configPath, configName);
+            try {
+                configuration.formConfig(this, "neutral");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            String instructionsPath = configuration.getInstructionsPath();
+            File instructionsFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+                    "SMaRT/config/" + instructionsPath);
+            android.app.AlertDialog alertDialog = CustomAlertDialogs.showInstructions(this, true, instructionsFile);
             alertDialog.show();
             return true;
         } else if (item.getItemId() == R.id.menu_show_instructions) {

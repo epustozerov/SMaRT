@@ -32,9 +32,10 @@ public class Configuration {
     String[] selectedBodySchemes;
     String[] sensationTypes;
     private String[] colorsSymptoms;
-
+    private String instructionsPath;
     String textScaleMax;
     String textScaleMin;
+
 
     public String getConfigName() {
         return configName;
@@ -52,6 +53,7 @@ public class Configuration {
         this.sensationTypes = iniPreference.node(this.configName).get("sensation_types", "").split(", ");
         this.colorsSymptoms = iniPreference.node(this.configName).get("colors_symptoms", "").split(", ");
         this.bodySchemes = iniPreference.node(this.configName).get("body_schemes", "").split(", ");
+        this.instructionsPath = iniPreference.node(this.configName).get("instructions", "instructions.png");
         this.textScaleMax = iniPreference.node(this.configName).get("text_scale_max", "");
         this.textScaleMin = iniPreference.node(this.configName).get("text_scale_min", "");
         this.formBodySchemes(selectedSubjectBodyScheme);
@@ -154,10 +156,18 @@ public class Configuration {
                 DrawFragment.SaveSnapshotTask.doInBackground(resourceImage, body_figures_folder, completeListOfBodyFigure + ".png");
             }
 
-            // Add default text labels for the scale
+            // Add default instructions image
             writer.append("\n" +
-                    "text_scale_max = max\n" +
-                    "text_scale_min = min");
+                    "instructions = instructions.png\n");
+            File instructions = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+                    "SMaRT/config/instructions.png");
+            @SuppressLint("DiscouragedApi") final int resourceId = context.getResources().getIdentifier("instructions",
+                    "drawable", context.getPackageName());
+            Bitmap resourceImage = BitmapFactory.decodeResource(context.getResources(), resourceId);
+            DrawFragment.SaveSnapshotTask.doInBackground(resourceImage, instructions.getParentFile(), instructions.getName());
+
+            // Add default text labels for the scale
+            writer.append("text_scale_max = max\n" + "text_scale_min = min");
 
             writer.flush();
             writer.close();
@@ -178,5 +188,10 @@ public class Configuration {
 
     public String getTextMax() {
         return textScaleMax;
+    }
+
+    public String getInstructionsPath() {
+        return instructionsPath;
+
     }
 }
