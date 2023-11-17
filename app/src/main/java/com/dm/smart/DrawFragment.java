@@ -43,6 +43,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -306,6 +307,45 @@ public class DrawFragment extends Fragment {
                         break;
                     }
                 }
+            }
+
+            // Create a txt file, put allStepsFront and allStepsBack in it
+            StringBuilder allStepsFront = new StringBuilder();
+            StringBuilder allStepsBack = new StringBuilder();
+            for (int i = 0; i < createdWindows; i++) {
+                CanvasFragment cf =
+                        (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
+                if (cf != null) {
+                    for (int j = 0; j < cf.bodyViewFront.steps.size(); j++) {
+                        allStepsFront.append(cf.selectedSensations).append(": ");
+                        allStepsFront.append(cf.bodyViewFront.steps.get(j).intensity_mark).append(" (color: ");
+                        int color = cf.bodyViewFront.steps.get(j).brush.paint.getColor();
+                        String color16bit = String.format("#%08X", color);
+                        allStepsFront.append(color16bit).append(")\n");
+                    }
+                    allStepsFront.append("\n");
+                    for (int j = 0; j < cf.bodyViewBack.steps.size(); j++) {
+                        allStepsBack.append(cf.selectedSensations).append(": ");
+                        allStepsBack.append(cf.bodyViewBack.steps.get(j).intensity_mark).append(" (color: ");
+                        int color = cf.bodyViewBack.steps.get(j).brush.paint.getColor();
+                        String color16bit = String.format("#%08X", color);
+                        allStepsBack.append(color16bit).append(")\n");
+                    }
+                    allStepsBack.append("\n");
+                }
+            }
+            File gpxfile = new File(directory, "steps.txt");
+            FileWriter writer;
+            try {
+                writer = new FileWriter(gpxfile);
+                writer.append("Front\n");
+                writer.append(allStepsFront);
+                writer.append("Back\n");
+                writer.append(allStepsBack);
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
 
             Bitmap merged_f = Bitmap.createBitmap(width, height, config);

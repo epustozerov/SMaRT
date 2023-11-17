@@ -59,7 +59,7 @@
         Legen Sie eine/n neue/n Patient:in an oder wählen Sie eine andere Konfiguration.</string>
 
     <!-- Menu -->
-    <string name="menu_remove_subject">Ausgewählte Proband:in und ihre Daten entfernen</string>
+    <string name="menu_remove_subject">Proband:in und zugehörige Daten entfernen</string>
     <string name="menu_change_name">Name der/des Proband:in ändern</string>
     <string name="menu_remove_record">Ausgewählten Datensatz entfernen</string>
     <string name="menu_show_image">Übersicht anzeigen</string>
@@ -68,10 +68,9 @@
     <string name="menu_instructions">Anweisungen</string>
     <string name="menu_show_instructions">Anweisungen vor den Aufnahmen anzeigen</string>
     <string name="menu_request_password">Passwort nach der Aufnahme anfordern</string>
-    <string name="menu_show_names">Proband:inennamen anzeigen</string>
+    <string name="menu_show_names">Proband:innennamen anzeigen</string>
     <string name="menu_custom_config">Benutzerdefinierte Konfiguration verwenden</string>
-    <string name="menu_selected_config">Konf
-        ig-Profil:</string>
+    <string name="menu_selected_config">Konfig-Profil:</string>
     <string name="menu_selected_config_default">Konfig-Profil: Built-in</string>
     <string name="menu_imprint">Impressum</string>
     <string name="menu_privacy">Datenschutz</string>

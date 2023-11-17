@@ -562,7 +562,7 @@ public class CanvasFragment extends Fragment {
         });
 
         intensityScale.setOnColorChangeListener((progress, color) -> {
-            currentBodyView.setIntensity(color);
+            currentBodyView.setIntensity(progress, color);
             currentIntensity = color;
             if (currentBrushId != lastBrushId) {
                 toolsBtns.get(eraserId).setPressed(false);

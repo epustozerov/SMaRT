@@ -118,11 +118,18 @@ public class MainActivity extends AppCompatActivity {
                         return false;
                     } else {
                         if (sharedPref.getBoolean(getString(R.string.sp_show_instructions), false)) {
-                            assert configuration != null;
-                            android.app.AlertDialog alertDialog = CustomAlertDialogs.showInstructions(this, true,
-                                    new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-                                            "SMaRT/config/" + configuration.getInstructionsPath()));
-                            alertDialog.show();
+                            if (!sharedPref.getBoolean(getString(R.string.sp_custom_config), false)) {
+                                android.app.AlertDialog alertDialog =
+                                        CustomAlertDialogs.showInstructions(this, false, null);
+                                alertDialog.show();
+                            } else {
+                                assert configuration != null;
+                                android.app.AlertDialog alertDialog =
+                                        CustomAlertDialogs.showInstructions(this, true,
+                                                new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+                                                        "SMaRT/config/" + configuration.getInstructionsPath()));
+                                alertDialog.show();
+                            }
                         }
                         return NavigationUI.onNavDestinationSelected(item, navController);
                     }
@@ -245,6 +252,10 @@ public class MainActivity extends AppCompatActivity {
                 // set the uri to Documents folder
                 Uri uri = Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getPath());
                 pickConfig(uri);
+            } else {
+                editor.putString(getString(R.string.sp_selected_config), "Built-in");
+                editor.apply();
+                invalidateOptionsMenu();
             }
 
             NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);

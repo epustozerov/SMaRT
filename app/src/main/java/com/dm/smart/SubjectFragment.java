@@ -132,7 +132,7 @@ public class SubjectFragment extends Fragment {
             MainActivity.currentlySelectedSubject = extractSubjectFromTheDB(cursorSingleSubject);
             cursorSingleSubject.close();
             DBAdapter.close();
-            populateListRecords();
+            populateListRecords(false);
         });
 
         // RecyclerView for Records
@@ -168,11 +168,11 @@ public class SubjectFragment extends Fragment {
                 MainActivity.currentlySelectedSubject = new_subject;
                 edittextPatientName.setText("");
                 populateListSubjects();
-                populateListRecords();
+                populateListRecords(false);
             }
         });
         populateListSubjects();
-        populateListRecords();
+        populateListRecords(false);
         return mView;
     }
 
@@ -185,14 +185,19 @@ public class SubjectFragment extends Fragment {
         DBAdapter.close();
     }
 
-    public void populateListRecords() {
+    @SuppressLint("NotifyDataSetChanged")
+    public void populateListRecords(boolean noSelection) {
         records.clear();
-        DBAdapter DBAdapter = new DBAdapter(requireActivity());
-        DBAdapter.open();
-        Cursor cursorRecords =
-                DBAdapter.getRecordsSingleSubject(MainActivity.currentlySelectedSubject.getId());
-        updateArrayRecords(cursorRecords);
-        DBAdapter.close();
+        if (!noSelection) {
+            DBAdapter DBAdapter = new DBAdapter(requireActivity());
+            DBAdapter.open();
+            Cursor cursorRecords =
+                    DBAdapter.getRecordsSingleSubject(MainActivity.currentlySelectedSubject.getId());
+            updateArrayRecords(cursorRecords);
+            DBAdapter.close();
+        } else {
+            adapterRecords.notifyDataSetChanged();
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -319,9 +324,15 @@ public class SubjectFragment extends Fragment {
                             DBAdapter.deleteSubject(selectedSubject.getId());
                             DBAdapter.close();
                             subjects.remove(selectedSubject);
-                            records.clear();
-                            populateListSubjects();
-                            populateListRecords();
+                            if (subjects.size() > 0) {
+                                MainActivity.currentlySelectedSubject = subjects.get(0);
+                                populateListSubjects();
+                                populateListRecords(false);
+                            } else {
+                                populateListSubjects();
+                                populateListRecords(true);
+                            }
+
                         })
                 .setNegativeButton(getResources().getString(R.string.dialog_no),
                         (dialog, id) -> {
@@ -364,7 +375,7 @@ public class SubjectFragment extends Fragment {
                             DBAdapter.open();
                             DBAdapter.deleteRecord(selectedRecord.getId());
                             DBAdapter.close();
-                            populateListRecords();
+                            populateListRecords(false);
                         })
                 .setNegativeButton(getResources().getString(R.string.dialog_no),
                         (dialog, id) -> {
@@ -423,6 +434,6 @@ public class SubjectFragment extends Fragment {
         boolean show_names = sharedPref.getBoolean(getString(R.string.sp_show_names), false);
         adapterSubjects.setShowNames(show_names);
         populateListSubjects();
-        populateListRecords();
+        populateListRecords(false);
     }
 }

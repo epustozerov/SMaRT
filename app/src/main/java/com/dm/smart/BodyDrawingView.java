@@ -50,6 +50,7 @@ public class BodyDrawingView extends View {
     private int intensity = -1;
     private CanvasFragment.Brush brush = null;
     private boolean allowOutsideDrawing;
+    private int intensity_mark = 0;
 
     public BodyDrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -191,6 +192,11 @@ public class BodyDrawingView extends View {
 
     public void setMaskImage(Bitmap maskImage) {
         this.maskImage = maskImage;
+    }
+
+    public void setIntensity(int progress, int intensity) {
+        this.intensity_mark = progress;
+        this.intensity = intensity;
     }
 
     public void setIntensity(int intensity) {
@@ -373,6 +379,7 @@ public class BodyDrawingView extends View {
 
                 Step step = new Step();
                 step.brush = new CanvasFragment.Brush(brush);
+                step.intensity_mark = intensity_mark;
 
                 step.brush.paint.setColor(intensity);
                 step.brush.drawOutside = allowOutsideDrawing;
@@ -390,6 +397,7 @@ public class BodyDrawingView extends View {
 
                 Step step = new Step();
                 step.brush = brush;
+                step.intensity_mark = intensity_mark;
             }
         }
         invalidate();
@@ -404,5 +412,6 @@ public class BodyDrawingView extends View {
 
         CanvasFragment.Brush brush;
         Path path;
+        int intensity_mark;
     }
 }
