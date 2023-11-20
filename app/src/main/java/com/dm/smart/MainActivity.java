@@ -49,9 +49,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            verifyStoragePermissions(this);
-        }
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
 
         // Config
@@ -195,21 +192,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_instructions) {
-            String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
-            String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
-            Configuration configuration = new Configuration(configPath, configName);
-            try {
-                configuration.formConfig(this, "neutral");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            // if custom config is selected, show the instructions from the custom config
+            if (!sharedPref.getBoolean(getString(R.string.sp_custom_config), false)) {
+                android.app.AlertDialog alertDialog = CustomAlertDialogs.showInstructions(this, false, null);
+                alertDialog.show();
+            } else {
+                String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
+                String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
+                Configuration configuration = new Configuration(configPath, configName);
+                try {
+                    configuration.formConfig(this, "neutral");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                String instructionsPath = configuration.getInstructionsPath();
+                File instructionsFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+                        "SMaRT/config/" + instructionsPath);
+                android.app.AlertDialog alertDialog = CustomAlertDialogs.showInstructions(this, true, instructionsFile);
+                alertDialog.show();
             }
-            String instructionsPath = configuration.getInstructionsPath();
-            File instructionsFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-                    "SMaRT/config/" + instructionsPath);
-            android.app.AlertDialog alertDialog = CustomAlertDialogs.showInstructions(this, true, instructionsFile);
-            alertDialog.show();
-            return true;
-        } else if (item.getItemId() == R.id.menu_show_instructions) {
+        }
+        if (item.getItemId() == R.id.menu_show_instructions) {
             item.setChecked(!item.isChecked());
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putBoolean(getString(R.string.sp_show_instructions), item.isChecked());
@@ -244,16 +247,19 @@ public class MainActivity extends AppCompatActivity {
             }
         } else if (item.getItemId() == R.id.menu_custom_config) {
             String pref = getString(R.string.sp_custom_config);
-            item.setChecked(!item.isChecked());
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean(pref, item.isChecked());
-            editor.apply();
-            if (item.isChecked()) {
+            if (!item.isChecked()) {
                 // set the uri to Documents folder
                 Uri uri = Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getPath());
                 pickConfig(uri);
+                item.setChecked(true);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean(pref, item.isChecked());
+                editor.apply();
             } else {
+                item.setChecked(false);
+                SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putString(getString(R.string.sp_selected_config), "Built-in");
+                editor.putBoolean(pref, item.isChecked());
                 editor.apply();
                 invalidateOptionsMenu();
             }
@@ -262,27 +268,28 @@ public class MainActivity extends AppCompatActivity {
             navController.navigate(R.id.navigation_subject);
 
         } else if (item.getItemId() == R.id.menu_selected_config) {
-            // open the selected config file
-            String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
-            try {
-                ContentResolver contentResolver = getContentResolver();
-                IniPreferences iniPreference = new IniPreferences(new Ini(contentResolver.openInputStream(Uri.parse(configPath))));
-                String[] configNames = iniPreference.childrenNames();
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(R.string.dialog_select_config);
-                builder.setItems(configNames, (dialog, which) -> {
-                    String configName = configNames[which];
-                    SharedPreferences.Editor editor = sharedPref.edit();
-                    editor.putString(getString(R.string.sp_selected_config), configName);
-                    editor.apply();
-                    invalidateOptionsMenu();
-                    NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-                    navController.navigate(R.id.navigation_subject);
-                });
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            } catch (IOException | BackingStoreException e) {
-                throw new RuntimeException(e);
+            if (sharedPref.getBoolean(getString(R.string.sp_custom_config), false)) {
+                String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
+                try {
+                    ContentResolver contentResolver = getContentResolver();
+                    IniPreferences iniPreference = new IniPreferences(new Ini(contentResolver.openInputStream(Uri.parse(configPath))));
+                    String[] configNames = iniPreference.childrenNames();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle(R.string.dialog_select_config);
+                    builder.setItems(configNames, (dialog, which) -> {
+                        String configName = configNames[which];
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putString(getString(R.string.sp_selected_config), configName);
+                        editor.apply();
+                        invalidateOptionsMenu();
+                        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+                        navController.navigate(R.id.navigation_subject);
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                } catch (IOException | BackingStoreException e) {
+                    throw new RuntimeException(e);
+                }
             }
         } else if (item.getItemId() == R.id.menu_imprint) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);

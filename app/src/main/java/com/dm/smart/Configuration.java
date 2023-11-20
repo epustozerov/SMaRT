@@ -17,9 +17,9 @@ import org.ini4j.IniPreferences;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -70,25 +70,28 @@ public class Configuration {
 
     public static void checkConfigFolder() {
         File configFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-                "SMaRT/config");
+                "SMaRT/config_sample");
         if (!configFolder.exists()) {
             //noinspection ResultOfMethodCallIgnored
             configFolder.mkdirs();
         }
     }
 
-    public static void initConfig(Context context) throws IOException {
-        File configFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-                "SMaRT/config/config.ini");
-        File folderImages = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-                "SMaRT/config/body_figures");
-        if (!configFile.exists() || !folderImages.exists() || Objects.requireNonNull(folderImages.listFiles()).length == 0) {
-            // remove old config file
-            if (configFile.exists()) {
+    public static void initConfig(Context context) {
+        File configFolder = new File(
+                String.valueOf(Paths.get(String.valueOf(Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_DOCUMENTS)), "SMaRT", "config_sample")));
+        File configFile = new File(configFolder, "config.ini");
+        if (!configFile.exists()) {
+
+            // Create folder for default body figures
+            File bodyFiguresFolder = new File(configFolder,
+                    "body_figures");
+            if (!bodyFiguresFolder.exists()) {
                 //noinspection ResultOfMethodCallIgnored
-                configFile.delete();
+                bodyFiguresFolder.mkdirs();
             }
-            FileWriter writer = new FileWriter(configFile);
+
             StringBuilder config_body = new StringBuilder("[Default]\n" +
                     "sensation_types = ");
 
@@ -124,15 +127,9 @@ public class Configuration {
             config_body.deleteCharAt(config_body.length() - 2);
             config_body.deleteCharAt(config_body.length() - 1);
 
-            // Create folder for default body figures
-            File body_figures_folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-                    "SMaRT/config/body_figures");
-            if (!body_figures_folder.exists()) {
-                //noinspection ResultOfMethodCallIgnored
-                body_figures_folder.mkdirs();
-            }
-            writer.append(config_body.toString());
-
+            config_body.append("\n" +
+                    "instructions = instructions.png\n");
+            config_body.append("text_scale_max = max\n" + "text_scale_min = min");
 
             String[] completeListOfBodyFigures = new String[12];
             completeListOfBodyFigures[0] = "body_female_front";
@@ -153,24 +150,32 @@ public class Configuration {
                 @SuppressLint("DiscouragedApi") final int resourceId = resources.getIdentifier(completeListOfBodyFigure, "drawable",
                         context.getPackageName());
                 Bitmap resourceImage = BitmapFactory.decodeResource(context.getResources(), resourceId);
-                DrawFragment.SaveSnapshotTask.doInBackground(resourceImage, body_figures_folder, completeListOfBodyFigure + ".png");
+                DrawFragment.SaveSnapshotTask.doInBackground(resourceImage, bodyFiguresFolder, completeListOfBodyFigure + ".png");
             }
 
-            // Add default instructions image
-            writer.append("\n" +
-                    "instructions = instructions.png\n");
-            File instructions = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-                    "SMaRT/config/instructions.png");
+
+            File instructions = new File(configFolder,
+                    "instructions.png");
             @SuppressLint("DiscouragedApi") final int resourceId = context.getResources().getIdentifier("instructions",
                     "drawable", context.getPackageName());
             Bitmap resourceImage = BitmapFactory.decodeResource(context.getResources(), resourceId);
             DrawFragment.SaveSnapshotTask.doInBackground(resourceImage, instructions.getParentFile(), instructions.getName());
 
-            // Add default text labels for the scale
-            writer.append("text_scale_max = max\n" + "text_scale_min = min");
+            FileWriter writer;
+            try {
+                // check if config file exists
+                if (!configFile.exists()) {
+                    //noinspection ResultOfMethodCallIgnored
+                    configFile.createNewFile();
+                }
+                writer = new FileWriter(configFile);
+                writer.append(config_body.toString());
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-            writer.flush();
-            writer.close();
         }
     }
 

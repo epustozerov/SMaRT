@@ -282,6 +282,7 @@ public class DrawFragment extends Fragment {
                         String.valueOf(patient_id), String.valueOf(recordCount + 1))));
         if (!directory.exists()) //noinspection ResultOfMethodCallIgnored
             directory.mkdirs();
+        String baseName = patient_id + "_" + (recordCount + 1);
 
         // Save all the images
         if (createdWindows > 0) {
@@ -334,10 +335,11 @@ public class DrawFragment extends Fragment {
                     allStepsBack.append("\n");
                 }
             }
-            File gpxfile = new File(directory, "steps.txt");
+            // create a txt file, overwrite automatically if it exists
+            File textFile = new File(directory, baseName + ".txt");
             FileWriter writer;
             try {
-                writer = new FileWriter(gpxfile);
+                writer = new FileWriter(textFile);
                 writer.append("Front\n");
                 writer.append(allStepsFront);
                 writer.append("Back\n");
@@ -345,7 +347,7 @@ public class DrawFragment extends Fragment {
                 writer.flush();
                 writer.close();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                // do nothing
             }
 
             Bitmap merged_f = Bitmap.createBitmap(width, height, config);
@@ -362,30 +364,34 @@ public class DrawFragment extends Fragment {
                 CanvasFragment cf =
                         (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
                 assert cf != null;
-                StringBuilder file_name_sensations = new StringBuilder();
-                for (int j = 0; j < cf.selectedSensations.size(); j++) {
-                    file_name_sensations.append(cf.selectedSensations.get(j)).append("_");
-                }
                 SaveSnapshotTask.doInBackground(
-                        cf.bodyViewFront.snapshot, directory, i + "_" + file_name_sensations + "f.png");
+                        cf.bodyViewFront.snapshot, directory, baseName + "_" + (i + 1) + "_f.png");
                 SaveSnapshotTask.doInBackground(
-                        cf.bodyViewBack.snapshot, directory, i + "_" + file_name_sensations + "b.png");
+                        cf.bodyViewBack.snapshot, directory, baseName + "_" + (i + 1) + "_b.png");
                 if (cf.bodyViewFront.snapshot != null)
                     canvasMergedFront.drawBitmap(cf.bodyViewFront.snapshot, 0f, 0f, null);
                 if (cf.bodyViewBack.snapshot != null)
                     canvasMergedBack.drawBitmap(cf.bodyViewBack.snapshot, 0f, 0f, null);
             }
-            SaveSnapshotTask.doInBackground(merged_f, directory, "merged_sensations_f.png");
-            SaveSnapshotTask.doInBackground(merged_b, directory, "merged_sensations_b.png");
+            SaveSnapshotTask.doInBackground(merged_f, directory, baseName + "_f.png");
+            SaveSnapshotTask.doInBackground(merged_b, directory, baseName + "_b.png");
             assert cf_base != null;
             Bitmap full_f = makeFullPicture(merged_f, cf_base.bodyViewFront.backgroundImage, sensations.toString());
-            SaveSnapshotTask.doInBackground(full_f, directory, "complete_picture_f.png");
+            SaveSnapshotTask.doInBackground(full_f, directory, baseName + "_fig_f.png");
             Bitmap full_b = makeFullPicture(merged_b, cf_base.bodyViewBack.backgroundImage, sensations.toString());
-            SaveSnapshotTask.doInBackground(full_b, directory, "complete_picture_b.png");
+            SaveSnapshotTask.doInBackground(full_b, directory, baseName + "_fig_b.png");
             endTime = SystemClock.elapsedRealtime();
             elapsedMilliSeconds = endTime - startTime;
             elapsedSeconds = elapsedMilliSeconds / 1000.0;
             Log.e("STORAGE", "Finalization elapsed time: " + elapsedSeconds);
+
+            // Config
+            Configuration.checkConfigFolder();
+            try {
+                Configuration.initConfig(requireActivity());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

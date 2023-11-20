@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -39,6 +40,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.dm.smart.items.Record;
 import com.dm.smart.items.Subject;
+import com.dm.smart.ui.elements.CustomAlertDialogs;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +50,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class SubjectFragment extends Fragment {
@@ -57,6 +60,8 @@ public class SubjectFragment extends Fragment {
     boolean currentViewFront;
     private ArrayList<Subject> subjects;
     private ArrayList<Record> records;
+    boolean showNames;
+    SharedPreferences sharedPref;
 
     static Subject extractSubjectFromTheDB(Cursor cursor) {
         @SuppressLint("Range") int id = cursor.getInt(cursor.
@@ -80,8 +85,8 @@ public class SubjectFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         // Read shared preference to shown subjects' names
-        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
-        boolean showNames = sharedPref.getBoolean(getString(R.string.sp_show_names), false);
+        sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        showNames = sharedPref.getBoolean(getString(R.string.sp_show_names), false);
         View mView = inflater.inflate(R.layout.fragment_subject, container, false);
 
         // Spinner for body scheme selection
@@ -244,7 +249,15 @@ public class SubjectFragment extends Fragment {
             showDeleteSubjectDialog();
             return true;
         } else if (item.getItemId() == SUBJECT_CHANGE_NAME) {
+            // if the option to show names is not on, show the password dialog
             showChangeNameDialog();
+            if (!showNames) {
+                android.app.AlertDialog alertDialog =
+                        CustomAlertDialogs.requestPassword(getActivity(), null, null, null);
+                alertDialog.show();
+                Objects.requireNonNull(alertDialog.getWindow()).setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT);
+            }
             return true;
         } else if (item.getItemId() == RECORD_DELETE) {
             showDeleteRecordDialog();
@@ -256,7 +269,7 @@ public class SubjectFragment extends Fragment {
             try {
                 showMergedImageDialog();
             } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
             return true;
         }
@@ -270,19 +283,27 @@ public class SubjectFragment extends Fragment {
         Subject selectedSubject = subjects.get(adapterSubjects.selectedSubjectPosition);
         File imageSensationsFront = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
-                + "/" + selectedRecord.getN() + "/complete_picture_f.png");
+                + "/" + selectedRecord.getN() + "/" + selectedSubject.getId() + "_" + selectedRecord.getN() + "_fig_f.png");
         File imageSensationsBack = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
-                + "/" + selectedRecord.getN() + "/complete_picture_b.png");
+                + "/" + selectedRecord.getN() + "/" + selectedSubject.getId() + "_" + selectedRecord.getN() + "_fig_b.png");
+        // take a txt file with sensations
+        File textFile = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
+                + "/" + selectedRecord.getN() + "/" + selectedSubject.getId() + "_" + selectedRecord.getN() + ".txt");
         Uri imageSensationsFrontUri = FileProvider.getUriForFile(requireActivity(),
                 BuildConfig.APPLICATION_ID + ".provider",
                 imageSensationsFront);
         Uri imageSensationsBackUri = FileProvider.getUriForFile(requireActivity(),
                 BuildConfig.APPLICATION_ID + ".provider",
                 imageSensationsBack);
+        Uri textSensationsUri = FileProvider.getUriForFile(requireActivity(),
+                BuildConfig.APPLICATION_ID + ".provider",
+                textFile);
         ArrayList<Uri> imageUris = new ArrayList<>();
         imageUris.add(imageSensationsFrontUri);
         imageUris.add(imageSensationsBackUri);
+        imageUris.add(textSensationsUri);
         Intent shareIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         shareIntent.setType("image/png");
         shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
@@ -394,17 +415,13 @@ public class SubjectFragment extends Fragment {
                 adapterRecords.getItem(adapterRecords.selectedRecordPosition);
         DBAdapter DBAdapter = new DBAdapter(requireActivity());
         DBAdapter.open();
-        Cursor cursorSingleSubject =
-                DBAdapter.getSubjectById(selectedRecord.getSubjectId());
-        cursorSingleSubject.moveToFirst();
-        Subject selectedSubject = subjects.get(adapterSubjects.selectedSubjectPosition);
-        cursorSingleSubject.close();
+        int selectedSubjectId = selectedRecord.getSubjectId();
         File imageSensationsFront = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
-                + "/" + selectedRecord.getN() + "/complete_picture_f.png");
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubjectId
+                + "/" + selectedRecord.getN() + "/" + selectedSubjectId + "_" + selectedRecord.getN() + "_fig_f.png");
         File imageSensationsBack = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
-                + "/" + selectedRecord.getN() + "/complete_picture_b.png");
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubjectId
+                + "/" + selectedRecord.getN() + "/" + selectedSubjectId + "_" + selectedRecord.getN() + "_fig_b.png");
         Log.e("PATH", imageSensationsFront.getAbsolutePath());
         Bitmap sensationsFront = BitmapFactory.decodeFile(imageSensationsFront.getAbsolutePath());
         Bitmap sensationsBack = BitmapFactory.decodeFile(imageSensationsBack.getAbsolutePath());
