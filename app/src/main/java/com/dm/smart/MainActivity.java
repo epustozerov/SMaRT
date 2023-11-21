@@ -68,10 +68,15 @@ public class MainActivity extends AppCompatActivity {
             try {
                 configuration.formConfig(this, "neutral");
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                // Switch to built-in config
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean(getString(R.string.sp_custom_config), false);
+                editor.putString(getString(R.string.sp_selected_config), "Built-in");
+                editor.apply();
             }
         } else {
             configuration = null;
+
         }
 
 
@@ -180,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
         }
         // update the text on the selected config menu item
         String selectedConfig = sharedPref.getString(getString(R.string.sp_selected_config), "");
-        if (selectedConfig.equals("")) {
+        if (selectedConfig.equals("") || !customConfig) {
             menu.findItem(R.id.menu_selected_config).setTitle(getString(R.string.menu_selected_config_default));
         } else {
             menu.findItem(R.id.menu_selected_config).setTitle(getString(R.string.menu_selected_config) + " " + selectedConfig);
