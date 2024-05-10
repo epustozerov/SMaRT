@@ -55,6 +55,11 @@
     <string name="dialog_config_mismatch">The selected config doesn\'t match the subject\'s setting\n
         Create a new patient or choose another configuration.
     </string>
+    <string name="dialog_config_no_scheme">One or more body schemes specified in the config is not presented
+        in the "SMaRT/config/body_schemes" folder.\n
+        Please check the configuration file and the folder content.\n
+        The app will use the default configuration.
+    </string>
 
     <string name="menu_remove_subject">Remove selected subject and their records</string>
     <string name="menu_change_name">Change subject\'s name</string>

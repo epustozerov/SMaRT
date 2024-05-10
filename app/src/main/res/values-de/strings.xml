@@ -57,6 +57,11 @@
     <string name="dialog_select_config">Konfiguration auswählen</string>
     <string name="dialog_config_mismatch">Die gewählte Konfiguration stimmt nicht mit den Einstellungen der/des Proband:in überein.\n
         Legen Sie eine/n neue/n Patient:in an oder wählen Sie eine andere Konfiguration.</string>
+    <string name="dialog_config_no_scheme">Ein oder mehrere in der Konfiguration angegebene Körperschemata werden nicht
+        im Ordner "SMaRT/config/body_schemes" enthalten.\n
+        Bitte überprüfen Sie die Konfigurationsdatei und den Inhalt des Ordners.\n
+        Die App wird die Standardkonfiguration verwenden.
+    </string>
 
     <!-- Menu -->
     <string name="menu_remove_subject">Proband:in und zugehörige Daten entfernen</string>

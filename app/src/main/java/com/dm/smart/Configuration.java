@@ -1,15 +1,11 @@
 package com.dm.smart;
 
 import android.annotation.SuppressLint;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Environment;
-
-import androidx.fragment.app.FragmentActivity;
 
 import org.ini4j.Ini;
 import org.ini4j.IniPreferences;
@@ -46,10 +42,9 @@ public class Configuration {
         this.configName = configName;
     }
 
-    public void formConfig(FragmentActivity fragmentActivity, String selectedSubjectBodyScheme) throws IOException {
+    public void formConfig(String selectedSubjectBodyScheme) throws IOException {
         IniPreferences iniPreference;
-        ContentResolver contentResolver = fragmentActivity.getContentResolver();
-        iniPreference = new IniPreferences(new Ini(contentResolver.openInputStream(Uri.parse(this.configPath))));
+        iniPreference = new IniPreferences(new Ini(new File(this.configPath)));
         this.sensationTypes = iniPreference.node(this.configName).get("sensation_types", "").split(", ");
         this.colorsSymptoms = iniPreference.node(this.configName).get("colors_symptoms", "").split(", ");
         this.bodySchemes = iniPreference.node(this.configName).get("body_schemes", "").split(", ");
@@ -68,114 +63,121 @@ public class Configuration {
         this.selectedBodySchemes[3] = "body_" + bodyScheme + "_back_mask.png";
     }
 
-    public static void checkConfigFolder() {
-        File configFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-                "SMaRT/config_sample");
-        if (!configFolder.exists()) {
+
+    public static void initDefaultConfig(Context context) {
+
+        File configFolder = context.getFilesDir();
+        File configFile = new File(configFolder, "config.ini");
+        if (!configFile.exists()) {
+            createConfigFile(context, configFolder, configFile);
+        }
+        // Create the copy of the default config file in the external storage
+        File configFolderOut = new File(
+                String.valueOf(Paths.get(String.valueOf(Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_DOCUMENTS)), "SMaRT", "config_sample")));
+        if (!configFolderOut.exists()) {
             //noinspection ResultOfMethodCallIgnored
-            configFolder.mkdirs();
+            configFolderOut.mkdirs();
+        }
+        File configFileOut = new File(configFolderOut, "config.ini");
+        if (!configFileOut.exists()) {
+            createConfigFile(context, configFolderOut, configFileOut);
         }
     }
 
-    public static void initConfig(Context context) {
-        File configFolder = new File(
-                String.valueOf(Paths.get(String.valueOf(Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_DOCUMENTS)), "SMaRT", "config_sample")));
-        File configFile = new File(configFolder, "config.ini");
-        if (!configFile.exists()) {
+    private static void createConfigFile(Context context, File configFolder, File configFile) {
 
-            // Create folder for default body figures
-            File bodyFiguresFolder = new File(configFolder,
-                    "body_figures");
-            if (!bodyFiguresFolder.exists()) {
-                //noinspection ResultOfMethodCallIgnored
-                bodyFiguresFolder.mkdirs();
-            }
+        // Create folder for default body figures
+        File bodyFiguresFolder = new File(configFolder,
+                "body_figures");
+        if (!bodyFiguresFolder.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            bodyFiguresFolder.mkdirs();
+        }
 
-            StringBuilder config_body = new StringBuilder("[Default]\n" +
-                    "sensation_types = ");
+        StringBuilder config_body = new StringBuilder("[Default]\n" +
+                "sensation_types = ");
 
-            // Add default sensations from the sting list stored in string.xml file
-            String[] sensations = context.getResources().getStringArray(R.array.sensation_types);
-            for (String sensation : sensations) {
-                config_body.append(sensation).append(", ");
-            }
-            config_body.deleteCharAt(config_body.length() - 2);
-            config_body.deleteCharAt(config_body.length() - 1);
+        // Add default sensations from the sting list stored in string.xml file
+        String[] sensations = context.getResources().getStringArray(R.array.sensation_types);
+        for (String sensation : sensations) {
+            config_body.append(sensation).append(", ");
+        }
+        config_body.deleteCharAt(config_body.length() - 2);
+        config_body.deleteCharAt(config_body.length() - 1);
 
-            // Add default colors to the config file
-            config_body.append("\n" +
-                    "colors_symptoms = ");
-            List<Integer> colors = Arrays.stream(context.getResources().
-                    getIntArray(R.array.colors_symptoms)).boxed().collect(Collectors.toList());
-            for (Integer color : colors) {
-                String hex = String.format("#%06X", (0xFFFFFF & color));
-                config_body.append(hex).append(", ");
-            }
-            config_body.deleteCharAt(config_body.length() - 2);
-            config_body.deleteCharAt(config_body.length() - 1);
+        // Add default colors to the config file
+        config_body.append("\n" +
+                "colors_symptoms = ");
+        List<Integer> colors = Arrays.stream(context.getResources().
+                getIntArray(R.array.colors_symptoms)).boxed().collect(Collectors.toList());
+        for (Integer color : colors) {
+            String hex = String.format("#%06X", (0xFFFFFF & color));
+            config_body.append(hex).append(", ");
+        }
+        config_body.deleteCharAt(config_body.length() - 2);
+        config_body.deleteCharAt(config_body.length() - 1);
 
-            // Iterate through schemes from body_figures.xml
-            config_body.append("\n" +
-                    "body_schemes = ");
-            List<String> body_figures = Arrays.stream(context.getResources().
-                    getStringArray(R.array.body_figures)).collect(Collectors.toList());
-            for (String body_figure : body_figures) {
-                body_figure = body_figure.substring(body_figure.lastIndexOf("_") + 1);
-                config_body.append(body_figure).append(", ");
-            }
-            config_body.deleteCharAt(config_body.length() - 2);
-            config_body.deleteCharAt(config_body.length() - 1);
+        // Iterate through schemes from body_figures.xml
+        config_body.append("\n" +
+                "body_schemes = ");
+        List<String> body_figures = Arrays.stream(context.getResources().
+                getStringArray(R.array.body_figures)).collect(Collectors.toList());
+        for (String body_figure : body_figures) {
+            body_figure = body_figure.substring(body_figure.lastIndexOf("_") + 1);
+            config_body.append(body_figure).append(", ");
+        }
+        config_body.deleteCharAt(config_body.length() - 2);
+        config_body.deleteCharAt(config_body.length() - 1);
 
-            config_body.append("\n" +
-                    "instructions = instructions.png\n");
-            config_body.append("text_scale_max = max\n" + "text_scale_min = min");
+        config_body.append("\n" +
+                "instructions = instructions.png\n");
+        config_body.append("text_scale_max = max\n" + "text_scale_min = min");
 
-            String[] completeListOfBodyFigures = new String[12];
-            completeListOfBodyFigures[0] = "body_female_front";
-            completeListOfBodyFigures[1] = "body_female_front_mask";
-            completeListOfBodyFigures[2] = "body_female_back";
-            completeListOfBodyFigures[3] = "body_female_back_mask";
-            completeListOfBodyFigures[4] = "body_male_front";
-            completeListOfBodyFigures[5] = "body_male_front_mask";
-            completeListOfBodyFigures[6] = "body_male_back";
-            completeListOfBodyFigures[7] = "body_male_back_mask";
-            completeListOfBodyFigures[8] = "body_neutral_front";
-            completeListOfBodyFigures[9] = "body_neutral_front_mask";
-            completeListOfBodyFigures[10] = "body_neutral_back";
-            completeListOfBodyFigures[11] = "body_neutral_back_mask";
+        String[] completeListOfBodyFigures = new String[12];
+        completeListOfBodyFigures[0] = "body_female_front";
+        completeListOfBodyFigures[1] = "body_female_front_mask";
+        completeListOfBodyFigures[2] = "body_female_back";
+        completeListOfBodyFigures[3] = "body_female_back_mask";
+        completeListOfBodyFigures[4] = "body_male_front";
+        completeListOfBodyFigures[5] = "body_male_front_mask";
+        completeListOfBodyFigures[6] = "body_male_back";
+        completeListOfBodyFigures[7] = "body_male_back_mask";
+        completeListOfBodyFigures[8] = "body_neutral_front";
+        completeListOfBodyFigures[9] = "body_neutral_front_mask";
+        completeListOfBodyFigures[10] = "body_neutral_back";
+        completeListOfBodyFigures[11] = "body_neutral_back_mask";
 
-            for (String completeListOfBodyFigure : completeListOfBodyFigures) {
-                Resources resources = context.getResources();
-                @SuppressLint("DiscouragedApi") final int resourceId = resources.getIdentifier(completeListOfBodyFigure, "drawable",
-                        context.getPackageName());
-                Bitmap resourceImage = BitmapFactory.decodeResource(context.getResources(), resourceId);
-                DrawFragment.SaveSnapshotTask.doInBackground(resourceImage, bodyFiguresFolder, completeListOfBodyFigure + ".png");
-            }
-
-
-            File instructions = new File(configFolder,
-                    "instructions.png");
-            @SuppressLint("DiscouragedApi") final int resourceId = context.getResources().getIdentifier("instructions",
-                    "drawable", context.getPackageName());
+        for (String completeListOfBodyFigure : completeListOfBodyFigures) {
+            Resources resources = context.getResources();
+            @SuppressLint("DiscouragedApi") final int resourceId = resources.getIdentifier(completeListOfBodyFigure, "drawable",
+                    context.getPackageName());
             Bitmap resourceImage = BitmapFactory.decodeResource(context.getResources(), resourceId);
-            DrawFragment.SaveSnapshotTask.doInBackground(resourceImage, instructions.getParentFile(), instructions.getName());
+            DrawFragment.SaveSnapshotTask.doInBackground(resourceImage, bodyFiguresFolder, completeListOfBodyFigure + ".png");
+        }
 
-            FileWriter writer;
-            try {
-                // check if config file exists
-                if (!configFile.exists()) {
-                    //noinspection ResultOfMethodCallIgnored
-                    configFile.createNewFile();
-                }
-                writer = new FileWriter(configFile);
-                writer.append(config_body.toString());
-                writer.flush();
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+
+        File instructions = new File(configFolder,
+                "instructions.png");
+        @SuppressLint("DiscouragedApi") final int resourceId = context.getResources().getIdentifier("instructions",
+                "drawable", context.getPackageName());
+        Bitmap resourceImage = BitmapFactory.decodeResource(context.getResources(), resourceId);
+        DrawFragment.SaveSnapshotTask.doInBackground(resourceImage, instructions.getParentFile(), instructions.getName());
+
+        FileWriter writer;
+        try {
+            // check if config file exists
+            if (!configFile.exists()) {
+                //noinspection ResultOfMethodCallIgnored
+                configFile.createNewFile();
             }
-
+            writer = new FileWriter(configFile);
+            writer.append(config_body.toString());
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            //noinspection CallToPrintStackTrace
+            e.printStackTrace();
         }
     }
 

@@ -119,7 +119,7 @@ public class DrawFragment extends Fragment {
             String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
             configuration = new Configuration(configPath, configName);
             try {
-                configuration.formConfig(requireActivity(), selectedSubjectBodyScheme);
+                configuration.formConfig(selectedSubjectBodyScheme);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -386,10 +386,10 @@ public class DrawFragment extends Fragment {
             Log.e("STORAGE", "Finalization elapsed time: " + elapsedSeconds);
 
             // Config
-            Configuration.checkConfigFolder();
             try {
-                Configuration.initConfig(requireActivity());
+                Configuration.initDefaultConfig(requireActivity());
             } catch (Exception e) {
+                //noinspection CallToPrintStackTrace
                 e.printStackTrace();
             }
         }

@@ -96,7 +96,7 @@ public class SubjectFragment extends Fragment {
         String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
         Configuration configuration = new Configuration(configPath, configName);
         try {
-            configuration.formConfig(requireActivity(), "neutral");
+            configuration.formConfig("neutral");
         } catch (IOException e) {
             // switch off custom config if it is not found
             SharedPreferences.Editor editor = sharedPref.edit();
@@ -152,7 +152,7 @@ public class SubjectFragment extends Fragment {
         Button buttonAddPatients = mView.findViewById(R.id.button_add_subject);
         boolean finalCustomConfig = customConfig;
         buttonAddPatients.setOnClickListener((View view) -> {
-            if (edittextPatientName.getText().toString().equals("")) {
+            if (edittextPatientName.getText().toString().isEmpty()) {
                 Toast toast = Toast.makeText(getContext(), getString(R.string.toast_empty_name), Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.CENTER, 0, 0);
                 toast.show();

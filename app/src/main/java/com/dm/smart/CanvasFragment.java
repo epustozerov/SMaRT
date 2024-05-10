@@ -120,7 +120,7 @@ public class CanvasFragment extends Fragment {
             String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
             configuration = new Configuration(configPath, configName);
             try {
-                configuration.formConfig(requireActivity(), selectedSubjectBodyScheme);
+                configuration.formConfig(selectedSubjectBodyScheme);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -159,7 +159,7 @@ public class CanvasFragment extends Fragment {
 
         // Show current fragment tag
         Log.e("RECREATION", "CanvasFragment");
-        Log.e("SELECTED SENSATIONS", selectedSensations + "");
+        Log.e("SELECTED SENSATIONS", String.valueOf(selectedSensations));
         // Init container with drawn sensations
         // Don't show the default text if there are more than 0 sensations
 
@@ -618,8 +618,8 @@ public class CanvasFragment extends Fragment {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             verifyStoragePermissions(requireActivity());
         }
-        File bitmapFile = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/config/body_figures/" + bodyTypeId);
+        // take the body scheme file from inner app store, filder body_figures
+        File bitmapFile = new File(requireActivity().getFilesDir(), "body_figures/" + bodyTypeId);
         Bitmap sensationsFront = BitmapFactory.decodeFile(bitmapFile.getAbsolutePath());
         if (thumbed) {
             return Bitmap.createScaledBitmap(sensationsFront, 149, 220, true);
