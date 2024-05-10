@@ -170,6 +170,14 @@ public class SubjectFragment extends Fragment {
 
                 new_subject.setId((int) DBAdapter.insertSubject(new_subject));
                 DBAdapter.close();
+                // create a folder for the images
+                File folder = new File(Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + new_subject.getId());
+                if (!folder.exists()) {
+                    //noinspection ResultOfMethodCallIgnored
+                    folder.mkdirs();
+                }
+
                 MainActivity.currentlySelectedSubject = new_subject;
                 edittextPatientName.setText("");
                 populateListSubjects();
@@ -269,6 +277,7 @@ public class SubjectFragment extends Fragment {
             try {
                 showMergedImageDialog();
             } catch (NoSuchFieldException | IllegalAccessException e) {
+                //noinspection CallToPrintStackTrace
                 e.printStackTrace();
             }
             return true;
@@ -345,13 +354,34 @@ public class SubjectFragment extends Fragment {
                             DBAdapter.deleteSubject(selectedSubject.getId());
                             DBAdapter.close();
                             subjects.remove(selectedSubject);
-                            if (subjects.size() > 0) {
+                            if (!subjects.isEmpty()) {
                                 MainActivity.currentlySelectedSubject = subjects.get(0);
                                 populateListSubjects();
                                 populateListRecords(false);
                             } else {
                                 populateListSubjects();
                                 populateListRecords(true);
+                            }
+                            // remove the folder with the images
+                            File folder = new File(Environment.getExternalStoragePublicDirectory(
+                                    Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId());
+                            if (folder.exists()) {
+                                File[] subFolders = folder.listFiles();
+                                if (subFolders != null) {
+                                    for (File subFolder : subFolders) {
+                                        File[] files = subFolder.listFiles();
+                                        if (files != null) {
+                                            for (File file : files) {
+                                                //noinspection ResultOfMethodCallIgnored
+                                                file.delete();
+                                            }
+                                        }
+                                        //noinspection ResultOfMethodCallIgnored
+                                        subFolder.delete();
+                                    }
+                                }
+                                //noinspection ResultOfMethodCallIgnored
+                                folder.delete();
                             }
 
                         })
@@ -397,6 +427,21 @@ public class SubjectFragment extends Fragment {
                             DBAdapter.deleteRecord(selectedRecord.getId());
                             DBAdapter.close();
                             populateListRecords(false);
+                            // remove the folder with the images
+                            File folder = new File(Environment.getExternalStoragePublicDirectory(
+                                    Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedRecord.getSubjectId()
+                                    + "/" + selectedRecord.getN());
+                            if (folder.exists()) {
+                                File[] files = folder.listFiles();
+                                if (files != null) {
+                                    for (File file : files) {
+                                        //noinspection ResultOfMethodCallIgnored
+                                        file.delete();
+                                    }
+                                }
+                                //noinspection ResultOfMethodCallIgnored
+                                folder.delete();
+                            }
                         })
                 .setNegativeButton(getResources().getString(R.string.dialog_no),
                         (dialog, id) -> {
