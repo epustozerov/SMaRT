@@ -112,7 +112,8 @@ public class MainActivity extends AppCompatActivity {
                     String selectedConfig = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
                     String patientConfig = currentlySelectedSubject.getConfig();
                     // create a configuration object
-                    String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
+                    String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path),
+                            getFilesDir() + "/config.ini");
                     Configuration patientConfiguration = new Configuration(configPath, patientConfig);
                     try {
                         patientConfiguration.formConfig(currentlySelectedSubject.getBodyScheme());
@@ -173,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
         boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
         Configuration configuration;
         if (customConfig) {
-            String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
+            String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), getFilesDir() + "/config.ini");
             String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
             configuration = new Configuration(configPath, configName);
             try {
@@ -268,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
                 android.app.AlertDialog alertDialog = CustomAlertDialogs.showInstructions(this, false, null);
                 alertDialog.show();
             } else {
-                String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
+                String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), getFilesDir() + "/config.ini");
                 String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
                 Configuration configuration = new Configuration(configPath, configName);
                 try {
@@ -392,6 +393,16 @@ public class MainActivity extends AppCompatActivity {
             String configName = configNames[which];
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putString(getString(R.string.sp_selected_config), configName);
+            editor.apply();
+            invalidateOptionsMenu();
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+            navController.navigate(R.id.navigation_subject);
+        });
+
+        // if the user clicks outside the dialog, select the first item in configNames
+        builder.setOnCancelListener(dialog -> {
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString(getString(R.string.sp_selected_config), configNames[0]);
             editor.apply();
             invalidateOptionsMenu();
             NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
