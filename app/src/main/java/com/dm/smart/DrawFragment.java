@@ -319,9 +319,7 @@ public class DrawFragment extends Fragment {
                 if (cf != null) {
                     for (int j = 0; j < cf.bodyViewFront.steps.size(); j++) {
                         allStepsFront.append(cf.selectedSensations).append(": ");
-                        int intentensity = cf.bodyViewFront.steps.get(j).intensity_mark;
-                        intentensity = 100 - intentensity;
-                        allStepsFront.append(intentensity).append(" (color: ");
+                        allStepsFront.append(cf.bodyViewFront.steps.get(j).intensity_mark).append(" (color: ");
                         int color = cf.bodyViewFront.steps.get(j).brush.paint.getColor();
                         String color16bit = String.format("#%08X", color);
                         allStepsFront.append(color16bit).append(")\n");
@@ -329,9 +327,7 @@ public class DrawFragment extends Fragment {
                     allStepsFront.append("\n");
                     for (int j = 0; j < cf.bodyViewBack.steps.size(); j++) {
                         allStepsBack.append(cf.selectedSensations).append(": ");
-                        int intentensity = cf.bodyViewBack.steps.get(j).intensity_mark;
-                        intentensity = 100 - intentensity;
-                        allStepsBack.append(intentensity).append(" (color: ");
+                        allStepsBack.append(cf.bodyViewBack.steps.get(j).intensity_mark).append(" (color: ");
                         int color = cf.bodyViewBack.steps.get(j).brush.paint.getColor();
                         String color16bit = String.format("#%08X", color);
                         allStepsBack.append(color16bit).append(")\n");
