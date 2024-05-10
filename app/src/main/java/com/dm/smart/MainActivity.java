@@ -321,10 +321,9 @@ public class MainActivity extends AppCompatActivity {
                 // set the uri to Documents folder
                 Uri uri = Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getPath());
                 pickConfig(uri);
-                item.setChecked(true);
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putBoolean(getString(R.string.sp_custom_config), true);
-                editor.apply();
+                // if the user picks the config, the menu item will be checked
+                if (sharedPref.getBoolean(getString(R.string.sp_custom_config), false))
+                    item.setChecked(true);
                 invalidateOptionsMenu();
                 NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
                 navController.navigate(R.id.navigation_subject);
@@ -427,7 +426,9 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, resultData);
         if (requestCode == 1) {
             Uri uri;
-            if (resultData != null) {
+            // if the user selected the file and it is the ini file
+            if (resultData != null && resultData.getData() != null
+                    && Objects.requireNonNull(resultData.getData().getPath()).endsWith(".ini")) {
                 uri = resultData.getData();
                 assert uri != null;
 
@@ -448,8 +449,9 @@ public class MainActivity extends AppCompatActivity {
                     // safe the uri to shared preferences
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.putString(getString(R.string.sp_custom_config_path), fileConfigAppFolder.getAbsolutePath());
-                    // set the option that custom config is selected
-                    editor.putBoolean(getString(R.string.sp_custom_config), true);
+                    // if there file was picked, set the custom config to true
+                    if (fileConfigAppFolder.exists())
+                        editor.putBoolean(getString(R.string.sp_custom_config), true);
                     editor.apply();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
