@@ -3,6 +3,7 @@ package com.dm.smart;
 import static com.dm.smart.CanvasFragment.verifyStoragePermissions;
 import static com.dm.smart.SubjectFragment.extractSubjectFromTheDB;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -18,9 +19,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -108,6 +111,19 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setOnItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.navigation_add_sense:
+                    // check if we have the permission to read media images
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        verifyStoragePermissions(this);
+                    }
+                    // if there is still no permission, do not go to the fragment
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == -1) {
+                            // show the short toast message that the permission is needed
+                            Toast.makeText(this, R.string.toast_media_permission, Toast.LENGTH_LONG).show();
+                            return false;
+                        }
+                    }
+
                     // check if the config of the selected patient matches the selected config in system preferences
                     String selectedConfig = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
                     String patientConfig = currentlySelectedSubject.getConfig();
