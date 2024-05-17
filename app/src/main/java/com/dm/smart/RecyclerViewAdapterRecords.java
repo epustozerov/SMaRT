@@ -20,9 +20,9 @@ import java.util.Locale;
 
 public class RecyclerViewAdapterRecords extends RecyclerView.Adapter<RecyclerViewAdapterRecords.ViewHolder> {
 
-    static final int RECORD_SHOW_IMAGE = Menu.FIRST + 1;
-    static final int RECORD_SHARE = Menu.FIRST + 2;
-    static final int RECORD_DELETE = Menu.FIRST + 3;
+    static final int RECORD_SHOW_IMAGE = Menu.FIRST + 2;
+    static final int RECORD_SHARE = Menu.FIRST + 3;
+    static final int RECORD_DELETE = Menu.FIRST + 4;
     private final List<Record> mRecords;
     private final LayoutInflater mInflater;
     private final Context mContext;
@@ -83,10 +83,10 @@ public class RecyclerViewAdapterRecords extends RecyclerView.Adapter<RecyclerVie
         public void onCreateContextMenu(ContextMenu contextMenu, View view,
                                         ContextMenu.ContextMenuInfo contextMenuInfo) {
             selectedRecordPosition = getBindingAdapterPosition();
-            int recordId = mRecords.get(selectedRecordPosition).getId();
+            int N = mRecords.get(selectedRecordPosition).getN();
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(mRecords.get(selectedRecordPosition).getTimestamp());
-            contextMenu.setHeaderTitle(mContext.getString(R.string.menu_record) + ": " + recordId + ", "
+            contextMenu.setHeaderTitle(mContext.getString(R.string.menu_record) + ": " + N + ", "
                     + mContext.getString(R.string.menu_config) + ": " + mRecords.get(selectedRecordPosition).getConfig());
             contextMenu.add(0, RECORD_SHOW_IMAGE, Menu.NONE,
                     mContext.getString(R.string.menu_show_image));

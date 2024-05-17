@@ -1,5 +1,7 @@
 package com.dm.smart;
 
+import static com.dm.smart.MainActivity.sharedPref;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -20,6 +22,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -40,6 +43,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -47,16 +51,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class DrawFragment extends Fragment {
 
-    Configuration configuration;
     final Map<String, ArrayList<String>> persSensations = new HashMap<>();
     final Map<String, ArrayList<BodyDrawingView.Step>> persStepsFront = new HashMap<>();
     final Map<String, ArrayList<BodyDrawingView.Step>> persStepsBack = new HashMap<>();
     public ViewPager2 viewPager;
     public ViewPagerAdapter viewPagerAdapter;
+    Configuration configuration;
     List<Integer> colors;
     Lifecycle lifecycle;
 
@@ -109,13 +114,15 @@ public class DrawFragment extends Fragment {
         String selectedSubjectBodyScheme = MainActivity.currentlySelectedSubject.getBodyScheme();
         SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
         boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
-        String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
-        String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Default");
-        configuration = new Configuration(configPath, configName);
-        try {
-            configuration.formConfig(requireActivity(), selectedSubjectBodyScheme);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (customConfig) {
+            String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
+            String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
+            configuration = new Configuration(configPath, configName);
+            try {
+                configuration.formConfig(selectedSubjectBodyScheme);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
         if (customConfig) {
             colors = Arrays.stream(configuration.getColorSymptoms()).map(Color::parseColor).collect(Collectors.toList());
@@ -208,10 +215,12 @@ public class DrawFragment extends Fragment {
                                     navigate(R.id.navigation_subject);
                             Runnable runnable = this::storeData;
                             new Thread(runnable).start();
-                            if (MainActivity.sharedPref.getBoolean(getString(R.string.sp_request_password), false)) {
+                            if (sharedPref.getBoolean(getString(R.string.sp_request_password), false)) {
                                 android.app.AlertDialog alertDialog =
                                         CustomAlertDialogs.requestPassword(getActivity(), null, null, null);
                                 alertDialog.show();
+                                Objects.requireNonNull(alertDialog.getWindow()).setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                                        WindowManager.LayoutParams.MATCH_PARENT);
                             }
                         });
         AlertDialog dialog = builder.create();
@@ -238,13 +247,26 @@ public class DrawFragment extends Fragment {
             }
             sensations.append("; ");
         }
-        Record record = new Record(patient_id, configuration.getConfigName(), sensations.toString());
+        sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
+        Record record;
+        if (customConfig) {
+            record = new Record(patient_id, configuration.getConfigName(), sensations.toString());
+        } else {
+            record = new Record(patient_id, "Built-in", sensations.toString());
+        }
 
         // get the amount of records by patient specified with patient_id
         Cursor cursorRecords =
                 DBAdapter.getRecordsSingleSubject(MainActivity.currentlySelectedSubject.getId());
-        int recordCount = cursorRecords.getCount();
-        cursorRecords.close();
+        // get the largest n
+        int recordCount = 0;
+        if (cursorRecords.moveToFirst()) {
+            do {
+                @SuppressLint("Range") int n = cursorRecords.getInt(cursorRecords.getColumnIndex(com.dm.smart.DBAdapter.RECORD_N));
+                if (n > recordCount) recordCount = n;
+            } while (cursorRecords.moveToNext());
+        }
         record.setN(recordCount + 1);
         DBAdapter.insertRecord(record);
         DBAdapter.close();
@@ -260,6 +282,7 @@ public class DrawFragment extends Fragment {
                         String.valueOf(patient_id), String.valueOf(recordCount + 1))));
         if (!directory.exists()) //noinspection ResultOfMethodCallIgnored
             directory.mkdirs();
+        String baseName = patient_id + "_" + (recordCount + 1);
 
         // Save all the images
         if (createdWindows > 0) {
@@ -287,6 +310,46 @@ public class DrawFragment extends Fragment {
                 }
             }
 
+            // Create a txt file, put allStepsFront and allStepsBack in it
+            StringBuilder allStepsFront = new StringBuilder();
+            StringBuilder allStepsBack = new StringBuilder();
+            for (int i = 0; i < createdWindows; i++) {
+                CanvasFragment cf =
+                        (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
+                if (cf != null) {
+                    for (int j = 0; j < cf.bodyViewFront.steps.size(); j++) {
+                        allStepsFront.append(cf.selectedSensations).append(": ");
+                        allStepsFront.append(cf.bodyViewFront.steps.get(j).intensity_mark).append(" (color: ");
+                        int color = cf.bodyViewFront.steps.get(j).brush.paint.getColor();
+                        String color16bit = String.format("#%08X", color);
+                        allStepsFront.append(color16bit).append(")\n");
+                    }
+                    allStepsFront.append("\n");
+                    for (int j = 0; j < cf.bodyViewBack.steps.size(); j++) {
+                        allStepsBack.append(cf.selectedSensations).append(": ");
+                        allStepsBack.append(cf.bodyViewBack.steps.get(j).intensity_mark).append(" (color: ");
+                        int color = cf.bodyViewBack.steps.get(j).brush.paint.getColor();
+                        String color16bit = String.format("#%08X", color);
+                        allStepsBack.append(color16bit).append(")\n");
+                    }
+                    allStepsBack.append("\n");
+                }
+            }
+            // create a txt file, overwrite automatically if it exists
+            File textFile = new File(directory, baseName + ".txt");
+            FileWriter writer;
+            try {
+                writer = new FileWriter(textFile);
+                writer.append("Front\n");
+                writer.append(allStepsFront);
+                writer.append("Back\n");
+                writer.append(allStepsBack);
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                // do nothing
+            }
+
             Bitmap merged_f = Bitmap.createBitmap(width, height, config);
             Bitmap merged_b = Bitmap.createBitmap(width, height, config);
             Canvas canvasMergedFront = new Canvas(merged_f);
@@ -301,30 +364,34 @@ public class DrawFragment extends Fragment {
                 CanvasFragment cf =
                         (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
                 assert cf != null;
-                StringBuilder file_name_sensations = new StringBuilder();
-                for (int j = 0; j < cf.selectedSensations.size(); j++) {
-                    file_name_sensations.append(cf.selectedSensations.get(j)).append("_");
-                }
                 SaveSnapshotTask.doInBackground(
-                        cf.bodyViewFront.snapshot, directory, i + "_" + file_name_sensations + "f.png");
+                        cf.bodyViewFront.snapshot, directory, baseName + "_" + (i + 1) + "_f.png");
                 SaveSnapshotTask.doInBackground(
-                        cf.bodyViewBack.snapshot, directory, i + "_" + file_name_sensations + "b.png");
+                        cf.bodyViewBack.snapshot, directory, baseName + "_" + (i + 1) + "_b.png");
                 if (cf.bodyViewFront.snapshot != null)
                     canvasMergedFront.drawBitmap(cf.bodyViewFront.snapshot, 0f, 0f, null);
                 if (cf.bodyViewBack.snapshot != null)
                     canvasMergedBack.drawBitmap(cf.bodyViewBack.snapshot, 0f, 0f, null);
             }
-            SaveSnapshotTask.doInBackground(merged_f, directory, "merged_sensations_f.png");
-            SaveSnapshotTask.doInBackground(merged_b, directory, "merged_sensations_b.png");
+            SaveSnapshotTask.doInBackground(merged_f, directory, baseName + "_f.png");
+            SaveSnapshotTask.doInBackground(merged_b, directory, baseName + "_b.png");
             assert cf_base != null;
             Bitmap full_f = makeFullPicture(merged_f, cf_base.bodyViewFront.backgroundImage, sensations.toString());
-            SaveSnapshotTask.doInBackground(full_f, directory, "complete_picture_f.png");
+            SaveSnapshotTask.doInBackground(full_f, directory, baseName + "_fig_f.png");
             Bitmap full_b = makeFullPicture(merged_b, cf_base.bodyViewBack.backgroundImage, sensations.toString());
-            SaveSnapshotTask.doInBackground(full_b, directory, "complete_picture_b.png");
+            SaveSnapshotTask.doInBackground(full_b, directory, baseName + "_fig_b.png");
             endTime = SystemClock.elapsedRealtime();
             elapsedMilliSeconds = endTime - startTime;
             elapsedSeconds = elapsedMilliSeconds / 1000.0;
             Log.e("STORAGE", "Finalization elapsed time: " + elapsedSeconds);
+
+            // Config
+            try {
+                Configuration.initDefaultConfig(requireActivity());
+            } catch (Exception e) {
+                //noinspection CallToPrintStackTrace
+                e.printStackTrace();
+            }
         }
     }
 

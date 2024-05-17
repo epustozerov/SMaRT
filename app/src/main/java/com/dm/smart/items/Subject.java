@@ -1,10 +1,10 @@
 package com.dm.smart.items;
 
 public class Subject {
-    private final String name;
     private final String config;
     private final String bodyScheme;
     private final long timestamp;
+    private String name;
     private int id;
 
     public Subject(int id, String name, String config, String bodyScheme, long timestamp) {
@@ -33,6 +33,10 @@ public class Subject {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getConfig() {

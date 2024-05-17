@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import androidx.navigation.Navigation;
 
 import com.dm.smart.R;
 
+import java.io.File;
 import java.util.Objects;
 
 public class CustomAlertDialogs {
@@ -48,13 +50,19 @@ public class CustomAlertDialogs {
         return dialog;
     }
 
-    public static AlertDialog showInstructions(Context context) {
+    public static AlertDialog showInstructions(Context context, boolean customConfig, File instructionsPath) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View alertView =
                 inflater.inflate(R.layout.alert_image, null);
-        ImageView image_view_body = alertView.findViewById(R.id.image_view_body);
-        image_view_body.setImageResource(R.drawable.instructions);
+        if (!customConfig) {
+            ImageView imageInstructions = alertView.findViewById(R.id.image_view_body);
+            imageInstructions.setImageResource(R.drawable.instructions);
+        } else {
+            Bitmap bitmap = BitmapFactory.decodeFile(String.valueOf(instructionsPath));
+            ImageView imageInstructions = alertView.findViewById(R.id.image_view_body);
+            imageInstructions.setImageBitmap(bitmap);
+        }
         builder.setView(alertView);
         AlertDialog dialog = builder.create();
         alertView.findViewById(R.id.button_close).setOnClickListener(v -> dialog.dismiss());

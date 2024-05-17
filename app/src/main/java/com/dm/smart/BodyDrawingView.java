@@ -15,6 +15,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -23,6 +24,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +36,8 @@ public class BodyDrawingView extends View {
     private final GestureDetector mGestureDetector;
     private final ScaleGestureDetector mScaleDetector;
     private final Paint snapshotPaint = new Paint();
-    public List<Step> steps = new ArrayList<>();
     public Bitmap snapshot;
+    List<Step> steps = new ArrayList<>();
     Canvas drawImageCanvas;
     Bitmap backgroundImage = null;
     Toast showedToast = null;
@@ -50,10 +52,12 @@ public class BodyDrawingView extends View {
     private int intensity = -1;
     private CanvasFragment.Brush brush = null;
     private boolean allowOutsideDrawing;
+    private int intensity_mark = 0;
 
     public BodyDrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        //noinspection NullableProblems
         mGestureDetector = new GestureDetector(context, new GestureDetector.OnGestureListener() {
             @Override
             public boolean onDown(@NonNull MotionEvent motionEvent) {
@@ -122,7 +126,7 @@ public class BodyDrawingView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
 
         if (isInEditMode()) {
             super.onDraw(canvas);
@@ -148,6 +152,7 @@ public class BodyDrawingView extends View {
     }
 
     // After lifting the pen this method draws the step to the snapshot
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     void drawStep(Step step, int width, int height) {
         if (freshSnapshot == null) {
             if (width != 0 && height != 0) {
@@ -193,6 +198,11 @@ public class BodyDrawingView extends View {
         this.maskImage = maskImage;
     }
 
+    public void setIntensity(int progress, int intensity) {
+        this.intensity_mark = progress;
+        this.intensity = intensity;
+    }
+
     public void setIntensity(int intensity) {
         this.intensity = intensity;
     }
@@ -201,14 +211,15 @@ public class BodyDrawingView extends View {
         this.brush = brush;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     public void undoLastStep() {
-        if (steps.size() > 0) {
+        if (!steps.isEmpty()) {
             steps.remove(steps.size() - 1);
             if (freshSnapshot != null) {
                 freshSnapshot.recycle();
                 freshSnapshot = null;
             }
-            if (steps.size() > 0) {
+            if (!steps.isEmpty()) {
                 for (Step step : steps) {
                     drawStep(step, 0, 0);
                 }
@@ -224,8 +235,9 @@ public class BodyDrawingView extends View {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     void redrawAllSavedSteps() {
-        if (steps.size() > 0) {
+        if (!steps.isEmpty()) {
             for (Step step : steps) {
                 drawStep(step, 1494, 2200);
             }
@@ -312,6 +324,7 @@ public class BodyDrawingView extends View {
         invalidate();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -373,6 +386,7 @@ public class BodyDrawingView extends View {
 
                 Step step = new Step();
                 step.brush = new CanvasFragment.Brush(brush);
+                step.intensity_mark = intensity_mark;
 
                 step.brush.paint.setColor(intensity);
                 step.brush.drawOutside = allowOutsideDrawing;
@@ -390,6 +404,7 @@ public class BodyDrawingView extends View {
 
                 Step step = new Step();
                 step.brush = brush;
+                step.intensity_mark = intensity_mark;
             }
         }
         invalidate();
@@ -404,5 +419,6 @@ public class BodyDrawingView extends View {
 
         CanvasFragment.Brush brush;
         Path path;
+        int intensity_mark;
     }
 }

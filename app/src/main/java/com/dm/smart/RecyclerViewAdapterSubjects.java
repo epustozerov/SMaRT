@@ -23,7 +23,8 @@ import java.util.Locale;
 
 public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerViewAdapterSubjects.ViewHolder> {
 
-    static final int SUBJECT_DELETE = Menu.FIRST;
+    static final int SUBJECT_CHANGE_NAME = Menu.FIRST;
+    static final int SUBJECT_DELETE = Menu.FIRST + 1;
     private final List<Subject> mSubjects;
     private final LayoutInflater mInflater;
     private final Context mContext;
@@ -128,10 +129,13 @@ public class RecyclerViewAdapterSubjects extends RecyclerView.Adapter<RecyclerVi
             SimpleDateFormat formatter =
                     new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
             String dateString = formatter.format(cal.getTime());
-            contextMenu.setHeaderTitle(patientId + ". " + mContext.getString(R.string.menu_first_config) + ": " + config + ", "
+            contextMenu.setHeaderTitle(patientId + ". " + mContext.getString(R.string.menu_config) + ": " + config + ", "
                     + bodyScheme + ",\n " + mContext.getString(R.string.menu_created) + ": " + dateString);
+            contextMenu.add(0, SUBJECT_CHANGE_NAME, Menu.NONE,
+                    mContext.getString(R.string.menu_change_name));
             contextMenu.add(0, SUBJECT_DELETE, Menu.NONE,
                     mContext.getString(R.string.menu_remove_subject));
+
         }
     }
 }

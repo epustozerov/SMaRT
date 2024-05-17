@@ -27,7 +27,6 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -61,6 +60,11 @@ import java.util.List;
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 public class CanvasFragment extends Fragment {
 
+    // Storage Permissions
+    private static final int READ_MEDIA_IMAGES = 1;
+    private static final String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_MEDIA_IMAGES
+    };
     private final List<String> sortedChoices = new ArrayList<>();
     public ArrayList<String> selectedSensations;
     public int color;
@@ -86,13 +90,27 @@ public class CanvasFragment extends Fragment {
     private int mShortAnimationDuration;
     private boolean allowOutsideDrawing = false;
 
-
     public CanvasFragment() {
     }
 
     public CanvasFragment(Bundle b) {
         color = b.getInt("color");
         dampenedColor = dampen(color);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_MEDIA_IMAGES);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    READ_MEDIA_IMAGES
+            );
+        }
     }
 
     @Override
@@ -114,19 +132,34 @@ public class CanvasFragment extends Fragment {
         String selectedSubjectBodyScheme = MainActivity.currentlySelectedSubject.getBodyScheme();
         SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
         boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
-        String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
-        String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Default");
-        Configuration configuration = new Configuration(configPath, configName);
-        try {
-            configuration.formConfig(requireActivity(), selectedSubjectBodyScheme);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        Configuration configuration;
+        if (customConfig) {
+            String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
+            String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
+            configuration = new Configuration(configPath, configName);
+            try {
+                configuration.formConfig(selectedSubjectBodyScheme);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            configuration = null;
         }
 
         currentStateIsFront = true;
         if (!customConfig) {
-            bodyFigures = getResources().obtainTypedArray(getResources().
-                    getIdentifier(selectedSubjectBodyScheme, "array", requireContext().getPackageName()));
+            String currentlySelectedSubjectBodyScheme = MainActivity.currentlySelectedSubject.getBodyScheme();
+            switch (currentlySelectedSubjectBodyScheme) {
+                case "männlich":
+                    bodyFigures = getResources().obtainTypedArray(R.array.body_figures_male);
+                    break;
+                case "weiblich":
+                    bodyFigures = getResources().obtainTypedArray(R.array.body_figures_female);
+                    break;
+                default:
+                    bodyFigures = getResources().obtainTypedArray(R.array.body_figures_neutral);
+                    break;
+            }
         }
 
         if (mCanvas != null) {
@@ -144,9 +177,8 @@ public class CanvasFragment extends Fragment {
 
         // Show current fragment tag
         Log.e("RECREATION", "CanvasFragment");
-        Log.e("SELECTED SENSATIONS", selectedSensations + "");
+        Log.e("SELECTED SENSATIONS", String.valueOf(selectedSensations));
         // Init container with drawn sensations
-
         // Don't show the default text if there are more than 0 sensations
 
         // Init body figures for drawing
@@ -175,7 +207,7 @@ public class CanvasFragment extends Fragment {
         buttonSensationsTool.setOnClickListener(v -> {
             AnimatorSet animSet = new AnimatorSet();
             if (tagsVisible) {
-                if (sortedChoices.size() == 0) {
+                if (sortedChoices.isEmpty()) {
                     if (showedToast != null) {
                         showedToast.cancel();
                     }
@@ -207,7 +239,7 @@ public class CanvasFragment extends Fragment {
         grayOverlay.setOnClickListener(v -> {
             AnimatorSet animSet = new AnimatorSet();
             if (tagsVisible) {
-                if (sortedChoices.size() == 0) {
+                if (sortedChoices.isEmpty()) {
                     if (showedToast != null) {
                         showedToast.cancel();
                     }
@@ -372,17 +404,10 @@ public class CanvasFragment extends Fragment {
 
         // Create buttons with sensations in the side panel
         View.OnClickListener choiceClickListener = v -> {
-            if (selectedSensations.size() == 0) {
+            if (selectedSensations.isEmpty()) {
                 ((LinearLayout) mCanvas.findViewById(R.id.drawn_sensations)).removeAllViews();
             }
-            int bid = ((ViewGroup) v.getParent()).indexOfChild(v);
-            String selectedSensation;
-            if (customConfig) {
-                selectedSensation = configuration.sensationTypes[bid];
-            } else {
-                selectedSensation =
-                        Arrays.asList(getResources().getStringArray(R.array.sensation_types)).get(bid);
-            }
+            String selectedSensation = ((ToggleButton) v).getText().toString();
             if (selectedSensations.contains(selectedSensation)) {
                 selectedSensations.remove(selectedSensation);
             } else {
@@ -411,19 +436,31 @@ public class CanvasFragment extends Fragment {
             sensationTypes = getResources().getStringArray(R.array.sensation_types);
         }
 
-
-        for (String choice : sensationTypes) {
-            ToggleButton b = new ToggleButton(getContext());
-            b.setBackground(requireContext().getDrawable(R.drawable.custom_radio));
-            b.setTextColor(Color.BLACK);
-            b.setTextOn(choice);
-            b.setTextOff(choice);
-            b.setText(choice);
-            b.setPadding(Math.round(dp2px(8)), Math.round(dp2px(8)),
-                    Math.round(dp2px(8)), Math.round(dp2px(8)));
-            b.setOnClickListener(choiceClickListener);
-            sensationsContainer.addView(b, lp);
+        int numRows = (int) Math.floor((double) (getResources().getDisplayMetrics().heightPixels - 120) / dp2px(60));
+        int numColumns = (int) Math.ceil((double) sensationTypes.length / numRows);
+        for (int i = 0; i < numColumns; i++) {
+            LinearLayout column = new LinearLayout(getContext());
+            column.setOrientation(LinearLayout.VERTICAL);
+            column.setLayoutParams(lp);
+            sensationsContainer.addView(column);
+            for (int j = 0; j < numRows; j++) {
+                int index = i * numRows + j;
+                if (index >= sensationTypes.length) {
+                    break;
+                }
+                ToggleButton b = new ToggleButton(getContext());
+                b.setBackground(requireContext().getDrawable(R.drawable.custom_radio));
+                b.setTextColor(Color.BLACK);
+                b.setTextOn(sensationTypes[index]);
+                b.setTextOff(sensationTypes[index]);
+                b.setText(sensationTypes[index]);
+                b.setPadding(Math.round(dp2px(8)), Math.round(dp2px(8)),
+                        Math.round(dp2px(8)), Math.round(dp2px(8)));
+                b.setOnClickListener(choiceClickListener);
+                column.addView(b);
+            }
         }
+
         // go through the list of sensations and select the ones that were selected before
         for (String selectedSensation : selectedSensations) {
             int index = Arrays.asList(sensationTypes).indexOf(selectedSensation);
@@ -524,6 +561,14 @@ public class CanvasFragment extends Fragment {
         intensityScale.setColorSeeds(defineMinMaxColors(color));
         intensityScale.setThumbDrawer(new CustomThumbDrawer(65, Color.WHITE, Color.BLACK));
 
+        // if the custom config is in use, set the text for textview_scale_max from the config
+        if (customConfig) {
+            TextView textViewScaleMax = mCanvas.findViewById(R.id.textview_scale_max);
+            textViewScaleMax.setText(configuration.getTextMax());
+            TextView textViewScaleMin = mCanvas.findViewById(R.id.textview_scale_min);
+            textViewScaleMin.setText(configuration.getTextMin());
+        }
+
         // Set intenstityScale on touch listener to process only stylised touch events
         intensityScale.setOnTouchListener((v, event) -> {
             boolean isPen = event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS;
@@ -535,7 +580,7 @@ public class CanvasFragment extends Fragment {
         });
 
         intensityScale.setOnColorChangeListener((progress, color) -> {
-            currentBodyView.setIntensity(color);
+            currentBodyView.setIntensity(progress, color);
             currentIntensity = color;
             if (currentBrushId != lastBrushId) {
                 toolsBtns.get(eraserId).setPressed(false);
@@ -554,29 +599,6 @@ public class CanvasFragment extends Fragment {
                 getResources().getDisplayMetrics());
     }
 
-
-    // Storage Permissions
-    private static final int READ_MEDIA_IMAGES = 1;
-    private static final String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_MEDIA_IMAGES
-    };
-
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-    public static void verifyStoragePermissions(Activity activity) {
-        // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_MEDIA_IMAGES);
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    READ_MEDIA_IMAGES
-            );
-        }
-    }
-
-
     public Bitmap setBodyImage(int bodyTypeId, boolean thumbed) {
         if (thumbed) {
             return Bitmap.createScaledBitmap(
@@ -591,8 +613,8 @@ public class CanvasFragment extends Fragment {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             verifyStoragePermissions(requireActivity());
         }
-        File bitmapFile = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/config/body_figures/" + bodyTypeId);
+        // take the body scheme file from inner app store, filder body_figures
+        File bitmapFile = new File(requireActivity().getFilesDir(), "body_figures/" + bodyTypeId);
         Bitmap sensationsFront = BitmapFactory.decodeFile(bitmapFile.getAbsolutePath());
         if (thumbed) {
             return Bitmap.createScaledBitmap(sensationsFront, 149, 220, true);

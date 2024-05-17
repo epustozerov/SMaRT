@@ -7,13 +7,13 @@
     <string name="brush_erase">Löschen</string>
     <string name="brush_line">Linie</string>
     <string name="brush_region">Region</string>
-    <string name="subject">Proband</string>
+    <string name="subject">Proband:in</string>
     <string name="title_add_sense">Neue Zeichnung</string>
     <string name="complete_recording">Zeichnung beenden</string>
     <string name="new_record">Neue Empfindung</string>
-    <string name="add_new_subject">Neuen Probanden erstellen</string>
+    <string name="add_new_subject">Neue/n Proband:in erstellen</string>
     <string name="subjects">
-        <b>Probanden:</b>
+        <b>Proband:innen:</b>
     </string>
     <string name="records">
         <b>Aufzeichnungen:</b>
@@ -22,13 +22,16 @@
     <string name="button_sensations_toolkit">Empfindungen zeigen</string>
     <string name="toast_select_tag">⇚ Bitte wählen Sie zunächst einen/mehrere Begriff(e) für die Empfindung aus</string>
     <string name="toast_select_intensity">⇛ Bitte wählen Sie zunächst eine Intensität auf der Skala aus</string>
-    <string name="toast_empty_name">Bitte geben Sie zunächst einen Namen für den Proband ein</string>
+    <string name="toast_empty_name">Bitte geben Sie zunächst einen Namen für die/den Proband:in ein</string>
+    <string name="toast_media_permission">Bitte geben Sie der App eine Berechtigung für den Zugriff auf die Medien</string>
+    <string name="toast_body_figures_not_copied">Ein oder mehrere Körperschemata konnten nicht kopiert werden</string>
+    <string name="toast_instructions_not_copied">Ein oder mehrere Bilder der Anweisungen konnten nicht kopiert werden</string>
     <string name="textview_max">max</string>
     <string name="textview_min">min</string>
     <string name="switch_bodyview">Körperansicht wechseln</string>
     <string name="to_drawing">Zur Zeichnung</string>
     <string name="to_tags">Zur den Begriffen</string>
-    <string name="new_subject">Neuer Proband</string>
+    <string name="new_subject">neue/r Proband:in</string>
     <string name="textview_general_view">Gesamtansicht</string>
     <string name="wrong_password">Falsches Passwort</string>
     <string name="password">1985</string>
@@ -37,7 +40,7 @@
     <string name="dialog_drawing_completed">Haben Sie wirklich <b>alle Befunde</b> eingezeichnet?
         Eine nachträgliche Bearbeitung ist nicht möglich
     </string>
-    <string name="dialog_delete_subject">Möchten Sie den Proband und <b>alle ihre Daten löschen</b>?
+    <string name="dialog_delete_subject">Möchten Sie die/den Proband:in und <b>alle ihre Daten löschen</b>?
     </string>
     <string name="dialog_delete_record">"Möchten Sie den ausgewählten Aufzeihnung löschen?"</string>
     <string name="dialog_drawing_confirmed">"Zeichnung beenden"</string>
@@ -46,34 +49,42 @@
     <string name="dialog_image">Übersicht</string>
     <string name="dialog_close">Ausblenden</string>
     <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Abbrechen</string>
     <string name="dialog_yes">Ja</string>
     <string name="dialog_continue">Fortfahren</string>
     <string name="dialog_no">Nein</string>
     <string name="dialog_password_title">Geben Sie das Passwort ein</string>
+    <string name="dialog_change_name_title">Geben Sie den neuen Namen für die/den Patient:in ein</string>
     <string name="dialog_password_hint">Passwort</string>
+    <string name="dialog_change_name_hint">Name der/des Patient:in</string>
     <string name="dialog_select_config">Konfiguration auswählen</string>
-    <string name="dialog_config_mismatch">Die gewählte Konfiguration stimmt nicht mit den Einstellungen des Subjekts überein.\n
-        Legen Sie einen neuen Patienten an oder wählen Sie eine andere Konfiguration.</string>
+    <string name="dialog_config_mismatch">Die gewählte Konfiguration stimmt nicht mit den Einstellungen der/des Proband:in überein.\n
+        Legen Sie eine/n neue/n Patient:in an oder wählen Sie eine andere Konfiguration.</string>
+    <string name="dialog_config_no_scheme">Ein oder mehrere in der Konfiguration angegebene Körperschemata werden nicht
+        im Ordner "SMaRT/config/body_schemes" enthalten.\n
+        Bitte überprüfen Sie die Konfigurationsdatei und den Inhalt des Ordners.\n
+        Die App wird die Standardkonfiguration verwenden.
+    </string>
 
     <!-- Menu -->
-    <string name="menu_remove_subject">Ausgewählte Probanden und ihre Daten entfernen</string>
+    <string name="menu_remove_subject">Proband:in und zugehörige Daten entfernen</string>
+    <string name="menu_change_name">Name der/des Proband:in ändern</string>
     <string name="menu_remove_record">Ausgewählten Datensatz entfernen</string>
-    <string name="menu_show_image">Symptomübersicht Anzeigen</string>
-    <string name="menu_share">Symptomaufzeichnung teilen</string>
+    <string name="menu_show_image">Übersicht anzeigen</string>
+    <string name="menu_share">Diese Zeichnung teilen</string>
     <string name="menu_export_title">Empfindungen von %1$s um %2$s</string>
     <string name="menu_instructions">Anweisungen</string>
     <string name="menu_show_instructions">Anweisungen vor den Aufnahmen anzeigen</string>
     <string name="menu_request_password">Passwort nach der Aufnahme anfordern</string>
-    <string name="menu_show_names">Probandennamen anzeigen</string>
+    <string name="menu_show_names">Proband:innennamen anzeigen</string>
     <string name="menu_custom_config">Benutzerdefinierte Konfiguration verwenden</string>
     <string name="menu_selected_config">Konfig-Profil:</string>
-    <string name="menu_selected_config_default">Konfig-Profil: Default</string>
+    <string name="menu_selected_config_default">Konfig-Profil: Built-in</string>
     <string name="menu_imprint">Impressum</string>
     <string name="menu_privacy">Datenschutz</string>
     <string name="menu_info">Informationsseite</string>
     <string name="menu_copyright">Copyright notice</string>
     <string name="menu_created">erstellt</string>
-    <string name="menu_first_config">erste Konfig</string>
     <string name="menu_record">Aufzeichnung</string>
     <string name="menu_config">Konfig</string>
 

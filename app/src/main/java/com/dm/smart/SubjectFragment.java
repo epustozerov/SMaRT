@@ -3,6 +3,7 @@ package com.dm.smart;
 import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_DELETE;
 import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_SHARE;
 import static com.dm.smart.RecyclerViewAdapterRecords.RECORD_SHOW_IMAGE;
+import static com.dm.smart.RecyclerViewAdapterSubjects.SUBJECT_CHANGE_NAME;
 import static com.dm.smart.RecyclerViewAdapterSubjects.SUBJECT_DELETE;
 
 import android.annotation.SuppressLint;
@@ -22,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,6 +40,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.dm.smart.items.Record;
 import com.dm.smart.items.Subject;
+import com.dm.smart.ui.elements.CustomAlertDialogs;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,6 +50,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class SubjectFragment extends Fragment {
@@ -54,6 +58,8 @@ public class SubjectFragment extends Fragment {
     RecyclerViewAdapterSubjects adapterSubjects;
     RecyclerViewAdapterRecords adapterRecords;
     boolean currentViewFront;
+    boolean showNames;
+    SharedPreferences sharedPref;
     private ArrayList<Subject> subjects;
     private ArrayList<Record> records;
 
@@ -79,20 +85,18 @@ public class SubjectFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         // Read shared preference to shown subjects' names
-        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
-        boolean showNames = sharedPref.getBoolean(getString(R.string.sp_show_names), false);
+        sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        showNames = sharedPref.getBoolean(getString(R.string.sp_show_names), false);
         View mView = inflater.inflate(R.layout.fragment_subject, container, false);
 
         // Spinner for body scheme selection
         Spinner spinner = mView.findViewById(R.id.spinner_body_scheme);
-        ArrayAdapter<CharSequence> adapterBodyScheme = ArrayAdapter.createFromResource(requireContext(),
-                R.array.schemes, android.R.layout.simple_spinner_item);
         boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
         String configPath = sharedPref.getString(getString(R.string.sp_custom_config_path), "");
-        String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Default");
+        String configName = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
         Configuration configuration = new Configuration(configPath, configName);
         try {
-            configuration.formConfig(requireActivity(), "neutral");
+            configuration.formConfig("neutral");
         } catch (IOException e) {
             // switch off custom config if it is not found
             SharedPreferences.Editor editor = sharedPref.edit();
@@ -100,10 +104,15 @@ public class SubjectFragment extends Fragment {
             editor.apply();
             customConfig = false;
         }
+
+        ArrayAdapter<CharSequence> adapterBodyScheme;
         if (customConfig) {
             // get the config path from shared preferences
             adapterBodyScheme = new ArrayAdapter<>(requireContext(),
                     android.R.layout.simple_spinner_item, configuration.getBodySchemes());
+        } else {
+            adapterBodyScheme = ArrayAdapter.createFromResource(requireContext(),
+                    R.array.schemes, android.R.layout.simple_spinner_item);
         }
 
         adapterBodyScheme.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -128,7 +137,7 @@ public class SubjectFragment extends Fragment {
             MainActivity.currentlySelectedSubject = extractSubjectFromTheDB(cursorSingleSubject);
             cursorSingleSubject.close();
             DBAdapter.close();
-            populateListRecords();
+            populateListRecords(false);
         });
 
         // RecyclerView for Records
@@ -141,26 +150,42 @@ public class SubjectFragment extends Fragment {
         // EditText and Button for adding new Subjects
         EditText edittextPatientName = mView.findViewById(R.id.edittext_subject_name);
         Button buttonAddPatients = mView.findViewById(R.id.button_add_subject);
+        boolean finalCustomConfig = customConfig;
         buttonAddPatients.setOnClickListener((View view) -> {
-            if (edittextPatientName.getText().toString().equals("")) {
+            if (edittextPatientName.getText().toString().isEmpty()) {
                 Toast toast = Toast.makeText(getContext(), getString(R.string.toast_empty_name), Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.CENTER, 0, 0);
                 toast.show();
             } else {
                 DBAdapter DBAdapter = new DBAdapter(requireActivity());
                 DBAdapter.open();
-                Subject new_subject =
-                        new Subject(edittextPatientName.getText().toString(), configName, (String) spinner.getSelectedItem());
+                Subject new_subject;
+                if (finalCustomConfig) {
+                    new_subject =
+                            new Subject(edittextPatientName.getText().toString(), configName, (String) spinner.getSelectedItem());
+                } else {
+                    new_subject =
+                            new Subject(edittextPatientName.getText().toString(), "Built-in", (String) spinner.getSelectedItem());
+                }
+
                 new_subject.setId((int) DBAdapter.insertSubject(new_subject));
                 DBAdapter.close();
+                // create a folder for the images
+                File folder = new File(Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + new_subject.getId());
+                if (!folder.exists()) {
+                    //noinspection ResultOfMethodCallIgnored
+                    folder.mkdirs();
+                }
+
                 MainActivity.currentlySelectedSubject = new_subject;
                 edittextPatientName.setText("");
                 populateListSubjects();
-                populateListRecords();
+                populateListRecords(false);
             }
         });
         populateListSubjects();
-        populateListRecords();
+        populateListRecords(false);
         return mView;
     }
 
@@ -173,14 +198,19 @@ public class SubjectFragment extends Fragment {
         DBAdapter.close();
     }
 
-    public void populateListRecords() {
+    @SuppressLint("NotifyDataSetChanged")
+    public void populateListRecords(boolean noSelection) {
         records.clear();
-        DBAdapter DBAdapter = new DBAdapter(requireActivity());
-        DBAdapter.open();
-        Cursor cursorRecords =
-                DBAdapter.getRecordsSingleSubject(MainActivity.currentlySelectedSubject.getId());
-        updateArrayRecords(cursorRecords);
-        DBAdapter.close();
+        if (!noSelection) {
+            DBAdapter DBAdapter = new DBAdapter(requireActivity());
+            DBAdapter.open();
+            Cursor cursorRecords =
+                    DBAdapter.getRecordsSingleSubject(MainActivity.currentlySelectedSubject.getId());
+            updateArrayRecords(cursorRecords);
+            DBAdapter.close();
+        } else {
+            adapterRecords.notifyDataSetChanged();
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -226,6 +256,17 @@ public class SubjectFragment extends Fragment {
         if (item.getItemId() == SUBJECT_DELETE) {
             showDeleteSubjectDialog();
             return true;
+        } else if (item.getItemId() == SUBJECT_CHANGE_NAME) {
+            // if the option to show names is not on, show the password dialog
+            showChangeNameDialog();
+            if (!showNames) {
+                android.app.AlertDialog alertDialog =
+                        CustomAlertDialogs.requestPassword(getActivity(), null, null, null);
+                alertDialog.show();
+                Objects.requireNonNull(alertDialog.getWindow()).setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT);
+            }
+            return true;
         } else if (item.getItemId() == RECORD_DELETE) {
             showDeleteRecordDialog();
             return true;
@@ -236,7 +277,8 @@ public class SubjectFragment extends Fragment {
             try {
                 showMergedImageDialog();
             } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new RuntimeException(e);
+                //noinspection CallToPrintStackTrace
+                e.printStackTrace();
             }
             return true;
         }
@@ -244,26 +286,33 @@ public class SubjectFragment extends Fragment {
     }
 
     private void shareSensations() {
-
         // Load front and back sensations images
         Record selectedRecord =
                 adapterRecords.getItem(adapterRecords.selectedRecordPosition);
         Subject selectedSubject = subjects.get(adapterSubjects.selectedSubjectPosition);
         File imageSensationsFront = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
-                + "/" + selectedRecord.getN() + "/complete_picture_f.png");
+                + "/" + selectedRecord.getN() + "/" + selectedSubject.getId() + "_" + selectedRecord.getN() + "_fig_f.png");
         File imageSensationsBack = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
-                + "/" + selectedRecord.getN() + "/complete_picture_b.png");
+                + "/" + selectedRecord.getN() + "/" + selectedSubject.getId() + "_" + selectedRecord.getN() + "_fig_b.png");
+        // take a txt file with sensations
+        File textFile = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
+                + "/" + selectedRecord.getN() + "/" + selectedSubject.getId() + "_" + selectedRecord.getN() + ".txt");
         Uri imageSensationsFrontUri = FileProvider.getUriForFile(requireActivity(),
                 BuildConfig.APPLICATION_ID + ".provider",
                 imageSensationsFront);
         Uri imageSensationsBackUri = FileProvider.getUriForFile(requireActivity(),
                 BuildConfig.APPLICATION_ID + ".provider",
                 imageSensationsBack);
+        Uri textSensationsUri = FileProvider.getUriForFile(requireActivity(),
+                BuildConfig.APPLICATION_ID + ".provider",
+                textFile);
         ArrayList<Uri> imageUris = new ArrayList<>();
         imageUris.add(imageSensationsFrontUri);
         imageUris.add(imageSensationsBackUri);
+        imageUris.add(textSensationsUri);
         Intent shareIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         shareIntent.setType("image/png");
         shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
@@ -304,12 +353,65 @@ public class SubjectFragment extends Fragment {
                             DBAdapter.open();
                             DBAdapter.deleteSubject(selectedSubject.getId());
                             DBAdapter.close();
-                            populateListSubjects();
+                            subjects.remove(selectedSubject);
+                            if (!subjects.isEmpty()) {
+                                MainActivity.currentlySelectedSubject = subjects.get(0);
+                                populateListSubjects();
+                                populateListRecords(false);
+                            } else {
+                                populateListSubjects();
+                                populateListRecords(true);
+                            }
+                            // remove the folder with the images
+                            File folder = new File(Environment.getExternalStoragePublicDirectory(
+                                    Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId());
+                            if (folder.exists()) {
+                                File[] subFolders = folder.listFiles();
+                                if (subFolders != null) {
+                                    for (File subFolder : subFolders) {
+                                        File[] files = subFolder.listFiles();
+                                        if (files != null) {
+                                            for (File file : files) {
+                                                //noinspection ResultOfMethodCallIgnored
+                                                file.delete();
+                                            }
+                                        }
+                                        //noinspection ResultOfMethodCallIgnored
+                                        subFolder.delete();
+                                    }
+                                }
+                                //noinspection ResultOfMethodCallIgnored
+                                folder.delete();
+                            }
+
                         })
                 .setNegativeButton(getResources().getString(R.string.dialog_no),
                         (dialog, id) -> {
                         });
         AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    public void showChangeNameDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+        @SuppressLint("InflateParams") View alertView =
+                getLayoutInflater().inflate(R.layout.alert_change_name, null);
+        EditText editTextName = alertView.findViewById(R.id.edit_text_name);
+        editTextName.setText(adapterSubjects.getItem(adapterSubjects.selectedSubjectPosition).getName());
+        builder.setView(alertView);
+        AlertDialog dialog = builder.create();
+        alertView.findViewById(R.id.button_cancel).setOnClickListener(v -> dialog.dismiss());
+        alertView.findViewById(R.id.button_ok).setOnClickListener(v -> {
+            Subject selectedSubject =
+                    adapterSubjects.getItem(adapterSubjects.selectedSubjectPosition);
+            DBAdapter DBAdapter = new DBAdapter(requireActivity());
+            DBAdapter.open();
+            selectedSubject.setName(editTextName.getText().toString());
+            DBAdapter.updateSubject(selectedSubject);
+            DBAdapter.close();
+            populateListSubjects();
+            dialog.dismiss();
+        });
         dialog.show();
     }
 
@@ -324,7 +426,22 @@ public class SubjectFragment extends Fragment {
                             DBAdapter.open();
                             DBAdapter.deleteRecord(selectedRecord.getId());
                             DBAdapter.close();
-                            populateListRecords();
+                            populateListRecords(false);
+                            // remove the folder with the images
+                            File folder = new File(Environment.getExternalStoragePublicDirectory(
+                                    Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedRecord.getSubjectId()
+                                    + "/" + selectedRecord.getN());
+                            if (folder.exists()) {
+                                File[] files = folder.listFiles();
+                                if (files != null) {
+                                    for (File file : files) {
+                                        //noinspection ResultOfMethodCallIgnored
+                                        file.delete();
+                                    }
+                                }
+                                //noinspection ResultOfMethodCallIgnored
+                                folder.delete();
+                            }
                         })
                 .setNegativeButton(getResources().getString(R.string.dialog_no),
                         (dialog, id) -> {
@@ -343,17 +460,13 @@ public class SubjectFragment extends Fragment {
                 adapterRecords.getItem(adapterRecords.selectedRecordPosition);
         DBAdapter DBAdapter = new DBAdapter(requireActivity());
         DBAdapter.open();
-        Cursor cursorSingleSubject =
-                DBAdapter.getSubjectById(selectedRecord.getSubjectId());
-        cursorSingleSubject.moveToFirst();
-        Subject selectedSubject = subjects.get(adapterSubjects.selectedSubjectPosition);
-        cursorSingleSubject.close();
+        int selectedSubjectId = selectedRecord.getSubjectId();
         File imageSensationsFront = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
-                + "/" + selectedRecord.getN() + "/complete_picture_f.png");
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubjectId
+                + "/" + selectedRecord.getN() + "/" + selectedSubjectId + "_" + selectedRecord.getN() + "_fig_f.png");
         File imageSensationsBack = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
-                + "/" + selectedRecord.getN() + "/complete_picture_b.png");
+                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubjectId
+                + "/" + selectedRecord.getN() + "/" + selectedSubjectId + "_" + selectedRecord.getN() + "_fig_b.png");
         Log.e("PATH", imageSensationsFront.getAbsolutePath());
         Bitmap sensationsFront = BitmapFactory.decodeFile(imageSensationsFront.getAbsolutePath());
         Bitmap sensationsBack = BitmapFactory.decodeFile(imageSensationsBack.getAbsolutePath());
@@ -383,6 +496,6 @@ public class SubjectFragment extends Fragment {
         boolean show_names = sharedPref.getBoolean(getString(R.string.sp_show_names), false);
         adapterSubjects.setShowNames(show_names);
         populateListSubjects();
-        populateListRecords();
+        populateListRecords(false);
     }
 }
