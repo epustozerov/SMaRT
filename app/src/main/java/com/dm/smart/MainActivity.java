@@ -154,8 +154,7 @@ public class MainActivity extends AppCompatActivity {
                                 // create a configuration object
                                 AlertDialog alertDialog =
                                         CustomAlertDialogs.showInstructions(this, true,
-                                                new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-                                                        "SMaRT/config/" + patientConfiguration.getInstructionsPath()));
+                                                new File(getFilesDir(), patientConfiguration.getInstructionsPath()));
                                 alertDialog.show();
                             }
                         }
@@ -483,10 +482,10 @@ public class MainActivity extends AppCompatActivity {
                         Objects.requireNonNull(uri.getPath()).substring(uri.getPath().indexOf("Documents") + 9);
                 // remove the file name from the path
                 config_path_from_uri = config_path_from_uri.substring(0, config_path_from_uri.lastIndexOf("/"));
-                File configFolderOut = new File(
+                File configFolderOutBF = new File(
                         String.valueOf(Paths.get(String.valueOf(Environment.getExternalStoragePublicDirectory(
                                 Environment.DIRECTORY_DOCUMENTS)), config_path_from_uri, "body_figures")));
-                File[] files = configFolderOut.listFiles();
+                File[] files = configFolderOutBF.listFiles();
                 for (File file : Objects.requireNonNull(files)) {
                     File outFile = new File(configFolder, file.getName());
                     try {
@@ -497,9 +496,34 @@ public class MainActivity extends AppCompatActivity {
                         out.flush();
                         out.close();
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        Toast.makeText(this, R.string.toast_body_figures_not_copied, Toast.LENGTH_LONG).show();
                     }
                 }
+
+                // copy also all instruction files listed in the config file
+                try {
+                    IniPreferences iniPreference = new IniPreferences(new Ini(new File(getFilesDir(), "config.ini")));
+                    String[] configNames = iniPreference.childrenNames();
+                    for (String configName : configNames) {
+                        Configuration configuration = new Configuration(getFilesDir() + "/config.ini", configName);
+                        configuration.formConfig("neutral");
+                        String instructionsPath = configuration.getInstructionsPath();
+                        File instructionsFile = new File(getFilesDir(), instructionsPath);
+                        File configFolderOut = new File(
+                                String.valueOf(Paths.get(String.valueOf(Environment.getExternalStoragePublicDirectory(
+                                        Environment.DIRECTORY_DOCUMENTS)), config_path_from_uri)));
+                        in = Files.newInputStream(new File(configFolderOut, instructionsPath).toPath());
+                        out = Files.newOutputStream(instructionsFile.toPath());
+                        copyFile(in, out);
+                        in.close();
+                        out.flush();
+                        out.close();
+                    }
+                } catch (IOException | BackingStoreException e) {
+                    // show the toast message that the instructions were not copied
+                    Toast.makeText(this, R.string.toast_instructions_not_copied, Toast.LENGTH_LONG).show();
+                }
+
                 try {
                     File outFile = new File(getFilesDir(), "config.ini");
                     AlertDialog dialog = getAlertDialogSelectConfigType(String.valueOf(outFile));

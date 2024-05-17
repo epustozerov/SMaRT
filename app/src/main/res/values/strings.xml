@@ -16,6 +16,8 @@
     <string name="toast_select_intensity">⇛ Please first select an intensity on the scale</string>
     <string name="toast_empty_name">Please first enter a name for the subject</string>
     <string name="toast_media_permission">Please grant the app permission to access the media</string>
+    <string name="toast_body_figures_not_copied">Some of the body figures could not be copied</string>
+    <string name="toast_instructions_not_copied">Some of the instruction images could not be copied</string>
     <string name="textview_max">max</string>
     <string name="textview_min">min</string>
     <string name="to_drawing">To drawing</string>
