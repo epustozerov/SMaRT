@@ -15,6 +15,7 @@
     <string name="toast_select_tag">⇚ Please first select a sensation tag(s)</string>
     <string name="toast_select_intensity">⇛ Please first select an intensity on the scale</string>
     <string name="toast_empty_name">Please first enter a name for the subject</string>
+    <string name="toast_media_permission">Please grant the app permission to access the media</string>
     <string name="textview_max">max</string>
     <string name="textview_min">min</string>
     <string name="to_drawing">To drawing</string>
