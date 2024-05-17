@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/navigation_subject" android:icon="@drawable/ic_baseline_account_circle_24" android:title="@string/subject" />
+    <item
+        android:id="@+id/navigation_subject"
+        android:icon="@drawable/ic_baseline_account_circle_24"
+        android:title="@string/subject" />
 
-    <item android:id="@+id/navigation_add_sense" android:icon="@drawable/ic_baseline_accessibility_new_24"
+    <item
+        android:id="@+id/navigation_add_sense"
+        android:icon="@drawable/ic_baseline_accessibility_new_24"
         android:title="@string/title_add_sense" />
 
 </menu>

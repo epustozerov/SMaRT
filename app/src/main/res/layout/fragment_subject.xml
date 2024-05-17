@@ -1,60 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     tools:context=".SubjectFragment">
 
-    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="50dp"
-        android:orientation="vertical" tools:layout_editor_absoluteX="1dp" tools:layout_editor_absoluteY="1dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="50dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="1dp">
 
-        <LinearLayout android:layout_width="match_parent" android:layout_height="70dp" android:orientation="horizontal"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:orientation="horizontal"
             tools:ignore="TextSizeCheck">
 
-            <EditText android:id="@+id/edittext_subject_name" android:layout_width="0sp" android:layout_height="match_parent"
-                android:layout_weight="0.5" android:autofillHints="@string/new_subject" android:ems="10" android:hint="@string/new_subject"
-                android:inputType="textPersonName" android:state_focused="false" android:textSize="20sp"
+            <EditText
+                android:id="@+id/edittext_subject_name"
+                android:layout_width="0sp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:autofillHints="@string/new_subject"
+                android:ems="10"
+                android:hint="@string/new_subject"
+                android:inputType="textPersonName"
+                android:state_focused="false"
+                android:textSize="20sp"
                 tools:ignore="LabelFor,VisualLintTextFieldSize" />
 
-            <LinearLayout android:layout_width="0sp" android:layout_height="match_parent" android:layout_weight="0.2"
+            <LinearLayout
+                android:layout_width="0sp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.2"
                 android:orientation="vertical">
 
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="5sp"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5sp"
                     android:text="@string/body_scheme" />
 
-                <Spinner android:id="@+id/spinner_body_scheme" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:minHeight="48dp" tools:ignore="TouchTargetSizeCheck" />
+                <Spinner
+                    android:id="@+id/spinner_body_scheme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    tools:ignore="TouchTargetSizeCheck" />
 
             </LinearLayout>
 
-            <Button android:id="@+id/button_add_subject" android:layout_width="0sp" android:layout_height="match_parent"
-                android:layout_weight="0.3" android:text="@string/add_new_subject"
+            <Button
+                android:id="@+id/button_add_subject"
+                android:layout_width="0sp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.3"
+                android:text="@string/add_new_subject"
                 tools:ignore="VisualLintButtonSize" />
 
         </LinearLayout>
 
-        <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:layout_marginTop="20sp"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="20sp"
             android:baselineAligned="false">
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_marginTop="20sp"
-                android:layout_marginEnd="10sp" android:layout_weight="1" android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginTop="20sp"
+                android:layout_marginEnd="10sp"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/subjects"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/subjects"
                     android:textSize="20sp" />
 
-                <androidx.recyclerview.widget.RecyclerView android:id="@+id/list_view_subjects" android:layout_width="match_parent"
-                    android:layout_height="match_parent" android:layout_marginTop="10sp" android:longClickable="false">
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/list_view_subjects"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="10sp"
+                    android:longClickable="false">
 
                 </androidx.recyclerview.widget.RecyclerView>
 
             </LinearLayout>
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_marginStart="10sp"
-                android:layout_marginTop="20sp" android:layout_weight="1" android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="10sp"
+                android:layout_marginTop="20sp"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/records"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/records"
                     android:textSize="20sp" />
 
-                <androidx.recyclerview.widget.RecyclerView android:id="@+id/list_view_records" android:layout_width="match_parent"
-                    android:layout_height="match_parent" android:layout_marginTop="10sp" android:layout_marginBottom="20dp">
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/list_view_records"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="10sp"
+                    android:layout_marginBottom="20dp">
 
                 </androidx.recyclerview.widget.RecyclerView>
 

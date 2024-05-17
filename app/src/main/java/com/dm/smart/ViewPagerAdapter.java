@@ -1,8 +1,10 @@
 package com.dm.smart;
 
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
@@ -21,6 +23,7 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
         this.fragmentManager = fragmentManager;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @NonNull
     @Override
     public Fragment createFragment(int position) {
