@@ -27,42 +27,16 @@ public class Configuration {
     String[] bodySchemes;
     String[] selectedBodySchemes;
     String[] sensationTypes;
-    private String[] colorsSymptoms;
-    private String instructionsPath;
     String textScaleMax;
     String textScaleMin;
+    private String[] colorsSymptoms;
+    private String instructionsPath;
 
-
-    public String getConfigName() {
-        return configName;
-    }
 
     public Configuration(String configPath, String configName) {
         this.configPath = configPath;
         this.configName = configName;
     }
-
-    public void formConfig(String selectedSubjectBodyScheme) throws IOException {
-        IniPreferences iniPreference;
-        iniPreference = new IniPreferences(new Ini(new File(this.configPath)));
-        this.sensationTypes = iniPreference.node(this.configName).get("sensation_types", "").split(", ");
-        this.colorsSymptoms = iniPreference.node(this.configName).get("colors_symptoms", "").split(", ");
-        this.bodySchemes = iniPreference.node(this.configName).get("body_schemes", "").split(", ");
-        this.instructionsPath = iniPreference.node(this.configName).get("instructions", "instructions.png");
-        this.textScaleMax = iniPreference.node(this.configName).get("text_scale_max", "");
-        this.textScaleMin = iniPreference.node(this.configName).get("text_scale_min", "");
-        this.formBodySchemes(selectedSubjectBodyScheme);
-    }
-
-
-    public void formBodySchemes(String bodyScheme) {
-        this.selectedBodySchemes = new String[4];
-        this.selectedBodySchemes[0] = "body_" + bodyScheme + "_front.png";
-        this.selectedBodySchemes[1] = "body_" + bodyScheme + "_front_mask.png";
-        this.selectedBodySchemes[2] = "body_" + bodyScheme + "_back.png";
-        this.selectedBodySchemes[3] = "body_" + bodyScheme + "_back_mask.png";
-    }
-
 
     public static void initDefaultConfig(Context context) {
 
@@ -179,6 +153,30 @@ public class Configuration {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
+    }
+
+    public String getConfigName() {
+        return configName;
+    }
+
+    public void formConfig(String selectedSubjectBodyScheme) throws IOException {
+        IniPreferences iniPreference;
+        iniPreference = new IniPreferences(new Ini(new File(this.configPath)));
+        this.sensationTypes = iniPreference.node(this.configName).get("sensation_types", "").split(", ");
+        this.colorsSymptoms = iniPreference.node(this.configName).get("colors_symptoms", "").split(", ");
+        this.bodySchemes = iniPreference.node(this.configName).get("body_schemes", "").split(", ");
+        this.instructionsPath = iniPreference.node(this.configName).get("instructions", "instructions.png");
+        this.textScaleMax = iniPreference.node(this.configName).get("text_scale_max", "");
+        this.textScaleMin = iniPreference.node(this.configName).get("text_scale_min", "");
+        this.formBodySchemes(selectedSubjectBodyScheme);
+    }
+
+    public void formBodySchemes(String bodyScheme) {
+        this.selectedBodySchemes = new String[4];
+        this.selectedBodySchemes[0] = "body_" + bodyScheme + "_front.png";
+        this.selectedBodySchemes[1] = "body_" + bodyScheme + "_front_mask.png";
+        this.selectedBodySchemes[2] = "body_" + bodyScheme + "_back.png";
+        this.selectedBodySchemes[3] = "body_" + bodyScheme + "_back_mask.png";
     }
 
     public String[] getColorSymptoms() {

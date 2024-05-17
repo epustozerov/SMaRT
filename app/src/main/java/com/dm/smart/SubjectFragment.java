@@ -58,10 +58,10 @@ public class SubjectFragment extends Fragment {
     RecyclerViewAdapterSubjects adapterSubjects;
     RecyclerViewAdapterRecords adapterRecords;
     boolean currentViewFront;
-    private ArrayList<Subject> subjects;
-    private ArrayList<Record> records;
     boolean showNames;
     SharedPreferences sharedPref;
+    private ArrayList<Subject> subjects;
+    private ArrayList<Record> records;
 
     static Subject extractSubjectFromTheDB(Cursor cursor) {
         @SuppressLint("Range") int id = cursor.getInt(cursor.

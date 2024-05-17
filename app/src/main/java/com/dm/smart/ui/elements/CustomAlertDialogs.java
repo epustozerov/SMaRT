@@ -61,8 +61,6 @@ public class CustomAlertDialogs {
         } else {
             Bitmap bitmap = BitmapFactory.decodeFile(String.valueOf(instructionsPath));
             ImageView imageInstructions = alertView.findViewById(R.id.image_view_body);
-            // Drawable d = new BitmapDrawable(context.getResources(), bitmap);
-            // imageInstructions.setBackground(d);
             imageInstructions.setImageBitmap(bitmap);
         }
         builder.setView(alertView);

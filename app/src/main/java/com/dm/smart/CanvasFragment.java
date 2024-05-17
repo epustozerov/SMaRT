@@ -27,7 +27,6 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -61,6 +60,11 @@ import java.util.List;
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 public class CanvasFragment extends Fragment {
 
+    // Storage Permissions
+    private static final int READ_MEDIA_IMAGES = 1;
+    private static final String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_MEDIA_IMAGES
+    };
     private final List<String> sortedChoices = new ArrayList<>();
     public ArrayList<String> selectedSensations;
     public int color;
@@ -86,13 +90,27 @@ public class CanvasFragment extends Fragment {
     private int mShortAnimationDuration;
     private boolean allowOutsideDrawing = false;
 
-
     public CanvasFragment() {
     }
 
     public CanvasFragment(Bundle b) {
         color = b.getInt("color");
         dampenedColor = dampen(color);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_MEDIA_IMAGES);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    READ_MEDIA_IMAGES
+            );
+        }
     }
 
     @Override
@@ -189,7 +207,7 @@ public class CanvasFragment extends Fragment {
         buttonSensationsTool.setOnClickListener(v -> {
             AnimatorSet animSet = new AnimatorSet();
             if (tagsVisible) {
-                if (sortedChoices.size() == 0) {
+                if (sortedChoices.isEmpty()) {
                     if (showedToast != null) {
                         showedToast.cancel();
                     }
@@ -221,7 +239,7 @@ public class CanvasFragment extends Fragment {
         grayOverlay.setOnClickListener(v -> {
             AnimatorSet animSet = new AnimatorSet();
             if (tagsVisible) {
-                if (sortedChoices.size() == 0) {
+                if (sortedChoices.isEmpty()) {
                     if (showedToast != null) {
                         showedToast.cancel();
                     }
@@ -386,7 +404,7 @@ public class CanvasFragment extends Fragment {
 
         // Create buttons with sensations in the side panel
         View.OnClickListener choiceClickListener = v -> {
-            if (selectedSensations.size() == 0) {
+            if (selectedSensations.isEmpty()) {
                 ((LinearLayout) mCanvas.findViewById(R.id.drawn_sensations)).removeAllViews();
             }
             String selectedSensation = ((ToggleButton) v).getText().toString();
@@ -580,29 +598,6 @@ public class CanvasFragment extends Fragment {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
                 getResources().getDisplayMetrics());
     }
-
-
-    // Storage Permissions
-    private static final int READ_MEDIA_IMAGES = 1;
-    private static final String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_MEDIA_IMAGES
-    };
-
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-    public static void verifyStoragePermissions(Activity activity) {
-        // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_MEDIA_IMAGES);
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    READ_MEDIA_IMAGES
-            );
-        }
-    }
-
 
     public Bitmap setBodyImage(int bodyTypeId, boolean thumbed) {
         if (thumbed) {

@@ -56,12 +56,12 @@ import java.util.stream.Collectors;
 
 public class DrawFragment extends Fragment {
 
-    Configuration configuration;
     final Map<String, ArrayList<String>> persSensations = new HashMap<>();
     final Map<String, ArrayList<BodyDrawingView.Step>> persStepsFront = new HashMap<>();
     final Map<String, ArrayList<BodyDrawingView.Step>> persStepsBack = new HashMap<>();
     public ViewPager2 viewPager;
     public ViewPagerAdapter viewPagerAdapter;
+    Configuration configuration;
     List<Integer> colors;
     Lifecycle lifecycle;
 
