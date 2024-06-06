@@ -120,7 +120,7 @@ public class BodyDrawingView extends View {
             return;
         }
         if (w > 0 & h > 0) {
-            setBGImageZooming();
+            setBGImageZooming(this.backgroundImage);
             setZoomingBounds();
         }
     }
@@ -223,15 +223,18 @@ public class BodyDrawingView extends View {
                 for (Step step : steps) {
                     drawStep(step, 0, 0);
                 }
-                invalidate();
             } else {
                 freshSnapshot = Bitmap.createBitmap(mBGRect.width(), mBGRect.height(),
                         Bitmap.Config.ARGB_8888);
                 drawImageCanvas = new Canvas(freshSnapshot);
                 drawImageCanvas.drawBitmap(freshSnapshot, 0, 0, null);
                 snapshot = freshSnapshot;
-                invalidate();
             }
+            // After a new drawing is added, notify the listener
+            if (onDrawingChangeListener != null) {
+                onDrawingChangeListener.onDrawingChange();
+            }
+            invalidate();
         }
     }
 
@@ -245,7 +248,7 @@ public class BodyDrawingView extends View {
         }
     }
 
-    private void setBGImageZooming() {
+    private void setBGImageZooming(Bitmap backgroundImage) {
         int imgW = backgroundImage.getWidth();
         int imgH = backgroundImage.getHeight();
         RectF imgRect = new RectF(0, 0, imgW, imgH);
@@ -407,12 +410,26 @@ public class BodyDrawingView extends View {
                 step.intensity_mark = intensity_mark;
             }
         }
+        // After a new drawing is added, notify the listener
+        if (onDrawingChangeListener != null) {
+            onDrawingChangeListener.onDrawingChange();
+        }
         invalidate();
         return true;
     }
 
     public void setAllowOutsideDrawing(boolean allowOutsideDrawing) {
         this.allowOutsideDrawing = allowOutsideDrawing;
+    }
+
+    public interface OnDrawingChangeListener {
+        void onDrawingChange();
+    }
+
+    private OnDrawingChangeListener onDrawingChangeListener;
+
+    public void setOnDrawingChangeListener(OnDrawingChangeListener listener) {
+        this.onDrawingChangeListener = listener;
     }
 
     static class Step {

@@ -5,25 +5,37 @@
         <item>"body_figures_neutral"</item>
         <item>"body_figures_female"</item>
         <item>"body_figures_male"</item>
-
     </array>
-    <array name="body_figures_neutral">
+
+    <array name="body_views">
+        <item>"front"</item>
+        <item>"back"</item>
+    </array>
+
+    <array name="body_figures_neutral_main">
         <item>@drawable/body_neutral_front</item>
-        <item>@drawable/body_neutral_front_mask</item>
         <item>@drawable/body_neutral_back</item>
+    </array>
+    <array name="body_figures_neutral_mask">
+        <item>@drawable/body_neutral_front_mask</item>
         <item>@drawable/body_neutral_back_mask</item>
     </array>
-    <array name="body_figures_female">
+
+    <array name="body_figures_female_main">
         <item>@drawable/body_female_front</item>
-        <item>@drawable/body_female_front_mask</item>
         <item>@drawable/body_female_back</item>
+    </array>
+    <array name="body_figures_female_mask">
+        <item>@drawable/body_female_front_mask</item>
         <item>@drawable/body_female_back_mask</item>
     </array>
-    <array name="body_figures_male">
+
+    <array name="body_figures_male_main">
         <item>@drawable/body_male_front</item>
-        <item>@drawable/body_male_front_mask</item>
         <item>@drawable/body_male_back</item>
+    </array>
+    <array name="body_figures_male_mask">
+        <item>@drawable/body_male_front_mask</item>
         <item>@drawable/body_male_back_mask</item>
     </array>
-
 </resources>

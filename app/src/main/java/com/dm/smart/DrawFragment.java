@@ -56,9 +56,8 @@ import java.util.stream.Collectors;
 
 public class DrawFragment extends Fragment {
 
-    final Map<String, ArrayList<String>> persSensations = new HashMap<>();
-    final Map<String, ArrayList<BodyDrawingView.Step>> persStepsFront = new HashMap<>();
-    final Map<String, ArrayList<BodyDrawingView.Step>> persStepsBack = new HashMap<>();
+    final Map<String, ArrayList<String>> sensationsList = new HashMap<>();
+    Map<String, List<List<BodyDrawingView.Step>>> stepsList = new HashMap<>();
     public ViewPager2 viewPager;
     public ViewPagerAdapter viewPagerAdapter;
     Configuration configuration;
@@ -151,7 +150,6 @@ public class DrawFragment extends Fragment {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                updateGeneralViewGlobal();
             }
         });
 
@@ -192,10 +190,7 @@ public class DrawFragment extends Fragment {
 
         // if this is not the first tab, update the general view
         if (newPageIndex > 0) {
-            Runnable runnable = () -> {
-                updateGeneralViewGlobal();
-                viewPager.setCurrentItem(newPageIndex);
-            };
+            Runnable runnable = () -> viewPager.setCurrentItem(newPageIndex);
             viewPager.post(runnable);
         }
 
@@ -292,188 +287,90 @@ public class DrawFragment extends Fragment {
             int width = 2200;
             Bitmap.Config config = Bitmap.Config.ARGB_8888;
 
+            // Create a txt file, put allSteps in it
+            StringBuilder allSteps = new StringBuilder();
+
+            // Create a merged bitmap for each BodyDrawingView
+            List<Bitmap> mergedBitmaps = new ArrayList<>();
+            List<String> sensationsString = new ArrayList<>();
+            List<Integer> sensationsColors = new ArrayList<>();
+
             for (int i = 0; i < createdWindows; i++) {
                 CanvasFragment cf =
                         (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
                 if (cf != null) {
-                    if (cf.bodyViewFront.snapshot != null) {
-                        height = cf.bodyViewFront.snapshot.getHeight();
-                        width = cf.bodyViewFront.snapshot.getWidth();
-                        config = cf.bodyViewFront.snapshot.getConfig();
-                        break;
-                    } else if (cf.bodyViewBack.snapshot != null) {
-                        height = cf.bodyViewBack.snapshot.getHeight();
-                        width = cf.bodyViewBack.snapshot.getWidth();
-                        config = cf.bodyViewBack.snapshot.getConfig();
-                        break;
+                    for (int j = 0; j < cf.bodyViews.length; j++) {
+                        SaveSnapshotTask.doInBackground(
+                                cf.bodyViews[j].snapshot, directory, baseName + "_e" + (i + 1) + "_f" + (j + 1) + ".png");
+
+                        // Create a merged bitmap for this BodyDrawingView if it doesn't exist
+                        if (mergedBitmaps.size() <= j) {
+                            mergedBitmaps.add(Bitmap.createBitmap(width, height, config));
+                        }
+
+                        // Add this snapshot to the merged bitmap
+                        if (cf.bodyViews[j].snapshot != null) {
+                            new Canvas(mergedBitmaps.get(j)).drawBitmap(cf.bodyViews[j].snapshot, 0f, 0f, null);
+                        }
+
+                        // Form the sensationsString and sensationsColors
+                        if (!cf.selectedSensations.isEmpty()) {
+                            StringBuilder sensationsStringSingle = new StringBuilder();
+                            for (int k = 0; k < cf.selectedSensations.size(); k++) {
+                                // check if the sensation is already in sensationsString, if not, add it
+                                if (!sensationsStringSingle.toString().contains(cf.selectedSensations.get(k))) {
+                                    sensationsStringSingle.append(cf.selectedSensations.get(k));
+                                    if (k < cf.selectedSensations.size() - 1) sensationsStringSingle.append(", ");
+                                }
+                            }
+                            // if sensationsStringSingle is not presented in sensationsString, add it
+                            if (!sensationsString.contains(sensationsStringSingle.toString())) {
+                                sensationsString.add(sensationsStringSingle.toString());
+                                sensationsColors.add(colors.get(i % colors.size()));
+                            }
+                        }
+
+                        // Add the steps to allSteps
+                        if (!cf.bodyViews[j].steps.isEmpty()) { // Only append new lines when there are steps
+                            for (int k = 0; k < cf.bodyViews[j].steps.size(); k++) {
+                                allSteps.append("Figure ").append(j + 1).append(" "); // Append the body figure index
+                                allSteps.append(cf.selectedSensations).append(": ");
+                                int intentensity = cf.bodyViews[j].steps.get(k).intensity_mark;
+                                intentensity = 100 - intentensity;
+                                allSteps.append(intentensity).append(" (color: ");
+                                int color = cf.bodyViews[j].steps.get(k).brush.paint.getColor();
+                                String color16bit = String.format("#%08X", color);
+                                allSteps.append(color16bit).append(")\n");
+                            }
+                        }
                     }
                 }
             }
 
-            // Create a txt file, put allStepsFront and allStepsBack in it
-            StringBuilder allStepsFront = new StringBuilder();
-            StringBuilder allStepsBack = new StringBuilder();
-            for (int i = 0; i < createdWindows; i++) {
-                CanvasFragment cf =
-                        (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
-                if (cf != null) {
-                    for (int j = 0; j < cf.bodyViewFront.steps.size(); j++) {
-                        allStepsFront.append(cf.selectedSensations).append(": ");
-                        int intentensity = cf.bodyViewFront.steps.get(j).intensity_mark;
-                        intentensity = 100 - intentensity;
-                        allStepsFront.append(intentensity).append(" (color: ");
-                        int color = cf.bodyViewFront.steps.get(j).brush.paint.getColor();
-                        String color16bit = String.format("#%08X", color);
-                        allStepsFront.append(color16bit).append(")\n");
-                    }
-                    allStepsFront.append("\n");
-                    for (int j = 0; j < cf.bodyViewBack.steps.size(); j++) {
-                        allStepsBack.append(cf.selectedSensations).append(": ");
-                        int intentensity = cf.bodyViewFront.steps.get(j).intensity_mark;
-                        intentensity = 100 - intentensity;
-                        allStepsBack.append(intentensity).append(" (color: ");
-                        int color = cf.bodyViewBack.steps.get(j).brush.paint.getColor();
-                        String color16bit = String.format("#%08X", color);
-                        allStepsBack.append(color16bit).append(")\n");
-                    }
-                    allStepsBack.append("\n");
-                }
+            // Save the merged bitmaps and full pictures
+            for (int j = 0; j < mergedBitmaps.size(); j++) {
+                SaveSnapshotTask.doInBackground(mergedBitmaps.get(j), directory, baseName + "_" + (j + 1) + ".png");
+                assert cf_base != null;
+                Bitmap full = makeFullPicture(mergedBitmaps.get(j),
+                        cf_base.bodyViews[j].backgroundImage, sensationsString, sensationsColors);
+                SaveSnapshotTask.doInBackground(full, directory, baseName + "_fig_f" + (j + 1) + ".png");
             }
+
             // create a txt file, overwrite automatically if it exists
             File textFile = new File(directory, baseName + ".txt");
             FileWriter writer;
             try {
                 writer = new FileWriter(textFile);
-                writer.append("Front\n");
-                writer.append(allStepsFront);
-                writer.append("Back\n");
-                writer.append(allStepsBack);
+                writer.append(allSteps);
                 writer.flush();
                 writer.close();
             } catch (IOException e) {
                 // do nothing
             }
-
-            Bitmap merged_f = Bitmap.createBitmap(width, height, config);
-            Bitmap merged_b = Bitmap.createBitmap(width, height, config);
-            Canvas canvasMergedFront = new Canvas(merged_f);
-            Canvas canvasMergedBack = new Canvas(merged_b);
-
-            endTime = SystemClock.elapsedRealtime();
-            elapsedMilliSeconds = endTime - startTime;
-            elapsedSeconds = elapsedMilliSeconds / 1000.0;
-            Log.e("STORAGE", "Storage init elapsed time: " + elapsedSeconds);
-
-            for (int i = 0; i < createdWindows; i++) {
-                CanvasFragment cf =
-                        (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
-                assert cf != null;
-                SaveSnapshotTask.doInBackground(
-                        cf.bodyViewFront.snapshot, directory, baseName + "_" + (i + 1) + "_f.png");
-                SaveSnapshotTask.doInBackground(
-                        cf.bodyViewBack.snapshot, directory, baseName + "_" + (i + 1) + "_b.png");
-                if (cf.bodyViewFront.snapshot != null)
-                    canvasMergedFront.drawBitmap(cf.bodyViewFront.snapshot, 0f, 0f, null);
-                if (cf.bodyViewBack.snapshot != null)
-                    canvasMergedBack.drawBitmap(cf.bodyViewBack.snapshot, 0f, 0f, null);
-            }
-            SaveSnapshotTask.doInBackground(merged_f, directory, baseName + "_f.png");
-            SaveSnapshotTask.doInBackground(merged_b, directory, baseName + "_b.png");
-            assert cf_base != null;
-            Bitmap full_f = makeFullPicture(merged_f, cf_base.bodyViewFront.backgroundImage, sensations.toString());
-            SaveSnapshotTask.doInBackground(full_f, directory, baseName + "_fig_f.png");
-            Bitmap full_b = makeFullPicture(merged_b, cf_base.bodyViewBack.backgroundImage, sensations.toString());
-            SaveSnapshotTask.doInBackground(full_b, directory, baseName + "_fig_b.png");
-            endTime = SystemClock.elapsedRealtime();
-            elapsedMilliSeconds = endTime - startTime;
-            elapsedSeconds = elapsedMilliSeconds / 1000.0;
-            Log.e("STORAGE", "Finalization elapsed time: " + elapsedSeconds);
-
-            // Config
-            try {
-                Configuration.initDefaultConfig(requireActivity());
-            } catch (Exception e) {
-                //noinspection CallToPrintStackTrace
-                e.printStackTrace();
-            }
         }
     }
 
-    @SuppressLint("NewApi")
-    void updateGeneralViewGlobal() {
-        int createdWindows = viewPagerAdapter.getItemCount();
-
-        if (createdWindows > 0) {
-            int height = 1494;
-            int width = 2200;
-            Bitmap.Config config = Bitmap.Config.ARGB_8888;
-
-            for (int i = 0; i < createdWindows; i++) {
-                CanvasFragment cf =
-                        (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
-                if (cf != null) {
-                    if (cf.bodyViewFront.snapshot != null) {
-                        height = cf.bodyViewFront.snapshot.getHeight();
-                        width = cf.bodyViewFront.snapshot.getWidth();
-                        config = cf.bodyViewFront.snapshot.getConfig();
-                        break;
-                    } else if (cf.bodyViewBack.snapshot != null) {
-                        height = cf.bodyViewBack.snapshot.getHeight();
-                        width = cf.bodyViewBack.snapshot.getWidth();
-                        config = cf.bodyViewBack.snapshot.getConfig();
-                        break;
-                    }
-                }
-            }
-
-            // Create the merged image with all sensations
-            Bitmap merged_f = Bitmap.createBitmap(width, height, config);
-            Bitmap merged_b = Bitmap.createBitmap(width, height, config);
-            Canvas canvasMergedFront = new Canvas(merged_f);
-            Canvas canvasMergedBack = new Canvas(merged_b);
-            for (int i = 0; i < createdWindows; i++) {
-                if (viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i) == null) continue;
-                CanvasFragment cf =
-                        (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
-                assert cf != null;
-                if (cf.bodyViewFront.snapshot != null)
-                    canvasMergedFront.drawBitmap(cf.bodyViewFront.snapshot, 0f, 0f, null);
-                if (cf.bodyViewBack.snapshot != null)
-                    canvasMergedBack.drawBitmap(cf.bodyViewBack.snapshot, 0f, 0f, null);
-            }
-
-            // Update the general view of each fragment
-            for (int i = 0; i < createdWindows; i++) {
-                if (viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i) == null) continue;
-                CanvasFragment cf =
-                        (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
-                assert cf != null;
-                cf.generalViewFront = merged_f;
-                cf.generalViewBack = merged_b;
-                // set front or back image
-                if (cf.currentStateIsFront) {
-                    Bitmap background = cf.bodyViewFront.backgroundImage;
-                    Bitmap fullPicture = Bitmap.createBitmap(background.getWidth(),
-                            background.getHeight() + 100, background.getConfig());
-                    Canvas canvas = new Canvas(fullPicture);
-                    canvas.drawBitmap(background, 0f, 0f, null);
-                    canvas.drawBitmap(merged_f, 0f, 0f, null);
-                    cf.buttonCompleteView.setImageBitmap(Bitmap.createScaledBitmap(fullPicture, 149, 220, true));
-                } else {
-                    Bitmap background = cf.bodyViewBack.backgroundImage;
-                    Bitmap fullPicture = Bitmap.createBitmap(background.getWidth(),
-                            background.getHeight() + 100, background.getConfig());
-                    Canvas canvas = new Canvas(fullPicture);
-                    canvas.drawBitmap(background, 0f, 0f, null);
-                    canvas.drawBitmap(merged_b, 0f, 0f, null);
-                    cf.buttonCompleteView.setImageBitmap(Bitmap.createScaledBitmap(fullPicture, 149, 220, true));
-                }
-            }
-        }
-    }
-
-    Bitmap makeFullPicture(Bitmap sensations, Bitmap background, String text_sensations) {
-        ArrayList<String> listSensations = new ArrayList<>(Arrays.asList(text_sensations.split(";")));
+    Bitmap makeFullPicture(Bitmap sensations, Bitmap background, List<String> listSensations, List<Integer> colors) {
         Bitmap fullPicture = Bitmap.createBitmap(background.getWidth(),
                 background.getHeight() + 100 * listSensations.size(), background.getConfig());
         Canvas canvas = new Canvas(fullPicture);
@@ -481,8 +378,6 @@ public class DrawFragment extends Fragment {
         canvas.drawBitmap(sensations, 0f, 0f, null);
         Paint paint = new Paint();
         paint.setTextSize(80);
-        List<Integer> colors = Arrays.stream(requireActivity().getResources().
-                getIntArray(R.array.colors_symptoms)).boxed().collect(Collectors.toList());
         for (int i = 0; i < listSensations.size(); i++) {
             paint.setColor(colors.get(i));
             canvas.drawText(listSensations.get(i).trim(), 0, background.getHeight() + 100 * i, paint);

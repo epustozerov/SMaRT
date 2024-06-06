@@ -97,9 +97,35 @@
                             android:layout_height="match_parent" />
 
                         <com.dm.smart.BodyDrawingView
-                            android:id="@+id/drawing_view_back"
+                            android:id="@+id/drawing_view_back1"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent" />
+
+                        <com.dm.smart.BodyDrawingView
+                            android:id="@+id/drawing_view_back2"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+
+                        <com.dm.smart.BodyDrawingView
+                            android:id="@+id/drawing_view_back3"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+
+                        <com.dm.smart.BodyDrawingView
+                            android:id="@+id/drawing_view_back4"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+
+                        <com.dm.smart.BodyDrawingView
+                            android:id="@+id/drawing_view_back5"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+
+                        <LinearLayout
+                            android:id="@+id/body_views_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical" />
 
                         <FrameLayout
                             android:layout_width="wrap_content"
@@ -126,6 +152,8 @@
 
                             <TextView
                                 android:id="@+id/textview_switch_bodyview"
+                                android:contentDescription="@string/textview_next_view"
+                                android:text="@string/textview_next_view"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center|bottom"

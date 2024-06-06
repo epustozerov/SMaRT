@@ -286,33 +286,34 @@ public class SubjectFragment extends Fragment {
     }
 
     private void shareSensations() {
-        // Load front and back sensations images
-        Record selectedRecord =
-                adapterRecords.getItem(adapterRecords.selectedRecordPosition);
+        // Load all images from the directory
+        Record selectedRecord = adapterRecords.getItem(adapterRecords.selectedRecordPosition);
         Subject selectedSubject = subjects.get(adapterSubjects.selectedSubjectPosition);
-        File imageSensationsFront = new File(Environment.getExternalStoragePublicDirectory(
+        File directory = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
-                + "/" + selectedRecord.getN() + "/" + selectedSubject.getId() + "_" + selectedRecord.getN() + "_fig_f.png");
-        File imageSensationsBack = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
-                + "/" + selectedRecord.getN() + "/" + selectedSubject.getId() + "_" + selectedRecord.getN() + "_fig_b.png");
+                + "/" + selectedRecord.getN());
+
+        File[] imageFiles = directory.listFiles((dir, name) -> name.contains("fig"));
+
+        ArrayList<Uri> imageUris = new ArrayList<>();
+        if (imageFiles != null) {
+            for (File imageFile : imageFiles) {
+                Uri imageUri = FileProvider.getUriForFile(requireActivity(),
+                        BuildConfig.APPLICATION_ID + ".provider",
+                        imageFile);
+                imageUris.add(imageUri);
+            }
+        }
+
         // take a txt file with sensations
         File textFile = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubject.getId()
                 + "/" + selectedRecord.getN() + "/" + selectedSubject.getId() + "_" + selectedRecord.getN() + ".txt");
-        Uri imageSensationsFrontUri = FileProvider.getUriForFile(requireActivity(),
-                BuildConfig.APPLICATION_ID + ".provider",
-                imageSensationsFront);
-        Uri imageSensationsBackUri = FileProvider.getUriForFile(requireActivity(),
-                BuildConfig.APPLICATION_ID + ".provider",
-                imageSensationsBack);
         Uri textSensationsUri = FileProvider.getUriForFile(requireActivity(),
                 BuildConfig.APPLICATION_ID + ".provider",
                 textFile);
-        ArrayList<Uri> imageUris = new ArrayList<>();
-        imageUris.add(imageSensationsFrontUri);
-        imageUris.add(imageSensationsBackUri);
         imageUris.add(textSensationsUri);
+
         Intent shareIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         shareIntent.setType("image/png");
         shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
@@ -453,40 +454,47 @@ public class SubjectFragment extends Fragment {
     @SuppressLint("ResourceType")
     public void showMergedImageDialog() throws NoSuchFieldException, IllegalAccessException {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
-        @SuppressLint("InflateParams") View alertView =
-                getLayoutInflater().inflate(R.layout.alert_image, null);
+        View alertView = getLayoutInflater().inflate(R.layout.alert_image, null);
         ImageView imageViewBody = alertView.findViewById(R.id.image_view_body);
-        Record selectedRecord =
-                adapterRecords.getItem(adapterRecords.selectedRecordPosition);
+        Record selectedRecord = adapterRecords.getItem(adapterRecords.selectedRecordPosition);
         DBAdapter DBAdapter = new DBAdapter(requireActivity());
         DBAdapter.open();
         int selectedSubjectId = selectedRecord.getSubjectId();
-        File imageSensationsFront = new File(Environment.getExternalStoragePublicDirectory(
+
+        // Get the directory containing the images
+        File directory = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubjectId
-                + "/" + selectedRecord.getN() + "/" + selectedSubjectId + "_" + selectedRecord.getN() + "_fig_f.png");
-        File imageSensationsBack = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS) + "/SMaRT/" + selectedSubjectId
-                + "/" + selectedRecord.getN() + "/" + selectedSubjectId + "_" + selectedRecord.getN() + "_fig_b.png");
-        Log.e("PATH", imageSensationsFront.getAbsolutePath());
-        Bitmap sensationsFront = BitmapFactory.decodeFile(imageSensationsFront.getAbsolutePath());
-        Bitmap sensationsBack = BitmapFactory.decodeFile(imageSensationsBack.getAbsolutePath());
-        currentViewFront = true;
-        imageViewBody.setImageBitmap(sensationsFront);
-        imageViewBody.setOnClickListener(v -> reverseBodyView(imageViewBody, sensationsFront, sensationsBack));
+                + "/" + selectedRecord.getN());
+
+        // Get an array of files with "fig" in the name
+        File[] imageFiles = directory.listFiles((dir, name) -> name.contains("fig"));
+
+        // Create a list to store all the image paths
+        List<String> imagePaths = new ArrayList<>();
+        if (imageFiles != null) {
+            for (File imageFile : imageFiles) {
+                imagePaths.add(imageFile.getAbsolutePath());
+            }
+        }
+
+        // Load the first image
+        Bitmap firstImage = BitmapFactory.decodeFile(imagePaths.get(0));
+        imageViewBody.setImageBitmap(firstImage);
+
+        // Create a counter to keep track of the current image
+        final int[] currentImageIndex = {0};
+
+        // Set the onClickListener to cycle through the images
+        imageViewBody.setOnClickListener(v -> {
+            currentImageIndex[0] = (currentImageIndex[0] + 1) % imagePaths.size();
+            Bitmap nextImage = BitmapFactory.decodeFile(imagePaths.get(currentImageIndex[0]));
+            imageViewBody.setImageBitmap(nextImage);
+        });
+
         builder.setView(alertView);
         AlertDialog dialog = builder.create();
         alertView.findViewById(R.id.button_close).setOnClickListener(v -> dialog.dismiss());
         dialog.show();
-    }
-
-    private void reverseBodyView(ImageView imageViewBody, Bitmap sensationsFront, Bitmap sensationsBack) {
-        if (currentViewFront) {
-            imageViewBody.setImageBitmap(sensationsFront);
-            currentViewFront = false;
-        } else {
-            imageViewBody.setImageBitmap(sensationsBack);
-            currentViewFront = true;
-        }
     }
 
     @Override

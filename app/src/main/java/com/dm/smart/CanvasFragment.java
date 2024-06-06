@@ -3,6 +3,7 @@ package com.dm.smart;
 import static com.dm.smart.DrawFragment.dampen;
 import static com.dm.smart.DrawFragment.defineMinMaxColors;
 import static com.dm.smart.ui.elements.CustomAlertDialogs.showGeneralView;
+import static com.dm.smart.ui.elements.CustomAlertDialogs.showAddSensationDialog;
 import static com.dm.smart.ui.elements.CustomToasts.showToast;
 
 import android.Manifest;
@@ -12,7 +13,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -46,6 +46,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.dm.smart.ui.elements.CustomThumbDrawer;
 import com.rtugeek.android.colorseekbar.ColorSeekBar;
@@ -55,10 +56,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-public class CanvasFragment extends Fragment {
+public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawingChangeListener {
 
     // Storage Permissions
     private static final int READ_MEDIA_IMAGES = 1;
@@ -69,16 +72,13 @@ public class CanvasFragment extends Fragment {
     public ArrayList<String> selectedSensations;
     public int color;
     public LinearLayout tagContainerSensations;
-    public BodyDrawingView bodyViewFront;
-    public BodyDrawingView bodyViewBack;
-    public Bitmap generalViewFront;
-    public Bitmap generalViewBack;
-    public BodyDrawingView currentBodyView;
-    public BodyDrawingView hiddenBodyView;
+    public int activeBodyViewIndex;
+    public BodyDrawingView[] bodyViews;
+    public Bitmap[] generalView;
     ImageView buttonCompleteView;
     ImageView buttonBackView;
-    TypedArray bodyFigures;
-    boolean currentStateIsFront;
+    TypedArray bodyImages;
+    TypedArray bodyImagesMasks;
     Toast showedToast = null;
     private Brush currentBrush;
     private List<Brush> brushes;
@@ -90,7 +90,80 @@ public class CanvasFragment extends Fragment {
     private int mShortAnimationDuration;
     private boolean allowOutsideDrawing = false;
 
+    private SharedViewModel sharedViewModel;
+
     public CanvasFragment() {
+    }
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    public void onSensationAdded(String sensation) {
+        if (!sharedViewModel.isSensationAddedFromDialog() ||
+                !Objects.equals(getTag(), sharedViewModel.getActiveCanvasFragmentTag())) {
+            return;
+        }
+
+        sharedViewModel.setSensationAddedFromDialog(false);
+        if (selectedSensations.isEmpty()) {
+            ((LinearLayout) mCanvas.findViewById(R.id.drawn_sensations)).removeAllViews();
+        }
+        if (selectedSensations.contains(sensation)) {
+            selectedSensations.remove(sensation);
+        } else {
+            selectedSensations.add(sensation);
+        }
+        int index = sortedChoices.indexOf(sensation);
+        if (index < 0) {
+            ToggleButton b = new ToggleButton(getContext());
+            b.setBackground(requireContext().getDrawable(R.drawable.custom_radio));
+            b.setTextColor(Color.BLACK);
+            b.setTextOn(sensation);
+            b.setTextOff(sensation);
+            b.setText(sensation);
+            b.setPadding(Math.round(dp2px(8)), Math.round(dp2px(8)),
+                    Math.round(dp2px(8)), Math.round(dp2px(8)));
+            b.setOnClickListener(v -> {
+                String selectedSensation1 = ((ToggleButton) v).getText().toString();
+                if (selectedSensations.contains(selectedSensation1)) { // TODO
+                    selectedSensations.remove(selectedSensation1);
+                    b.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                } else {
+                    selectedSensations.add(selectedSensation1);
+                    b.setBackgroundTintList(ColorStateList.valueOf(dampenedColor));
+                }
+                updateTagContainerSensations();
+            });
+            b.setTag(sensation);
+            b.setBackgroundTintList(ColorStateList.valueOf(dampenedColor));
+            sortedChoices.add(sensation);
+            LinearLayout sensationsContainer = mCanvas.findViewById(R.id.sensations_container);
+            LinearLayout lastColumn = (LinearLayout) sensationsContainer.getChildAt(sensationsContainer.getChildCount() - 1);
+
+            // If the last column has less than 20 buttons, add the new button to it.
+            // Otherwise, create a new column and add the button to it.
+            if (lastColumn != null && lastColumn.getChildCount() < 20) {
+                lastColumn.addView(b, lastColumn.getChildCount() - 1); // Add the button above the "add sensation" button
+            } else {
+                LinearLayout newColumn = new LinearLayout(getContext());
+                newColumn.setOrientation(LinearLayout.VERTICAL);
+                newColumn.setLayoutParams(new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+                newColumn.addView(b);
+                sensationsContainer.addView(newColumn);
+            }
+            updateTagContainerSensations();
+        }
+    }
+
+    private void updateTagContainerSensations() {
+        tagContainerSensations.removeAllViews();
+        for (String selectedSensation : selectedSensations) {
+            TextView txt = new TextView(getContext());
+            txt.setText(selectedSensation);
+            txt.setPadding(Math.round(dp2px(6)), Math.round(dp2px(6)),
+                    Math.round(dp2px(6)), Math.round(dp2px(6)));
+            tagContainerSensations.addView(txt);
+        }
     }
 
     public CanvasFragment(Bundle b) {
@@ -119,15 +192,20 @@ public class CanvasFragment extends Fragment {
         initBrushes();
     }
 
-    @SuppressLint({"ClickableViewAccessibility", "UseCompatLoadingForDrawables", "ResourceType"})
+    @SuppressLint({"ClickableViewAccessibility", "UseCompatLoadingForDrawables", "ResourceType", "MissingInflatedId"})
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.e("DEBUG", "onCreateView of CanvasFragment " + getTag());
-        DrawFragment drawFragment = (DrawFragment) getParentFragment();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             verifyStoragePermissions(requireActivity());
         }
+
+        // Get the SharedViewModel
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
+        // Observe the LiveData
+        sharedViewModel.getSensation().observe(getViewLifecycleOwner(), this::onSensationAdded);
 
         String selectedSubjectBodyScheme = MainActivity.currentlySelectedSubject.getBodyScheme();
         SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
@@ -144,20 +222,19 @@ public class CanvasFragment extends Fragment {
             }
         } else {
             configuration = null;
-        }
-
-        currentStateIsFront = true;
-        if (!customConfig) {
             String currentlySelectedSubjectBodyScheme = MainActivity.currentlySelectedSubject.getBodyScheme();
             switch (currentlySelectedSubjectBodyScheme) {
                 case "männlich":
-                    bodyFigures = getResources().obtainTypedArray(R.array.body_figures_male);
+                    bodyImages = getResources().obtainTypedArray(R.array.body_figures_male_main);
+                    bodyImagesMasks = getResources().obtainTypedArray(R.array.body_figures_male_mask);
                     break;
                 case "weiblich":
-                    bodyFigures = getResources().obtainTypedArray(R.array.body_figures_female);
+                    bodyImages = getResources().obtainTypedArray(R.array.body_figures_female_main);
+                    bodyImagesMasks = getResources().obtainTypedArray(R.array.body_figures_female_mask);
                     break;
                 default:
-                    bodyFigures = getResources().obtainTypedArray(R.array.body_figures_neutral);
+                    bodyImages = getResources().obtainTypedArray(R.array.body_figures_neutral_main);
+                    bodyImagesMasks = getResources().obtainTypedArray(R.array.body_figures_neutral_mask);
                     break;
             }
         }
@@ -166,14 +243,7 @@ public class CanvasFragment extends Fragment {
             return mCanvas;
         }
         mCanvas = inflater.inflate(R.layout.fragment_canvas, container, false);
-        assert getParentFragment() != null;
-        ArrayList<String> savedSendations = ((DrawFragment) getParentFragment()).persSensations.get(getTag());
-        if (savedSendations != null) {
-            selectedSensations = savedSendations;
-        } else {
-            selectedSensations = new ArrayList<>();
-        }
-        tagContainerSensations = mCanvas.findViewById(R.id.drawn_sensations);
+
 
         // Show current fragment tag
         Log.e("RECREATION", "CanvasFragment");
@@ -181,20 +251,55 @@ public class CanvasFragment extends Fragment {
         // Init container with drawn sensations
         // Don't show the default text if there are more than 0 sensations
 
+        // Determine the number of body views based on the configuration
+        int numBodyViews = customConfig ? configuration.selectedBodyViews.length : 2;
+
         // Init body figures for drawing
-        bodyViewFront = mCanvas.findViewById(R.id.drawing_view_front);
-        bodyViewBack = mCanvas.findViewById(R.id.drawing_view_back);
-        if (customConfig) {
-            bodyViewFront.setBGImage(setBodyImage(configuration.selectedBodySchemes[0], false));
-            bodyViewFront.setMaskImage(setBodyImage(configuration.selectedBodySchemes[1], false));
-            bodyViewBack.setBGImage(setBodyImage(configuration.selectedBodySchemes[2], false));
-            bodyViewBack.setMaskImage(setBodyImage(configuration.selectedBodySchemes[3], false));
-        } else {
-            bodyViewFront.setBGImage(setBodyImage(bodyFigures.getResourceId(0, 0), false));
-            bodyViewFront.setMaskImage(setBodyImage(bodyFigures.getResourceId(1, 0), false));
-            bodyViewBack.setBGImage(setBodyImage(bodyFigures.getResourceId(2, 0), false));
-            bodyViewBack.setMaskImage(setBodyImage(bodyFigures.getResourceId(3, 0), false));
+        bodyViews = new BodyDrawingView[numBodyViews];
+
+        // Array of all possible view IDs
+        int[] viewIds = {
+                R.id.drawing_view_front,
+                R.id.drawing_view_back1,
+                R.id.drawing_view_back2,
+                R.id.drawing_view_back3,
+                R.id.drawing_view_back4,
+                R.id.drawing_view_back5
+        };
+
+        for (int i = 0; i < numBodyViews; i++) {
+            bodyViews[i] = mCanvas.findViewById(viewIds[i]);
+            if (i != 0) {
+                bodyViews[i].setVisibility(View.GONE);
+            }
         }
+
+        // If there is only one body view, hide the switch button
+        if (numBodyViews == 1) {
+            mCanvas.findViewById(R.id.textview_switch_bodyview).setVisibility(View.GONE);
+        }
+
+        // Set the remaining views to GONE
+        for (int i = numBodyViews; i < viewIds.length; i++) {
+            mCanvas.findViewById(viewIds[i]).setVisibility(View.GONE);
+        }
+
+        if (customConfig) {
+            for (int i = 0; i < configuration.selectedBodyViews.length; i++) {
+                bodyViews[i].setBGImage(setBodyImage(configuration.selectedBodyViews[i], false));
+                bodyViews[i].setMaskImage(setBodyImage(configuration.selectedBodyViews[i] + "_mask", false));
+                // set the visibility to GONE for all body views except the first one
+                if (i != 0) {
+                    bodyViews[i].setVisibility(View.GONE);
+                }
+            }
+        } else {
+            bodyViews[0].setBGImage(setBodyImage(bodyImages.getResourceId(0, 0), false));
+            bodyViews[0].setMaskImage(setBodyImage(bodyImagesMasks.getResourceId(0, 0), false));
+            bodyViews[1].setBGImage(setBodyImage(bodyImages.getResourceId(1, 0), false));
+            bodyViews[1].setMaskImage(setBodyImage(bodyImagesMasks.getResourceId(1, 0), false));
+        }
+
 
         // Init gray overlay
         final LinearLayout viewA = mCanvas.findViewById(R.id.viewA);
@@ -262,114 +367,45 @@ public class CanvasFragment extends Fragment {
         // Init the complete image view
         buttonCompleteView = mCanvas.findViewById(R.id.button_general_view);
         if (customConfig) {
-            if (currentStateIsFront) {
-                bodyViewFront.setBGImage(setBodyImage(configuration.selectedBodySchemes[0], false));
-            } else {
-                bodyViewBack.setBGImage(setBodyImage(configuration.selectedBodySchemes[2], false));
-            }
-
+            buttonCompleteView.setImageBitmap(setBodyImage(configuration.selectedBodyViews[0], true));
         } else {
-            if (currentStateIsFront) {
-                buttonCompleteView.setImageBitmap(setBodyImage(bodyFigures.getResourceId(0, 0), true));
-            } else {
-                buttonCompleteView.setImageBitmap(setBodyImage(bodyFigures.getResourceId(2, 0), true));
-            }
+            buttonCompleteView.setImageBitmap(setBodyImage(bodyImages.getResourceId(0, 0), true));
         }
         buttonCompleteView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        generalViewFront = Bitmap.createBitmap(bodyViewFront.backgroundImage.getWidth(),
-                bodyViewFront.backgroundImage.getHeight(), Bitmap.Config.ARGB_8888);
-        generalViewBack = Bitmap.createBitmap(bodyViewBack.backgroundImage.getWidth(),
-                bodyViewBack.backgroundImage.getHeight(), Bitmap.Config.ARGB_8888);
+        generalView = new Bitmap[bodyViews.length];
         buttonCompleteView.setOnClickListener(v -> {
-            if (currentStateIsFront) {
-                Bitmap generalViewFrontBitmap =
-                        Bitmap.createBitmap(bodyViewFront.backgroundImage.getWidth(), bodyViewFront.backgroundImage.getHeight(),
-                                Bitmap.Config.ARGB_8888);
-                Canvas generalViewFrontCanvas = new Canvas(generalViewFrontBitmap);
-                if (customConfig) {
-                    generalViewFrontCanvas.drawBitmap(setBodyImage(
-                            configuration.selectedBodySchemes[0], false), 0, 0, null);
-                } else {
-                    generalViewFrontCanvas.drawBitmap(setBodyImage(
-                            bodyFigures.getResourceId(0, 0), false), 0, 0, null);
-                }
-                generalViewFrontCanvas.drawBitmap(generalViewFront, 0, 0, null);
-                if (bodyViewFront.snapshot != null) {
-                    generalViewFrontCanvas.drawBitmap(bodyViewFront.snapshot, 0, 0, null);
-                }
-                AlertDialog alertDialog = showGeneralView(getContext(), generalViewFrontBitmap);
-                alertDialog.show();
-            } else {
-                Bitmap generalViewBackBitmap =
-                        Bitmap.createBitmap(bodyViewBack.backgroundImage.getWidth(), bodyViewBack.backgroundImage.getHeight(),
-                                Bitmap.Config.ARGB_8888);
-                Canvas generalViewBackCanvas = new Canvas(generalViewBackBitmap);
-                if (customConfig) {
-                    generalViewBackCanvas.drawBitmap(setBodyImage(
-                            configuration.selectedBodySchemes[0], false), 0, 0, null);
-                } else {
-                    generalViewBackCanvas.drawBitmap(setBodyImage(
-                            bodyFigures.getResourceId(2, 0), false), 0, 0, null);
-                }
-                generalViewBackCanvas.drawBitmap(generalViewBack, 0, 0, null);
-                if (bodyViewBack.snapshot != null) {
-                    generalViewBackCanvas.drawBitmap(bodyViewBack.snapshot, 0, 0, null);
-                }
-                AlertDialog alertDialog = showGeneralView(getContext(), generalViewBackBitmap);
-                alertDialog.show();
-            }
+            updateGeneralView(activeBodyViewIndex);
+            showGeneralView(requireContext(), generalView[activeBodyViewIndex]).show();
         });
 
         // Init switch of front and back body images
         mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         buttonBackView = mCanvas.findViewById(R.id.button_switch_bodyview);
-        final TextView textViewSwitchBody = mCanvas.findViewById(R.id.textview_switch_bodyview);
 
         if (customConfig) {
-            buttonBackView.setImageBitmap(setBodyImage(configuration.selectedBodySchemes[3], true));
+            if (configuration.selectedBodyViews.length < 2) {
+                buttonBackView.setVisibility(View.GONE);
+            } else {
+                buttonBackView.setImageBitmap(setBodyImage(configuration.selectedBodyViews[1], true));
+            }
         } else {
-            buttonBackView.setImageBitmap(setBodyImage(bodyFigures.getResourceId(3, 0), true));
+            buttonBackView.setImageBitmap(setBodyImage(bodyImages.getResourceId(1, 0), true));
         }
 
         buttonBackView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        textViewSwitchBody.setText(getResources().getString(R.string.back_view));
-        TypedArray finalBody_figures = bodyFigures;
         buttonBackView.setOnClickListener(v -> {
-            if (!currentStateIsFront) {
-                if (customConfig) {
-                    buttonBackView.setImageBitmap(setBodyImage(configuration.selectedBodySchemes[3], true));
-                } else {
-                    buttonBackView.setImageBitmap(setBodyImage(finalBody_figures.getResourceId(3, 0), true));
-                }
-                textViewSwitchBody.setText(getResources().getString(R.string.back_view));
-                currentStateIsFront = true;
-                currentBodyView = bodyViewBack;
-                hiddenBodyView = bodyViewFront;
-                assert drawFragment != null;
-                updateGeneralView(generalViewFront, bodyViewFront.backgroundImage);
-                updateBackView(bodyViewBack.snapshot, bodyViewBack.backgroundImage);
-            } else {
-                if (customConfig) {
-                    buttonBackView.setImageBitmap(setBodyImage(configuration.selectedBodySchemes[1], true));
-                } else {
-                    buttonBackView.setImageBitmap(setBodyImage(finalBody_figures.getResourceId(1, 0), true));
-                }
+            int nextBodyViewIndex = (activeBodyViewIndex + 1) % bodyViews.length;
+            int prevBodyViewIndex = (activeBodyViewIndex + bodyViews.length - 2) % bodyViews.length;
 
-                textViewSwitchBody.setText(getResources().getString(R.string.front_view));
-                currentStateIsFront = false;
-                currentBodyView = bodyViewFront;
-                hiddenBodyView = bodyViewBack;
-                assert drawFragment != null;
-                updateGeneralView(generalViewBack, bodyViewBack.backgroundImage);
-                updateBackView(bodyViewFront.snapshot, bodyViewFront.backgroundImage);
-            }
+            updateBackView(bodyViews[prevBodyViewIndex].snapshot, bodyViews[prevBodyViewIndex].backgroundImage);
+            updateGeneralView(nextBodyViewIndex);
             v.setEnabled(false);
-            hiddenBodyView.setAlpha(0f);
-            hiddenBodyView.setVisibility(View.VISIBLE);
+            bodyViews[(activeBodyViewIndex + 1) % bodyViews.length].setAlpha(1f); // Set alpha to 1
+            bodyViews[(activeBodyViewIndex + 1) % bodyViews.length].setVisibility(View.VISIBLE);
 
             // Animate the content view to 100% opacity, and clear any animation
             // listener set on the view
-            hiddenBodyView.animate()
+            bodyViews[(activeBodyViewIndex + 1) % bodyViews.length].animate()
                     .alpha(1f)
                     .setDuration(mShortAnimationDuration)
                     .setListener(null);
@@ -377,22 +413,29 @@ public class CanvasFragment extends Fragment {
             // Animate the loading view to 0% opacity. After the animation ends,
             // set its visibility to GONE as an optimization step
             // (it won't participate in layout passes, etc.)
-            currentBodyView.animate()
+            bodyViews[activeBodyViewIndex].animate()
                     .alpha(0f)
                     .setDuration(mShortAnimationDuration)
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
-                            currentBodyView.setVisibility(View.GONE);
-                            hiddenBodyView.setBrush(currentBrush);
-                            hiddenBodyView.setIntensity(currentIntensity);
-                            BodyDrawingView tmp = hiddenBodyView;
-                            hiddenBodyView = currentBodyView;
-                            currentBodyView = tmp;
+                            bodyViews[activeBodyViewIndex].setVisibility(View.GONE);
+                            bodyViews[(activeBodyViewIndex + 1) % bodyViews.length].setBrush(currentBrush);
+                            bodyViews[(activeBodyViewIndex + 1) % bodyViews.length].setIntensity(currentIntensity);
+                            activeBodyViewIndex = (activeBodyViewIndex + 1) % bodyViews.length;
                             v.setEnabled(true);
                         }
                     });
         });
+
+        assert getParentFragment() != null;
+        ArrayList<String> savedSendations = ((DrawFragment) getParentFragment()).sensationsList.get(getTag());
+        if (savedSendations != null) {
+            selectedSensations = savedSendations;
+        } else {
+            selectedSensations = new ArrayList<>();
+        }
+        tagContainerSensations = mCanvas.findViewById(R.id.drawn_sensations);
 
         // Init the list of sensations to select in the top panel
         LinearLayout.LayoutParams lp =
@@ -425,7 +468,9 @@ public class CanvasFragment extends Fragment {
             } else {
                 v.setBackgroundTintList(null);
                 sortedChoices.remove(selectedSensation);
-                tagContainerSensations.removeViewAt(index);
+                if (tagContainerSensations.getChildCount() > index) {
+                    tagContainerSensations.removeViewAt(index);
+                }
             }
         };
 
@@ -434,6 +479,12 @@ public class CanvasFragment extends Fragment {
             sensationTypes = configuration.sensationTypes;
         } else {
             sensationTypes = getResources().getStringArray(R.array.sensation_types);
+        }
+        for (String selectedSensation : selectedSensations) {
+            if (!Arrays.asList(sensationTypes).contains(selectedSensation)) {
+                sensationTypes = Arrays.copyOf(sensationTypes, sensationTypes.length + 1);
+                sensationTypes[sensationTypes.length - 1] = selectedSensation;
+            }
         }
 
         int numRows = (int) Math.floor((double) (getResources().getDisplayMetrics().heightPixels - 120) / dp2px(60));
@@ -457,14 +508,77 @@ public class CanvasFragment extends Fragment {
                 b.setPadding(Math.round(dp2px(8)), Math.round(dp2px(8)),
                         Math.round(dp2px(8)), Math.round(dp2px(8)));
                 b.setOnClickListener(choiceClickListener);
+                b.setTag(sensationTypes[index]);
                 column.addView(b);
+            }
+            // Add here one more button with the text "anderer Begriff" on it
+            if (i == numColumns - 1) {
+
+                // Create new layout parameters for the button
+                LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT, // Width
+                        LinearLayout.LayoutParams.WRAP_CONTENT  // Height
+                );
+                int topMarginInDp = 20;
+                int topMarginInPixels = Math.round(TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        topMarginInDp,
+                        getResources().getDisplayMetrics()
+                ));
+                buttonParams.setMargins(0, topMarginInPixels, 0, 0);
+
+                Button b_add_sens = new Button(getContext());
+                b_add_sens.setBackground(requireContext().getDrawable(R.drawable.custom_radio));
+                b_add_sens.setTextColor(Color.BLACK);
+                b_add_sens.setText(getResources().getString(R.string.other_sensation));
+                b_add_sens.setPadding(Math.round(dp2px(8)), Math.round(dp2px(8)),
+                        Math.round(dp2px(8)), Math.round(dp2px(8)));
+                b_add_sens.setLayoutParams(buttonParams);
+                b_add_sens.setOnClickListener(v -> {
+                    // create a new dialog with an edit text field
+                    String newSensation = showAddSensationDialog(getContext(), sharedViewModel);
+                    if (newSensation != null) {
+                        if (selectedSensations.isEmpty()) {
+                            ((LinearLayout) mCanvas.findViewById(R.id.drawn_sensations)).removeAllViews();
+                        }
+                        if (selectedSensations.contains(newSensation)) {
+                            selectedSensations.remove(newSensation);
+                        } else {
+                            selectedSensations.add(newSensation);
+                        }
+                        int index1 = sortedChoices.indexOf(newSensation);
+                        if (index1 < 0) {
+                            ToggleButton b = new ToggleButton(getContext());
+                            b.setBackground(requireContext().getDrawable(R.drawable.custom_radio));
+                            b.setTextColor(Color.BLACK);
+                            b.setTextOn(newSensation);
+                            b.setTextOff(newSensation);
+                            b.setText(newSensation);
+                            b.setPadding(Math.round(dp2px(8)), Math.round(dp2px(8)),
+                                    Math.round(dp2px(8)), Math.round(dp2px(8)));
+                            b.setOnClickListener(choiceClickListener);
+                            b.setTag(newSensation);
+                            b.setBackgroundTintList(ColorStateList.valueOf(dampenedColor));
+                            sortedChoices.add(newSensation);
+                            TextView txt = new TextView(getContext());
+                            txt.setText(newSensation);
+                            txt.setPadding(Math.round(dp2px(6)), Math.round(dp2px(6)),
+                                    Math.round(dp2px(6)), Math.round(dp2px(6)));
+                            tagContainerSensations.addView(txt);
+                        } else {
+                            sortedChoices.remove(newSensation);
+                            tagContainerSensations.removeViewAt(index1);
+                        }
+                    }
+
+                });
+                column.addView(b_add_sens);
             }
         }
 
-        // go through the list of sensations and select the ones that were selected before
         for (String selectedSensation : selectedSensations) {
             int index = Arrays.asList(sensationTypes).indexOf(selectedSensation);
-            ToggleButton b = (ToggleButton) sensationsContainer.getChildAt(index);
+            ToggleButton b = sensationsContainer.findViewWithTag(sensationTypes[index]);
             b.setChecked(true);
             b.setBackgroundTintList(ColorStateList.valueOf(dampenedColor));
             sortedChoices.add(selectedSensation);
@@ -496,7 +610,7 @@ public class CanvasFragment extends Fragment {
                 }
                 currentBrushId = brushId;
                 currentBrush = brushes.get(brushId);
-                currentBodyView.setBrush(currentBrush);
+                bodyViews[activeBodyViewIndex].setBrush(currentBrush);
             }
             return true;
         };
@@ -516,9 +630,7 @@ public class CanvasFragment extends Fragment {
         }
 
         // Select the initial body view
-        currentBodyView = bodyViewFront;
-        hiddenBodyView = bodyViewBack;
-        hiddenBodyView.setVisibility(View.GONE);
+        activeBodyViewIndex = 0;
 
         // Select the initially selected tool
         currentBrushId = 0;
@@ -526,7 +638,7 @@ public class CanvasFragment extends Fragment {
         currentBrush = brushes.get(0);
         currentIntensity = -1;
         toolsBtns.get(0).setPressed(true);
-        currentBodyView.setBrush(currentBrush);
+        bodyViews[activeBodyViewIndex].setBrush(currentBrush);
 
         // Undo button
         ImageButton btnUndo = new ImageButton(getContext());
@@ -534,7 +646,7 @@ public class CanvasFragment extends Fragment {
         btnUndo.setImageDrawable(requireContext().getDrawable(R.drawable.icon_undo));
         btnUndo.setCropToPadding(false);
         btnUndo.setScaleType(ImageButton.ScaleType.FIT_CENTER);
-        btnUndo.setOnClickListener(view -> currentBodyView.undoLastStep());
+        btnUndo.setOnClickListener(view -> bodyViews[activeBodyViewIndex].undoLastStep());
         toolContainer.addView(btnUndo, lp2);
 
         // Out of body button
@@ -545,14 +657,13 @@ public class CanvasFragment extends Fragment {
         btnOutOfBody.setScaleType(ImageButton.ScaleType.FIT_CENTER);
         btnOutOfBody.setOnClickListener(view -> {
             allowOutsideDrawing = !allowOutsideDrawing;
-            currentBodyView.setAllowOutsideDrawing(allowOutsideDrawing);
-            hiddenBodyView.setAllowOutsideDrawing(allowOutsideDrawing);
+            bodyViews[activeBodyViewIndex].setAllowOutsideDrawing(allowOutsideDrawing);
+            bodyViews[(activeBodyViewIndex + 1) % bodyViews.length].setAllowOutsideDrawing(allowOutsideDrawing);
             if (allowOutsideDrawing) {
                 btnOutOfBody.setImageDrawable(requireContext().getDrawable(R.drawable.icon_no_out));
             } else {
                 btnOutOfBody.setImageDrawable(requireContext().getDrawable(R.drawable.icon_out));
             }
-
         });
         toolContainer.addView(btnOutOfBody, lp2);
 
@@ -573,26 +684,37 @@ public class CanvasFragment extends Fragment {
         intensityScale.setOnTouchListener((v, event) -> {
             boolean isPen = event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS;
             if (isPen) {
-                currentBodyView.setIntensity(currentIntensity);
+                bodyViews[activeBodyViewIndex].setIntensity(currentIntensity);
                 return false;
             }
             return true;
         });
 
         intensityScale.setOnColorChangeListener((progress, color) -> {
-            currentBodyView.setIntensity(progress, color);
+            bodyViews[activeBodyViewIndex].setIntensity(progress, color);
             currentIntensity = color;
             if (currentBrushId != lastBrushId) {
                 toolsBtns.get(eraserId).setPressed(false);
                 toolsBtns.get(lastBrushId).setPressed(true);
                 currentBrushId = lastBrushId;
                 currentBrush = brushes.get(currentBrushId);
-                currentBodyView.setBrush(currentBrush);
+                bodyViews[activeBodyViewIndex].setBrush(currentBrush);
             }
         });
 
+        updateGeneralView(activeBodyViewIndex);
+        for (BodyDrawingView bodyView : bodyViews) {
+            bodyView.setOnDrawingChangeListener(this);
+        }
+
         return mCanvas;
     }
+
+    @Override
+    public void onDrawingChange() {
+        updateGeneralView(activeBodyViewIndex);
+    }
+
 
     private float dp2px(int dp) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
@@ -614,7 +736,7 @@ public class CanvasFragment extends Fragment {
             verifyStoragePermissions(requireActivity());
         }
         // take the body scheme file from inner app store, filder body_figures
-        File bitmapFile = new File(requireActivity().getFilesDir(), "body_figures/" + bodyTypeId);
+        File bitmapFile = new File(requireActivity().getFilesDir(), "body_figures/" + bodyTypeId + ".png");
         Bitmap sensationsFront = BitmapFactory.decodeFile(bitmapFile.getAbsolutePath());
         if (thumbed) {
             return Bitmap.createScaledBitmap(sensationsFront, 149, 220, true);
@@ -654,15 +776,35 @@ public class CanvasFragment extends Fragment {
         }
     }
 
-    private void updateGeneralView(Bitmap merged, Bitmap background) {
-        Log.e("RESTORE GENERAL VIEW 1", "updateGeneralView: " + merged + " " + background);
-        Bitmap fullPicture = Bitmap.createBitmap(background.getWidth(),
-                background.getHeight() + 100, background.getConfig());
-        Canvas canvas = new Canvas(fullPicture);
-        canvas.drawBitmap(background, 0f, 0f, null);
-        canvas.drawBitmap(merged, 0f, 0f, null);
-        buttonCompleteView.setImageBitmap(Bitmap.createScaledBitmap(fullPicture, 149, 220, true));
-        buttonCompleteView.invalidate();
+    void updateGeneralView(int index) {
+        DrawFragment drawFragment = (DrawFragment) getParentFragment();
+        assert drawFragment != null;
+
+        int createdWindows = drawFragment.viewPagerAdapter.getItemCount();
+        Bitmap fullPicture = null;
+        Canvas canvas = null;
+
+        for (int i = 0; i < createdWindows; i++) {
+            CanvasFragment cf = (CanvasFragment) drawFragment.viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
+            if (cf != null) {
+                if (fullPicture == null) {
+                    fullPicture = Bitmap.createBitmap(cf.bodyViews[index].backgroundImage.getWidth(),
+                            cf.bodyViews[index].backgroundImage.getHeight(), cf.bodyViews[index].backgroundImage.getConfig());
+                    canvas = new Canvas(fullPicture);
+                    canvas.drawBitmap(cf.bodyViews[index].backgroundImage, 0f, 0f, null);
+                }
+                if (cf.bodyViews[index].snapshot != null) {
+                    Paint paint = new Paint();
+                    paint.setColor(cf.color);
+                    canvas.drawBitmap(cf.bodyViews[index].snapshot, 0f, 0f, paint);
+                }
+            }
+        }
+
+        if (fullPicture != null) {
+            generalView[index] = fullPicture;
+            buttonCompleteView.setImageBitmap(Bitmap.createScaledBitmap(fullPicture, 149, 220, true));
+        }
     }
 
     private void updateBackView(Bitmap sensations, Bitmap background) {
@@ -678,25 +820,22 @@ public class CanvasFragment extends Fragment {
     public void restoreSteps() {
         DrawFragment drawFragment = (DrawFragment) getParentFragment();
         assert getParentFragment() != null;
-        ArrayList<BodyDrawingView.Step> savedStepsFront = drawFragment.persStepsFront.get(getTag());
-        ArrayList<BodyDrawingView.Step> savedStepsBack = drawFragment.persStepsBack.get(getTag());
-        if (savedStepsFront != null) {
-            bodyViewFront.steps = savedStepsFront;
+        Map<String, List<List<BodyDrawingView.Step>>> stepsList = drawFragment.stepsList;
+        List<List<BodyDrawingView.Step>> bodyViewStepsList = stepsList.get(getTag());
+        if (bodyViewStepsList != null) {
+            for (int i = 0; i < bodyViewStepsList.size(); i++) {
+                List<BodyDrawingView.Step> savedSteps = bodyViewStepsList.get(i);
+                if (savedSteps != null) {
+                    bodyViews[i].steps = savedSteps;
+                    bodyViews[i].redrawAllSavedSteps();
+                    bodyViews[i].invalidate();
+                }
+            }
         }
-        if (savedStepsBack != null) {
-            bodyViewBack.steps = savedStepsBack;
-        }
-        Log.e("RESTORE STEPS", "Restoring steps for " + getTag() + " " + currentBodyView.steps);
-        bodyViewFront.redrawAllSavedSteps();
-        bodyViewFront.invalidate();
-        bodyViewBack.redrawAllSavedSteps();
-        bodyViewBack.invalidate();
-        // run Update general view global from DrawFragment
-        if (this.currentStateIsFront) {
-            updateBackView(bodyViewBack.snapshot, bodyViewBack.backgroundImage);
-        } else {
-            updateBackView(bodyViewFront.snapshot, bodyViewFront.backgroundImage);
-        }
+        Log.e("RESTORE STEPS", "Restoring steps for " + getTag() + ": " + bodyViews[activeBodyViewIndex].steps);
+        int backViewIndex = (activeBodyViewIndex + 1) % bodyViews.length;
+        updateBackView(bodyViews[backViewIndex].snapshot, bodyViews[backViewIndex].backgroundImage);
+        updateGeneralView(activeBodyViewIndex);
     }
 
     @Override
@@ -704,17 +843,16 @@ public class CanvasFragment extends Fragment {
         Log.e("DEBUG", "OnPause of CanvasFragment " + this.getTag());
         DrawFragment drawFragment = (DrawFragment) getParentFragment();
         assert drawFragment != null;
-        drawFragment.persSensations.put(this.getTag(), selectedSensations);
-        if (this.currentStateIsFront) {
-            drawFragment.persStepsFront.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.currentBodyView.steps);
-            drawFragment.persStepsBack.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.hiddenBodyView.steps);
-        } else {
-            drawFragment.persStepsBack.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.currentBodyView.steps);
-            drawFragment.persStepsFront.put(this.getTag(), (ArrayList<BodyDrawingView.Step>) this.hiddenBodyView.steps);
+        drawFragment.sensationsList.put(this.getTag(), selectedSensations);
+        Log.e("SAVING", "Saving sensations for " + this.getTag() + ": " + selectedSensations.size());
+
+        List<List<BodyDrawingView.Step>> bodyViewStepsList = new ArrayList<>();
+        for (BodyDrawingView bodyView : bodyViews) {
+            bodyViewStepsList.add(new ArrayList<>(bodyView.steps));
+            Log.e("SAVING", "Saving steps for " + this.getTag() + ": " +
+                    Objects.requireNonNull(bodyViewStepsList.get(bodyViewStepsList.size() - 1)).size());
         }
-        drawFragment.updateGeneralViewGlobal();
-        Log.e("SAVING", "Saving sensations for " + this.getTag() + " " + selectedSensations.size());
-        Log.e("SAVING", "Saving steps for " + this.getTag() + " " + this.currentBodyView.steps.size());
+        drawFragment.stepsList.put(this.getTag(), bodyViewStepsList);
         super.onPause();
     }
 
@@ -746,6 +884,7 @@ public class CanvasFragment extends Fragment {
     public void onResume() {
         Log.e("DEBUG", "OnResume of CanvasFragment " + this.getTag());
         super.onResume();
+        sharedViewModel.setActiveCanvasFragmentTag(getTag());
         restoreSteps();
     }
 

@@ -17,9 +17,12 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.dm.smart.R;
+import com.dm.smart.SharedViewModel;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Objects;
+
 
 public class CustomAlertDialogs {
 
@@ -81,5 +84,30 @@ public class CustomAlertDialogs {
         AlertDialog dialog = builder.create();
         alertView.findViewById(R.id.button_close).setOnClickListener(v -> dialog.dismiss());
         return dialog;
+    }
+
+    public static String showAddSensationDialog(Context context, SharedViewModel sharedViewModel) {
+        final String[] inputText = new String[1];
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View alertView = inflater.inflate(R.layout.alert_add_sensation, null); // Assuming you have a layout file named alert_add_sensation
+        EditText editText = alertView.findViewById(R.id.edit_text_sensation); // Assuming you have an EditText with id edit_text_sensation in your layout
+
+        builder.setView(alertView);
+        AlertDialog dialog = builder.create();
+
+        alertView.findViewById(R.id.button_ok).setOnClickListener(v -> {
+            inputText[0] = editText.getText().toString();
+            sharedViewModel.setSensationAddedFromDialog(true);
+            sharedViewModel.selectSensation(inputText[0]);
+            dialog.dismiss();
+        });
+
+        alertView.findViewById(R.id.button_cancel).setOnClickListener(v -> dialog.dismiss());
+
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.show();
+
+        return inputText[0];
     }
 }

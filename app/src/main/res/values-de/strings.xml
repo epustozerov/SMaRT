@@ -12,6 +12,7 @@
     <string name="complete_recording">Zeichnung beenden</string>
     <string name="new_record">Neue Empfindung</string>
     <string name="add_new_subject">Neue/n Proband:in erstellen</string>
+    <string name="other_sensation">anderer Begriff</string>
     <string name="subjects">
         <b>Proband:innen:</b>
     </string>
@@ -33,6 +34,7 @@
     <string name="to_tags">Zur den Begriffen</string>
     <string name="new_subject">neue/r Proband:in</string>
     <string name="textview_general_view">Gesamtansicht</string>
+    <string name="textview_next_view">Nächste Ansicht</string>
     <string name="wrong_password">Falsches Passwort</string>
     <string name="password">1985</string>
 

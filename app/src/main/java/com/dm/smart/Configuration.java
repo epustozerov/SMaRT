@@ -25,7 +25,10 @@ public class Configuration {
     private final String configName;
 
     String[] bodySchemes;
-    String[] selectedBodySchemes;
+
+    String[] bodyViews;
+    String[] selectedBodyViews;
+    String[] selectedBodyMasks;
     String[] sensationTypes;
     String textScaleMax;
     String textScaleMin;
@@ -105,6 +108,16 @@ public class Configuration {
         config_body.deleteCharAt(config_body.length() - 1);
 
         config_body.append("\n" +
+                "body_views = ");
+        List<String> body_views = Arrays.stream(context.getResources().
+                getStringArray(R.array.body_views)).collect(Collectors.toList());
+        for (String body_view : body_views) {
+            config_body.append(body_view).append(", ");
+        }
+        config_body.deleteCharAt(config_body.length() - 2);
+        config_body.deleteCharAt(config_body.length() - 1);
+
+        config_body.append("\n" +
                 "instructions = instructions.png\n");
         config_body.append("text_scale_max = max\n" + "text_scale_min = min");
 
@@ -165,6 +178,7 @@ public class Configuration {
         this.sensationTypes = iniPreference.node(this.configName).get("sensation_types", "").split(", ");
         this.colorsSymptoms = iniPreference.node(this.configName).get("colors_symptoms", "").split(", ");
         this.bodySchemes = iniPreference.node(this.configName).get("body_schemes", "").split(", ");
+        this.bodyViews = iniPreference.node(this.configName).get("body_views", "").split(", ");
         this.instructionsPath = iniPreference.node(this.configName).get("instructions", "instructions.png");
         this.textScaleMax = iniPreference.node(this.configName).get("text_scale_max", "");
         this.textScaleMin = iniPreference.node(this.configName).get("text_scale_min", "");
@@ -172,11 +186,16 @@ public class Configuration {
     }
 
     public void formBodySchemes(String bodyScheme) {
-        this.selectedBodySchemes = new String[4];
-        this.selectedBodySchemes[0] = "body_" + bodyScheme + "_front.png";
-        this.selectedBodySchemes[1] = "body_" + bodyScheme + "_front_mask.png";
-        this.selectedBodySchemes[2] = "body_" + bodyScheme + "_back.png";
-        this.selectedBodySchemes[3] = "body_" + bodyScheme + "_back_mask.png";
+        // Initialize the selectedBodyViews and selectedBodyMasks arrays
+        selectedBodyViews = new String[bodyViews.length];
+        selectedBodyMasks = new String[bodyViews.length];
+
+        // Iterate over the bodyViews array
+        for (int i = 0; i < bodyViews.length; i++) {
+            // For each body view, create the corresponding body figure and mask names
+            selectedBodyViews[i] = "body_" + bodyScheme + "_" + bodyViews[i];
+            selectedBodyMasks[i] = selectedBodyViews[i] + "_mask";
+        }
     }
 
     public String[] getColorSymptoms() {

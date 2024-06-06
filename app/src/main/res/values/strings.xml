@@ -23,6 +23,7 @@
     <string name="to_drawing">To drawing</string>
     <string name="to_tags">To tags</string>
     <string name="add_new_subject">Create new subject</string>
+    <string name="other_sensation">Other sensation</string>
     <string name="subjects">
         <b>Subjects:</b>
     </string>
@@ -34,6 +35,7 @@
     <string name="password">1985</string>
     <string name="wrong_password">Wrong password</string>
     <string name="textview_general_view">General view</string>
+    <string name="textview_next_view">Next view</string>
 
     <!-- Dialogs -->
     <string name="dialog_drawing_completed">"Did you really draw <b>all Symptoms</b>? Subsequent editing is not possible."
