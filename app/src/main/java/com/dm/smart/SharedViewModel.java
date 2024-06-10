@@ -14,6 +14,16 @@ public class SharedViewModel extends ViewModel {
 
     private final MutableLiveData<Pair<Integer, Integer>> colorAndIndex = new MutableLiveData<>();
 
+    private final MutableLiveData<Integer> lineWidth = new MutableLiveData<>(1);
+
+    public void setLineWidth(int lineWidth) {
+        this.lineWidth.setValue(lineWidth);
+    }
+
+    public LiveData<Integer> getLineWidth() {
+        return lineWidth;
+    }
+
     public void setColorAndIndex(int color, int index) {
         this.colorAndIndex.setValue(new Pair<>(color, index));
     }
@@ -48,4 +58,5 @@ public class SharedViewModel extends ViewModel {
     public LiveData<String> getSensation() {
         return sensation;
     }
+
 }

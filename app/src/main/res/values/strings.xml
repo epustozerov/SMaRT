@@ -57,6 +57,7 @@
     <string name="dialog_password_hint">Password</string>
     <string name="dialog_change_name_hint">Subject name</string>
     <string name="dialog_choose_color">Choose color</string>
+    <string name="dialog_line_width">Line Width: %d</string>
     <string name="dialog_select_config">Select configuration</string>
     <string name="dialog_config_mismatch">The selected config doesn\'t match the subject\'s setting\n
         Create a new patient or choose another configuration.

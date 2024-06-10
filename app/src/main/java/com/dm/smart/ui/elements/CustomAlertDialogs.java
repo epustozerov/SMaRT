@@ -12,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -129,4 +131,53 @@ public class CustomAlertDialogs {
                 .build()
                 .show();
     }
+
+    public static AlertDialog showLineWidthDialog(Context context, SharedViewModel sharedViewModel, int currentBrushThickness, OnLineWidthSelectedListener listener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View alertView = inflater.inflate(R.layout.alert_line_width, null);
+
+        SeekBar sbLineWidth = alertView.findViewById(R.id.sb_line_width);
+        TextView tvLineWidth = alertView.findViewById(R.id.tv_line_width);
+
+        // Set the SeekBar progress to the current brush thickness
+        sbLineWidth.setProgress(currentBrushThickness - 1);
+        tvLineWidth.setText(context.getString(R.string.dialog_line_width, currentBrushThickness));
+
+        sbLineWidth.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                tvLineWidth.setText(context.getString(R.string.dialog_line_width, (progress + 1)));
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // Set the lineWidth in the SharedViewModel
+                sharedViewModel.setLineWidth(seekBar.getProgress() + 1);
+            }
+        });
+
+        builder.setView(alertView);
+        AlertDialog dialog = builder.create();
+
+        alertView.findViewById(R.id.button_ok).setOnClickListener(v -> {
+            dialog.dismiss();
+            // Call the listener with the selected line width
+            listener.onLineWidthSelected(sbLineWidth.getProgress() + 1);
+        });
+
+        dialog.show();
+
+        return dialog;
+    }
+
+
+    public interface OnLineWidthSelectedListener {
+        void onLineWidthSelected(int lineWidth);
+    }
+
 }

@@ -5,6 +5,7 @@ import static com.dm.smart.DrawFragment.defineMinMaxColors;
 import static com.dm.smart.ui.elements.CustomAlertDialogs.showColorPickerDialog;
 import static com.dm.smart.ui.elements.CustomAlertDialogs.showGeneralView;
 import static com.dm.smart.ui.elements.CustomAlertDialogs.showAddSensationDialog;
+import static com.dm.smart.ui.elements.CustomAlertDialogs.showLineWidthDialog;
 import static com.dm.smart.ui.elements.CustomToasts.showToast;
 
 import android.Manifest;
@@ -224,6 +225,7 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
 
         // Observe the LiveData
         sharedViewModel.getSensation().observe(getViewLifecycleOwner(), this::onSensationAdded);
+        sharedViewModel.getLineWidth().observe(getViewLifecycleOwner(), this::onLineWidthChanged);
 
         String selectedSubjectBodyScheme = MainActivity.currentlySelectedSubject.getBodyScheme();
         SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
@@ -691,40 +693,66 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
         btnColorPicker.setImageDrawable(requireContext().getDrawable(R.drawable.icon_color));
         btnColorPicker.setCropToPadding(false);
         btnColorPicker.setScaleType(ImageButton.ScaleType.FIT_CENTER);
-        // set the background color of the btnColorPicker to appropriate color in the drawFragment color array
         btnColorPicker.setBackgroundColor(dampenedColor);
         CustomThumbDrawer thumbDrawer = new CustomThumbDrawer(65, Color.WHITE, Color.BLACK);
-        btnColorPicker.setOnClickListener(v -> showColorPickerDialog(
-                getContext(),
-                currentBrush.paint.getColor(),
-                selectedColor -> {
-                    color = selectedColor;
-                    dampenedColor = dampen(color);
-                    bodyViews[activeBodyViewIndex].setIntensity(currentIntensity);
-                    intensityScale.setColorSeeds(defineMinMaxColors(selectedColor));
-                    intensityScale.setMaxProgress(100);
-                    btnColorPicker.setBackgroundColor(dampenedColor);
-                    currentIntensity = color;
-                    currentBrush.paint.setColor(selectedColor);
-                    bodyViews[activeBodyViewIndex].setBrush(currentBrush);
-                    // overwrite the appropriate colors in colors array of the parent DrawFragment
-                    sharedViewModel.setColorAndIndex(selectedColor, getTabIndex());
-                    ((DrawFragment) getParentFragment()).colors.set(getTabIndex(), selectedColor);
-                },
-                (dialog, selectedColor, allColors) -> {
-                    intensityScale.setColorSeeds(defineMinMaxColors(selectedColor));
-                    // update the color of the buttons on the left panel with the new color
-                    for (String sensation : selectedSensations) {
-                        ToggleButton b = sensationsContainer.findViewWithTag(sensation);
-                        if (b != null) {
-                            b.setBackgroundTintList(ColorStateList.valueOf(dampenedColor));
-                        }
-                    }
-
-                    dialog.dismiss();
+        btnColorPicker.setOnClickListener(v -> {
+                    showColorPickerDialog(
+                            getContext(),
+                            currentBrush.paint.getColor(),
+                            selectedColor -> {
+                                color = selectedColor;
+                                dampenedColor = dampen(color);
+                                bodyViews[activeBodyViewIndex].setIntensity(currentIntensity);
+                                intensityScale.setColorSeeds(defineMinMaxColors(selectedColor));
+                                intensityScale.setMaxProgress(100);
+                                btnColorPicker.setBackgroundColor(dampenedColor);
+                                currentIntensity = color;
+                                currentBrush.paint.setColor(selectedColor);
+                                bodyViews[activeBodyViewIndex].setBrush(currentBrush);
+                                // overwrite the appropriate colors in colors array of the parent DrawFragment
+                                sharedViewModel.setColorAndIndex(selectedColor, getTabIndex());
+                                ((DrawFragment) getParentFragment()).colors.set(getTabIndex(), selectedColor);
+                                toolsBtns.get(currentBrushId).setPressed(true);
+                            },
+                            (dialog, selectedColor, allColors) -> {
+                                intensityScale.setColorSeeds(defineMinMaxColors(selectedColor));
+                                // update the color of the buttons on the left panel with the new color
+                                for (String sensation : selectedSensations) {
+                                    ToggleButton b = sensationsContainer.findViewWithTag(sensation);
+                                    if (b != null) {
+                                        b.setBackgroundTintList(ColorStateList.valueOf(dampenedColor));
+                                    }
+                                }
+                                toolsBtns.get(currentBrushId).setPressed(true);
+                                dialog.dismiss();
+                            }
+                    );
+                    toolsBtns.get(currentBrushId).setPressed(true);
                 }
-        ));
-        toolContainer.addView(btnColorPicker, lp2);
+        );
+        toolContainer.addView(btnColorPicker, lp1);
+
+        // Line width button
+        ImageButton btnLineWidth = new ImageButton(getContext());
+        btnLineWidth.setBackground(requireContext().getDrawable(R.drawable.listitem_selector));
+        btnLineWidth.setImageDrawable(requireContext().getDrawable(R.drawable.icon_line_width));
+        btnLineWidth.setCropToPadding(false);
+        btnLineWidth.setScaleType(ImageButton.ScaleType.FIT_CENTER);
+        btnLineWidth.setOnClickListener(v -> {
+            toolsBtns.get(currentBrushId).setPressed(true);
+            // create a new dialog with a seekbar to select the line width
+            showLineWidthDialog(getContext(), sharedViewModel, currentBrush.thickness, lineWidth -> {
+                // Update the brush thickness
+                currentBrush.thickness = lineWidth;
+                toolsBtns.get(currentBrushId).setPressed(true);
+            });
+            // update the thinkness of the brush
+            //noinspection DataFlowIssue
+            currentBrush.thickness = sharedViewModel.getLineWidth().getValue();
+            bodyViews[activeBodyViewIndex].setBrush(currentBrush);
+            toolsBtns.get(currentBrushId).setPressed(true);
+        });
+        toolContainer.addView(btnLineWidth, lp1);
 
         // Init intensity scale
         intensityScale = mCanvas.findViewById(R.id.color_seek_bar);
@@ -769,6 +797,14 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
         }
 
         return mCanvas;
+    }
+
+    private void onLineWidthChanged(Integer lineWidth) {
+        if (lineWidth != null) {
+            // Update the line width of the brush
+            currentBrush.paint.setStrokeWidth(lineWidth);
+            bodyViews[activeBodyViewIndex].setBrush(currentBrush);
+        }
     }
 
     @Override
@@ -984,4 +1020,5 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
             this.paint = new Paint(brush.paint);
         }
     }
+
 }

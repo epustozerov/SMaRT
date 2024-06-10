@@ -54,6 +54,7 @@ public class BodyDrawingView extends View {
     private boolean allowOutsideDrawing;
     private int intensity_mark = 0;
 
+
     public BodyDrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -376,9 +377,6 @@ public class BodyDrawingView extends View {
 
             } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
                 // Get all points from event.getHistoricalX/Y for a smoother draw;
-                // There is an issue here:
-                // Attempt to invoke virtual method 'void android.graphics.Path.lineTo(float, float)'
-                // on a null object reference
                 int histPointsAmount = event.getHistorySize();
                 for (int i = 0; i < histPointsAmount; i++) {
                     freshPath.lineTo(event.getHistoricalX(i), event.getHistoricalY(i));
