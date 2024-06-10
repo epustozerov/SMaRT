@@ -18,9 +18,12 @@ import androidx.navigation.Navigation;
 
 import com.dm.smart.R;
 import com.dm.smart.SharedViewModel;
+import com.flask.colorpicker.ColorPickerView;
+import com.flask.colorpicker.OnColorSelectedListener;
+import com.flask.colorpicker.builder.ColorPickerClickListener;
+import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Objects;
 
 
@@ -90,8 +93,8 @@ public class CustomAlertDialogs {
         final String[] inputText = new String[1];
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View alertView = inflater.inflate(R.layout.alert_add_sensation, null); // Assuming you have a layout file named alert_add_sensation
-        EditText editText = alertView.findViewById(R.id.edit_text_sensation); // Assuming you have an EditText with id edit_text_sensation in your layout
+        View alertView = inflater.inflate(R.layout.alert_add_sensation, null);
+        EditText editText = alertView.findViewById(R.id.edit_text_sensation);
 
         builder.setView(alertView);
         AlertDialog dialog = builder.create();
@@ -109,5 +112,21 @@ public class CustomAlertDialogs {
         dialog.show();
 
         return inputText[0];
+    }
+
+    public static void showColorPickerDialog(Context context, int initialColor, OnColorSelectedListener onColorSelectedListener,
+                                             ColorPickerClickListener onPositiveButtonClickListener) {
+        ColorPickerDialogBuilder
+                .with(context)
+                .setTitle(R.string.dialog_choose_color)
+                .initialColor(initialColor)
+                .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
+                .density(12)
+                .setOnColorSelectedListener(onColorSelectedListener)
+                .setPositiveButton(R.string.dialog_ok, onPositiveButtonClickListener)
+                .setNegativeButton(R.string.dialog_cancel, (dialog, which) -> {
+                })
+                .build()
+                .show();
     }
 }

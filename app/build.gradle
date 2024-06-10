@@ -45,6 +45,7 @@ dependencies {
     implementation 'com.github.rtugeek:colorseekbar:2.0.3'
     implementation fileTree(dir: 'libs', include: ['*.aar', '*.jar'], exclude: [])
     implementation 'org.ini4j:ini4j:0.5.4'
+    implementation 'com.github.QuadFlask:colorpicker:0.0.15'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

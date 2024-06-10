@@ -2,6 +2,7 @@ package com.dm.smart;
 
 import static com.dm.smart.DrawFragment.dampen;
 import static com.dm.smart.DrawFragment.defineMinMaxColors;
+import static com.dm.smart.ui.elements.CustomAlertDialogs.showColorPickerDialog;
 import static com.dm.smart.ui.elements.CustomAlertDialogs.showGeneralView;
 import static com.dm.smart.ui.elements.CustomAlertDialogs.showAddSensationDialog;
 import static com.dm.smart.ui.elements.CustomToasts.showToast;
@@ -91,8 +92,25 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
     private boolean allowOutsideDrawing = false;
 
     private SharedViewModel sharedViewModel;
+    private ColorSeekBar intensityScale;
 
     public CanvasFragment() {
+    }
+
+    public int getTabIndex() {
+        DrawFragment parentFragment = (DrawFragment) getParentFragment();
+        if (parentFragment != null) {
+            for (int i = 0; i < parentFragment.viewPagerAdapter.getItemCount(); i++) {
+                Fragment fragment = parentFragment.viewPagerAdapter.fragmentManager.findFragmentByTag("f" + i);
+                if (fragment != null) {
+                    assert fragment.getTag() != null;
+                    if (fragment.getTag().equals(this.getTag())) {
+                        return i;
+                    }
+                }
+            }
+        }
+        return -1;
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
@@ -123,7 +141,7 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
                     Math.round(dp2px(8)), Math.round(dp2px(8)));
             b.setOnClickListener(v -> {
                 String selectedSensation1 = ((ToggleButton) v).getText().toString();
-                if (selectedSensations.contains(selectedSensation1)) { // TODO
+                if (selectedSensations.contains(selectedSensation1)) {
                     selectedSensations.remove(selectedSensation1);
                     b.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                 } else {
@@ -667,10 +685,51 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
         });
         toolContainer.addView(btnOutOfBody, lp2);
 
+        // Color picker button
+        ImageButton btnColorPicker = new ImageButton(getContext());
+        btnColorPicker.setBackground(requireContext().getDrawable(R.drawable.listitem_selector));
+        btnColorPicker.setImageDrawable(requireContext().getDrawable(R.drawable.icon_color));
+        btnColorPicker.setCropToPadding(false);
+        btnColorPicker.setScaleType(ImageButton.ScaleType.FIT_CENTER);
+        // set the background color of the btnColorPicker to appropriate color in the drawFragment color array
+        btnColorPicker.setBackgroundColor(dampenedColor);
+        CustomThumbDrawer thumbDrawer = new CustomThumbDrawer(65, Color.WHITE, Color.BLACK);
+        btnColorPicker.setOnClickListener(v -> showColorPickerDialog(
+                getContext(),
+                currentBrush.paint.getColor(),
+                selectedColor -> {
+                    color = selectedColor;
+                    dampenedColor = dampen(color);
+                    bodyViews[activeBodyViewIndex].setIntensity(currentIntensity);
+                    intensityScale.setColorSeeds(defineMinMaxColors(selectedColor));
+                    intensityScale.setMaxProgress(100);
+                    btnColorPicker.setBackgroundColor(dampenedColor);
+                    currentIntensity = color;
+                    currentBrush.paint.setColor(selectedColor);
+                    bodyViews[activeBodyViewIndex].setBrush(currentBrush);
+                    // overwrite the appropriate colors in colors array of the parent DrawFragment
+                    sharedViewModel.setColorAndIndex(selectedColor, getTabIndex());
+                    ((DrawFragment) getParentFragment()).colors.set(getTabIndex(), selectedColor);
+                },
+                (dialog, selectedColor, allColors) -> {
+                    intensityScale.setColorSeeds(defineMinMaxColors(selectedColor));
+                    // update the color of the buttons on the left panel with the new color
+                    for (String sensation : selectedSensations) {
+                        ToggleButton b = sensationsContainer.findViewWithTag(sensation);
+                        if (b != null) {
+                            b.setBackgroundTintList(ColorStateList.valueOf(dampenedColor));
+                        }
+                    }
+
+                    dialog.dismiss();
+                }
+        ));
+        toolContainer.addView(btnColorPicker, lp2);
+
         // Init intensity scale
-        ColorSeekBar intensityScale = mCanvas.findViewById(R.id.color_seek_bar);
+        intensityScale = mCanvas.findViewById(R.id.color_seek_bar);
         intensityScale.setColorSeeds(defineMinMaxColors(color));
-        intensityScale.setThumbDrawer(new CustomThumbDrawer(65, Color.WHITE, Color.BLACK));
+        intensityScale.setThumbDrawer(thumbDrawer);
 
         // if the custom config is in use, set the text for textview_scale_max from the config
         if (customConfig) {
@@ -691,6 +750,8 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
         });
 
         intensityScale.setOnColorChangeListener((progress, color) -> {
+            // recalculate the necessary color using this.color and progress
+
             bodyViews[activeBodyViewIndex].setIntensity(progress, color);
             currentIntensity = color;
             if (currentBrushId != lastBrushId) {

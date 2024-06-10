@@ -17,7 +17,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Html;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -57,7 +56,6 @@ public class SubjectFragment extends Fragment {
 
     RecyclerViewAdapterSubjects adapterSubjects;
     RecyclerViewAdapterRecords adapterRecords;
-    boolean currentViewFront;
     boolean showNames;
     SharedPreferences sharedPref;
     private ArrayList<Subject> subjects;

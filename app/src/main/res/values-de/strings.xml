@@ -59,6 +59,7 @@
     <string name="dialog_change_name_title">Geben Sie den neuen Namen für die/den Patient:in ein</string>
     <string name="dialog_password_hint">Passwort</string>
     <string name="dialog_change_name_hint">Name der/des Patient:in</string>
+    <string name="dialog_choose_color">Farbe auswählen</string>
     <string name="dialog_select_config">Konfiguration auswählen</string>
     <string name="dialog_config_mismatch">Die gewählte Konfiguration stimmt nicht mit den Einstellungen der/des Proband:in überein.\n
         Legen Sie eine/n neue/n Patient:in an oder wählen Sie eine andere Konfiguration.</string>

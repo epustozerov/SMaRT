@@ -33,6 +33,7 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -56,6 +57,7 @@ import java.util.stream.Collectors;
 
 public class DrawFragment extends Fragment {
 
+    private TabLayout tabLayout;
     final Map<String, ArrayList<String>> sensationsList = new HashMap<>();
     Map<String, List<List<BodyDrawingView.Step>>> stepsList = new HashMap<>();
     public ViewPager2 viewPager;
@@ -83,6 +85,30 @@ public class DrawFragment extends Fragment {
         hsv[2] = 1f;
         int color_min = Color.HSVToColor(hsv);
         return new int[]{color_max, color_min};
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Get the SharedViewModel
+        SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
+        // Observe the color and active tab index in the SharedViewModel
+        sharedViewModel.getColorAndIndex().observe(this, colorAndIndex -> {
+            updateDrawableColor(colorAndIndex.second, colorAndIndex.first);
+        });
+    }
+
+    private void updateDrawableColor(int index, int color) {
+        // Get a reference to the active tab
+        TabLayout.Tab activeTab = tabLayout.getTabAt(index);
+        if (activeTab != null && activeTab.getCustomView() != null) {
+            Drawable drawable = activeTab.getCustomView().getBackground();
+            if (drawable != null) {
+                drawable.setColorFilter(dampen(color), PorterDuff.Mode.SRC_ATOP);
+            }
+        }
     }
 
     @Override
@@ -156,11 +182,11 @@ public class DrawFragment extends Fragment {
         viewPager.setAdapter(null);
 
         viewPager.setAdapter(viewPagerAdapter);
-        TabLayout tabLayout = view.findViewById(R.id.tab_layout);
+        tabLayout = view.findViewById(R.id.tab_layout);
         tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
         tabLayout.setTabGravity(TabLayout.GRAVITY_START);
 
-        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+        TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             TextView tab_new_sensation = new TextView(getActivity());
             tab_new_sensation.setTextColor(Color.BLACK);
             tab_new_sensation.setText(String.format("%s %s",
@@ -174,7 +200,8 @@ public class DrawFragment extends Fragment {
             d.setColorFilter(dampen(color), PorterDuff.Mode.SRC_ATOP);
             tab_new_sensation.setBackground(d);
             tab.setCustomView(tab_new_sensation);
-        }).attach();
+        });
+        tabLayoutMediator.attach();
         createNewTab();
     }
 
@@ -193,6 +220,9 @@ public class DrawFragment extends Fragment {
             Runnable runnable = () -> viewPager.setCurrentItem(newPageIndex);
             viewPager.post(runnable);
         }
+
+        // Update the color of the newly created tab
+        updateDrawableColor(newPageIndex, color);
 
         long endTime = SystemClock.elapsedRealtime();
         long elapsedMilliSeconds = endTime - startTime;
