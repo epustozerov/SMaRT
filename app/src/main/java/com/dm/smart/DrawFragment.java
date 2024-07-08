@@ -95,9 +95,8 @@ public class DrawFragment extends Fragment {
         SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
         // Observe the color and active tab index in the SharedViewModel
-        sharedViewModel.getColorAndIndex().observe(this, colorAndIndex -> {
-            updateDrawableColor(colorAndIndex.second, colorAndIndex.first);
-        });
+        sharedViewModel.getColorAndIndex().observe(this,
+                colorAndIndex -> updateDrawableColor(colorAndIndex.second, colorAndIndex.first));
     }
 
     private void updateDrawableColor(int index, int color) {
@@ -313,8 +312,6 @@ public class DrawFragment extends Fragment {
         if (createdWindows > 0) {
             CanvasFragment cf_base =
                     (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + 0);
-            int height = 1494;
-            int width = 2200;
             Bitmap.Config config = Bitmap.Config.ARGB_8888;
 
             // Create a txt file, put allSteps in it
@@ -335,6 +332,8 @@ public class DrawFragment extends Fragment {
 
                         // Create a merged bitmap for this BodyDrawingView if it doesn't exist
                         if (mergedBitmaps.size() <= j) {
+                            int width = cf.bodyViews[j].snapshot.getWidth();
+                            int height = cf.bodyViews[j].snapshot.getHeight();
                             mergedBitmaps.add(Bitmap.createBitmap(width, height, config));
                         }
 
