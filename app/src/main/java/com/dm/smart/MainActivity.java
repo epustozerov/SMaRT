@@ -471,32 +471,26 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                // copy the body schemes from body_figures folder in the external storage next to the config file to the app folder
+
+                // Copy the body schemes from body_figures folder in the external storage next to the config file to the app folder
                 File configFolder = new File(getFilesDir(), "body_figures");
-                if (!configFolder.exists()) {
-                    //noinspection ResultOfMethodCallIgnored
-                    configFolder.mkdirs();
-                }
-                // take the path from the uri, extract only part of the path after the Documents folder
-                String config_path_from_uri =
-                        Objects.requireNonNull(uri.getPath()).substring(uri.getPath().indexOf("Documents") + 9);
-                // remove the file name from the path
-                config_path_from_uri = config_path_from_uri.substring(0, config_path_from_uri.lastIndexOf("/"));
-                File configFolderOutBF = new File(
-                        String.valueOf(Paths.get(String.valueOf(Environment.getExternalStoragePublicDirectory(
-                                Environment.DIRECTORY_DOCUMENTS)), config_path_from_uri, "body_figures")));
-                File[] files = configFolderOutBF.listFiles();
-                for (File file : Objects.requireNonNull(files)) {
-                    File outFile = new File(configFolder, file.getName());
-                    try {
-                        in = Files.newInputStream(file.toPath());
-                        out = Files.newOutputStream(outFile.toPath());
-                        copyFile(in, out);
-                        in.close();
-                        out.flush();
-                        out.close();
-                    } catch (IOException e) {
-                        Toast.makeText(this, R.string.toast_body_figures_not_copied, Toast.LENGTH_LONG).show();
+                File[] files = getBodySchemes(configFolder, uri);
+                if (files == null) {
+                    Toast.makeText(this, R.string.toast_body_figures_folder_empty, Toast.LENGTH_LONG).show();
+                    return;
+                } else {
+                    for (File file : files) {
+                        File outFile = new File(configFolder, file.getName());
+                        try {
+                            in = Files.newInputStream(file.toPath());
+                            out = Files.newOutputStream(outFile.toPath());
+                            copyFile(in, out);
+                            in.close();
+                            out.flush();
+                            out.close();
+                        } catch (IOException e) {
+                            Toast.makeText(this, R.string.toast_body_figure_not_copied, Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
 
@@ -511,7 +505,7 @@ public class MainActivity extends AppCompatActivity {
                         File instructionsFile = new File(getFilesDir(), instructionsPath);
                         File configFolderOut = new File(
                                 String.valueOf(Paths.get(String.valueOf(Environment.getExternalStoragePublicDirectory(
-                                        Environment.DIRECTORY_DOCUMENTS)), config_path_from_uri)));
+                                        Environment.DIRECTORY_DOCUMENTS)), "SMaRT/config")));
                         in = Files.newInputStream(new File(configFolderOut, instructionsPath).toPath());
                         out = Files.newOutputStream(instructionsFile.toPath());
                         copyFile(in, out);
@@ -533,6 +527,20 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    private static File[] getBodySchemes(File configFolder, Uri uri) {
+        if (!configFolder.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            configFolder.mkdirs();
+        }
+        String path = Objects.requireNonNull(uri.getPath()).substring(uri.getPath().indexOf(":") + 1);
+        path = Environment.getExternalStorageDirectory() + "/" + path;
+        path = path.substring(0, path.lastIndexOf("/"));
+        path = path + "/body_figures";
+
+        File folder = new File(path);
+        return folder.listFiles();
     }
 
 

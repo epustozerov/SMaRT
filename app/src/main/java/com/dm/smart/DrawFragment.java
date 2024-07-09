@@ -332,9 +332,10 @@ public class DrawFragment extends Fragment {
 
                         // Create a merged bitmap for this BodyDrawingView if it doesn't exist
                         if (mergedBitmaps.size() <= j) {
-                            int width = cf.bodyViews[j].snapshot.getWidth();
-                            int height = cf.bodyViews[j].snapshot.getHeight();
-                            mergedBitmaps.add(Bitmap.createBitmap(width, height, config));
+                            if (cf.bodyViews[j].snapshot != null) {
+                                mergedBitmaps.add(Bitmap.createBitmap(cf.bodyViews[j].snapshot.getWidth(),
+                                        cf.bodyViews[j].snapshot.getHeight(), config));
+                            }
                         }
 
                         // Add this snapshot to the merged bitmap

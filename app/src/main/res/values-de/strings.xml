@@ -25,7 +25,8 @@
     <string name="toast_select_intensity">⇛ Bitte wählen Sie zunächst eine Intensität auf der Skala aus</string>
     <string name="toast_empty_name">Bitte geben Sie zunächst einen Namen für die/den Proband:in ein</string>
     <string name="toast_media_permission">Bitte geben Sie der App eine Berechtigung für den Zugriff auf die Medien</string>
-    <string name="toast_body_figures_not_copied">Ein oder mehrere Körperschemata konnten nicht kopiert werden</string>
+    <string name="toast_body_figure_not_copied">Ein oder mehrere Körperschemata konnten nicht kopiert werden</string>
+    <string name="toast_body_figures_folder_empty">Im Ordner "body_figures" befinden sich keine Bilder von Körperschemata</string>
     <string name="toast_instructions_not_copied">Ein oder mehrere Bilder der Anweisungen konnten nicht kopiert werden</string>
     <string name="textview_max">max</string>
     <string name="textview_min">min</string>

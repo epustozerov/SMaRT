@@ -474,6 +474,9 @@ public class SubjectFragment extends Fragment {
                 imagePaths.add(imageFile.getAbsolutePath());
             }
         }
+        if (imagePaths.isEmpty()) {
+            return;
+        }
 
         // Load the first image
         Bitmap firstImage = BitmapFactory.decodeFile(imagePaths.get(0));
