@@ -1,5 +1,7 @@
 package com.dm.smart.ui.elements;
 
+import static com.dm.smart.DrawFragment.clearTempData;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -9,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -17,6 +20,7 @@ import android.widget.TextView;
 
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.ui.NavigationUI;
 
 import com.dm.smart.R;
 import com.dm.smart.SharedViewModel;
@@ -132,7 +136,8 @@ public class CustomAlertDialogs {
                 .show();
     }
 
-    public static AlertDialog showLineWidthDialog(Context context, SharedViewModel sharedViewModel, int currentBrushThickness, OnLineWidthSelectedListener listener) {
+    public static AlertDialog showLineWidthDialog(Context context, SharedViewModel sharedViewModel, int currentBrushThickness,
+                                                  OnLineWidthSelectedListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View alertView = inflater.inflate(R.layout.alert_line_width, null);
@@ -152,7 +157,8 @@ public class CustomAlertDialogs {
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
@@ -180,4 +186,14 @@ public class CustomAlertDialogs {
         void onLineWidthSelected(int lineWidth);
     }
 
+    public static AlertDialog showUnsavedRecordDialog(Activity context, MenuItem menuItem) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(R.string.dialog_continue_last_step);
+        builder.setPositiveButton(R.string.dialog_continue, (dialog, id) -> {
+            NavController navController = Navigation.findNavController(context, R.id.nav_host_fragment_activity_main);
+            NavigationUI.onNavDestinationSelected(menuItem, navController);
+        });
+        builder.setNegativeButton(R.string.dialog_no, (dialog, id) -> clearTempData(context));
+        return builder.create();
+    }
 }

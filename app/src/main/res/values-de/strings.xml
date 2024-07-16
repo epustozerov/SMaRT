@@ -70,6 +70,9 @@
         Bitte überprüfen Sie die Konfigurationsdatei und den Inhalt des Ordners.\n
         Die App wird die Standardkonfiguration verwenden.
     </string>
+    <string name="dialog_continue_last_step">Die App enthält eine nicht gespeicherte Zeichnung.
+        Möchten Sie mit diesem Datensatz fortfahren?
+    </string>
 
     <!-- Menu -->
     <string name="menu_remove_subject">Proband:in und zugehörige Daten entfernen</string>

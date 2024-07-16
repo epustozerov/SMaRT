@@ -9,7 +9,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -17,6 +16,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -25,6 +25,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+
+import com.dm.smart.items.Brush;
+import com.dm.smart.items.SerializablePath;
+import com.dm.smart.items.Step;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,15 +46,16 @@ public class BodyDrawingView extends View {
     Bitmap backgroundImage = null;
     Toast showedToast = null;
     private Point mBGSizeZoomed;
-    private Rect mBGZoomedRect;
-    private Matrix mZoomingMatrix, mInvertMatrix;
+    Rect mBGZoomedRect;
+    Matrix mZoomingMatrix;
+    Matrix mInvertMatrix;
     private float mZoomingScale = 1.0f, minZoomingScale = 1.0f, maxZoomingScale = 7.0f;
     private Bitmap freshSnapshot;
-    private Path freshPath = null;
+    private SerializablePath freshPath = null;
     private Paint freshPaint = null;
     private Bitmap maskImage = null;
     private int intensity = -1;
-    private CanvasFragment.Brush brush = null;
+    private Brush brush = null;
     private boolean allowOutsideDrawing;
     private int intensity_mark = 0;
 
@@ -172,9 +177,14 @@ public class BodyDrawingView extends View {
                     Bitmap.Config.ARGB_8888);
         }
         Canvas tempCanvas = new Canvas(currentSnapshot);
-        Paint paint = new Paint(step.brush.paint);
+        new Paint();
+        Paint paint;
+        if (step.brush.paint == null) {
+            paint = new Paint();
+        } else {
+            paint = new Paint(step.brush.paint);
+        }
         paint.setStrokeWidth(step.brush.thickness);
-        paint.setColor(step.brush.paint.getColor());
         boolean drawOutside = step.brush.drawOutside;
         if (step.brush.type.equals("erase")) {
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
@@ -187,6 +197,8 @@ public class BodyDrawingView extends View {
                 tempCanvas.drawBitmap(maskImage, 0, 0, paint);
             }
         }
+        // Log the size of the current snapshot
+        Log.d("Snapshot size", "Width: " + currentSnapshot.getWidth() + " Height: " + currentSnapshot.getHeight());
         drawImageCanvas.drawBitmap(currentSnapshot, 0, 0, null);
         snapshot = freshSnapshot;
     }
@@ -208,7 +220,7 @@ public class BodyDrawingView extends View {
         this.intensity = intensity;
     }
 
-    public void setBrush(CanvasFragment.Brush brush) {
+    public void setBrush(Brush brush) {
         this.brush = brush;
     }
 
@@ -242,8 +254,10 @@ public class BodyDrawingView extends View {
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     void redrawAllSavedSteps() {
         if (!steps.isEmpty()) {
+            int width = backgroundImage.getWidth();
+            int height = backgroundImage.getHeight();
             for (Step step : steps) {
-                drawStep(step, 1494, 2200);
+                drawStep(step, width, height);
             }
             invalidate();
         }
@@ -365,15 +379,14 @@ public class BodyDrawingView extends View {
         if (brush.drawByMove) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
-                freshPath = new Path();
+                freshPath = new SerializablePath();
                 freshPath.moveTo(x, y);
                 freshPath.lineTo(x, y);
 
                 freshPaint = new Paint(brush.paint);
                 freshPaint.setStyle(Paint.Style.STROKE);
                 freshPaint.setStrokeWidth(mZoomingScale * brush.thickness);
-                freshPaint.setColor(brush.type.equals("erase") ? Color.WHITE
-                        : intensity);
+                freshPaint.setColor(brush.type.equals("erase") ? Color.WHITE : intensity);
 
             } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
                 // Get all points from event.getHistoricalX/Y for a smoother draw;
@@ -386,16 +399,21 @@ public class BodyDrawingView extends View {
                 freshPath.lineTo(x, y);
 
                 Step step = new Step();
-                step.brush = new CanvasFragment.Brush(brush);
-                step.intensity_mark = intensity_mark;
-
+                step.brush = new Brush(brush);
                 step.brush.paint.setColor(intensity);
                 step.brush.drawOutside = allowOutsideDrawing;
-                step.path = new Path(freshPath);
+                step.intensity_mark = intensity_mark;
+                step.path = new SerializablePath();
+                step.path.addPath(freshPath);
                 freshPath = null;
                 step.path.transform(mInvertMatrix);
                 steps.add(step);
                 drawStep(step, 0, 0);
+
+                // After a new drawing is added, notify the listener
+                if (onDrawingChangeListener != null) {
+                    onDrawingChangeListener.onDrawingChange();
+                }
             }
         } else {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -403,14 +421,11 @@ public class BodyDrawingView extends View {
                 float[] pts = new float[]{x, y};
                 mInvertMatrix.mapPoints(pts);
 
-                Step step = new Step();
+                Step step;
+                step = new Step();
                 step.brush = brush;
                 step.intensity_mark = intensity_mark;
             }
-        }
-        // After a new drawing is added, notify the listener
-        if (onDrawingChangeListener != null) {
-            onDrawingChangeListener.onDrawingChange();
         }
         invalidate();
         return true;
@@ -430,10 +445,4 @@ public class BodyDrawingView extends View {
         this.onDrawingChangeListener = listener;
     }
 
-    static class Step {
-
-        CanvasFragment.Brush brush;
-        Path path;
-        int intensity_mark;
-    }
 }

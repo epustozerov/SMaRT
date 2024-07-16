@@ -1,6 +1,7 @@
 package com.dm.smart;
 
 import static com.dm.smart.CanvasFragment.verifyStoragePermissions;
+import static com.dm.smart.DrawFragment.clearTempData;
 import static com.dm.smart.SubjectFragment.extractSubjectFromTheDB;
 
 import android.Manifest;
@@ -45,6 +46,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.prefs.BackingStoreException;
+
+import static com.dm.smart.ui.elements.CustomAlertDialogs.showUnsavedRecordDialog;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -114,9 +117,7 @@ public class MainActivity extends AppCompatActivity {
                     // check if we have the permission to read media images
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         verifyStoragePermissions(this);
-                    }
-                    // if there is still no permission, do not go to the fragment
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        // if there is still no permission, do not go to the fragment
                         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == -1) {
                             // show the short toast message that the permission is needed
                             Toast.makeText(this, R.string.toast_media_permission, Toast.LENGTH_LONG).show();
@@ -151,7 +152,6 @@ public class MainActivity extends AppCompatActivity {
                                         CustomAlertDialogs.showInstructions(this, false, null);
                                 alertDialog.show();
                             } else {
-                                // create a configuration object
                                 AlertDialog alertDialog =
                                         CustomAlertDialogs.showInstructions(this, true,
                                                 new File(getFilesDir(), patientConfiguration.getInstructionsPath()));
@@ -161,7 +161,6 @@ public class MainActivity extends AppCompatActivity {
                         return NavigationUI.onNavDestinationSelected(item, navController);
                     }
                 case R.id.navigation_subject:
-                    // if we are not at th subject fragment, we can go there
                     if (Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.navigation_subject) {
                         AlertDialog.Builder builder = getBuilderSaveRecord(item, navController);
                         builder.setNegativeButton(R.string.dialog_no, (dialog, id) -> {
@@ -183,7 +182,21 @@ public class MainActivity extends AppCompatActivity {
             Objects.requireNonNull(alertDialog.getWindow()).setLayout(WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT);
         }
+
+
+        // check if the folder "steps" exists in the app folder
+        File stepsFolder = new File(getFilesDir(), "temp/steps");
+        if (!stepsFolder.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            stepsFolder.mkdirs();
+        }
+        File[] files = stepsFolder.listFiles();
+        @SuppressLint("RestrictedApi") MenuItem item = navigationView.getMenu().getItem(1);
+        if (files != null && files.length > 0) {
+            showUnsavedRecordDialog(this, item).show();
+        }
     }
+
 
     private void formConfigAndSchemes() {
         boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
@@ -239,6 +252,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setMessage(R.string.dialog_save_images);
         builder.setPositiveButton(R.string.dialog_continue, (dialog, id) -> {
             NavigationUI.onNavDestinationSelected(item, navController);
+            clearTempData(this);
             if (sharedPref.getBoolean(getString(R.string.sp_request_password), false)) {
                 AlertDialog alertDialog = CustomAlertDialogs.requestPassword(
                         MainActivity.this, null, null, null);
