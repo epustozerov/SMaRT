@@ -229,8 +229,13 @@ public class DrawFragment extends Fragment {
             viewPager.post(runnable);
         }
 
-        // Update the color of the newly created tab
-        updateTabColor(newPageIndex, color);
+        for (int i = 0; i <= newPageIndex; i++) {
+            Integer tabColor = this.colorsList.get("f" + i); // Attempt to read the color from colorsList
+            if (tabColor == null) {
+                tabColor = colors.get(i % colors.size()); // Use a default color if not found in colorsList
+            }
+            updateTabColor(i, tabColor);
+        }
 
         long endTime = SystemClock.elapsedRealtime();
         long elapsedMilliSeconds = endTime - startTime;
@@ -691,9 +696,10 @@ public class DrawFragment extends Fragment {
             for (File file : files) {
                 int canvasFragmentIndex = Integer.parseInt(file.getName().split("_")[1]);
                 int bodyViewIndex = Integer.parseInt(file.getName().split("_")[2]);
-                Step step;
-                step = Objects.requireNonNull(loadObjectFromFile(file.getAbsolutePath()));
-                Log.e("DEBUG", "Step: " + step.intensity_mark);
+                Step step = loadObjectFromFile(file.getAbsolutePath());
+                if (step == null) {
+                    continue;
+                }
                 // step.path.scaleCoordinates(1494f / 1023f, 2200f / 1267f);
                 if (stepsList.containsKey("f" + canvasFragmentIndex)) {
                     if (Objects.requireNonNull(stepsList.get("f" + canvasFragmentIndex)).size() > bodyViewIndex) {

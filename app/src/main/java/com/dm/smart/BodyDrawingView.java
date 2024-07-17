@@ -121,10 +121,6 @@ public class BodyDrawingView extends View {
 
     @Override
     protected void onSizeChanged(int w, int h, int old_w, int old_h) {
-        if (isInEditMode()) {
-            super.onSizeChanged(w, h, old_w, old_h);
-            return;
-        }
         if (w > 0 & h > 0) {
             setBGImageZooming(this.backgroundImage);
             setZoomingBounds();
@@ -133,11 +129,6 @@ public class BodyDrawingView extends View {
 
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
-
-        if (isInEditMode()) {
-            super.onDraw(canvas);
-            return;
-        }
 
         // Draw background
         if (backgroundImage != null) {

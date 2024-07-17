@@ -62,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         formConfigAndSchemes();
 
+        loadCurrentlySelectedSubjectById();
+
         // Check if we have config.ini file in the app files folder
         File file = new File(getFilesDir(), "config.ini");
         boolean justCreated = !file.exists();
@@ -86,18 +88,6 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-
-        // Add a dafault patient if the database is empty
-        DBAdapter db = new DBAdapter(this);
-        db.open();
-        Cursor cursor = db.getAllSubjects();
-        cursor.moveToFirst();
-        if (cursor.getCount() > 0) {
-            currentlySelectedSubject = extractSubjectFromTheDB(cursor);
-        } else {
-            currentlySelectedSubject = new Subject("Default Subject", "Built-in", "neutral");
-        }
-        db.close();
 
         com.dm.smart.databinding.ActivityMainBinding binding =
                 ActivityMainBinding.inflate(getLayoutInflater());
@@ -566,11 +556,44 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    private void saveCurrentlySelectedSubjectId() {
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt("currentlySelectedSubjectId", currentlySelectedSubject.getId());
+        editor.apply();
+    }
+
+    private void loadCurrentlySelectedSubjectById() {
+        int id = sharedPref.getInt("currentlySelectedSubjectId", -1); // Default to -1 if not found
+        if (id != -1) {
+            DBAdapter db = new DBAdapter(this);
+            db.open();
+            Cursor cursor = db.getSubjectById(id); // Assuming getSubjectById(int id) is a method that queries the subject by its ID
+            if (cursor != null && cursor.moveToFirst()) {
+                currentlySelectedSubject = extractSubjectFromTheDB(cursor);
+                cursor.close();
+            } else {
+                // Handle case where there is no subject found with the given id
+                currentlySelectedSubject = new Subject("Default Subject", "Built-in", "neutral");
+            }
+            db.close();
+        } else {
+            // Handle case where there is no saved id, e.g., default or new subject
+            currentlySelectedSubject = new Subject("Default Subject", "Built-in", "neutral");
+        }
+    }
+
     // run code before activity is created
     @Override
     public void onAttachedToWindow() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             verifyStoragePermissions(this);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        saveCurrentlySelectedSubjectId();
     }
 }

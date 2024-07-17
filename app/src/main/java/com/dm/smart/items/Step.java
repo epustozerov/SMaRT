@@ -11,9 +11,4 @@ public class Step implements Serializable {
     public Step() {
     }
 
-    public Step(Step step) {
-        this.brush = new Brush(step.brush);
-        this.path = new SerializablePath(step.path);
-        this.intensity_mark = step.intensity_mark;
-    }
 }
