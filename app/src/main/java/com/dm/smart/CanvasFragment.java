@@ -458,6 +458,12 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
         }
         tagContainerSensations = mCanvas.findViewById(R.id.drawn_sensations);
 
+        Integer savedColor = ((DrawFragment) getParentFragment()).colorsList.get(getTag());
+        if (savedColor != null) {
+            color = savedColor;
+            dampenedColor = dampen(color);
+        }
+
         // Init the list of sensations to select in the top panel
         LinearLayout.LayoutParams lp =
                 new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -713,6 +719,7 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
                                 // overwrite the appropriate colors in colors array of the parent DrawFragment
                                 sharedViewModel.setColorAndIndex(selectedColor, getTabIndex());
                                 ((DrawFragment) getParentFragment()).colors.set(getTabIndex(), selectedColor);
+                                ((DrawFragment) getParentFragment()).colorsList.put(getTag(), selectedColor);
                                 toolsBtns.get(currentBrushId).setPressed(true);
                             },
                             (dialog, selectedColor, allColors) -> {
@@ -994,6 +1001,7 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
         DrawFragment drawFragment = (DrawFragment) getParentFragment();
         assert drawFragment != null;
         drawFragment.sensationsList.put(this.getTag(), selectedSensations);
+        drawFragment.colorsList.put(this.getTag(), color);
         List<List<Step>> bodyViewStepsList = new ArrayList<>();
         for (BodyDrawingView bodyView : bodyViews) {
             bodyViewStepsList.add(new ArrayList<>(bodyView.steps));

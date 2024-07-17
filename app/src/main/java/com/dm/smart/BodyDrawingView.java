@@ -194,7 +194,9 @@ public class BodyDrawingView extends View {
             tempCanvas.drawPath(step.path, paint);
             if (!drawOutside) {
                 paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
-                tempCanvas.drawBitmap(maskImage, 0, 0, paint);
+                if (maskImage != null) {
+                    tempCanvas.drawBitmap(maskImage, 0, 0, paint);
+                }
             }
         }
         // Log the size of the current snapshot

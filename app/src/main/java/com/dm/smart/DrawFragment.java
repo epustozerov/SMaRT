@@ -66,6 +66,7 @@ public class DrawFragment extends Fragment {
 
     private TabLayout tabLayout;
     final Map<String, ArrayList<String>> sensationsList = new HashMap<>();
+    final Map<String, Integer> colorsList = new HashMap<>();
     Map<String, List<List<Step>>> stepsList = new HashMap<>();
     public ViewPager2 viewPager;
     public ViewPagerAdapter viewPagerAdapter;
@@ -103,10 +104,10 @@ public class DrawFragment extends Fragment {
 
         // Observe the color and active tab index in the SharedViewModel
         sharedViewModel.getColorAndIndex().observe(this,
-                colorAndIndex -> updateDrawableColor(colorAndIndex.second, colorAndIndex.first));
+                colorAndIndex -> updateTabColor(colorAndIndex.second, colorAndIndex.first));
     }
 
-    private void updateDrawableColor(int index, int color) {
+    private void updateTabColor(int index, int color) {
         // Get a reference to the active tab
         TabLayout.Tab activeTab = tabLayout.getTabAt(index);
         if (activeTab != null && activeTab.getCustomView() != null) {
@@ -229,7 +230,7 @@ public class DrawFragment extends Fragment {
         }
 
         // Update the color of the newly created tab
-        updateDrawableColor(newPageIndex, color);
+        updateTabColor(newPageIndex, color);
 
         long endTime = SystemClock.elapsedRealtime();
         long elapsedMilliSeconds = endTime - startTime;
@@ -554,8 +555,8 @@ public class DrawFragment extends Fragment {
             directory.mkdirs();
         }
         File textFile = new File(directory, "sensations.txt");
-        FileWriter writer;
         try {
+            FileWriter writer;
             writer = new FileWriter(textFile);
             for (int i = 0; i < this.sensationsList.size(); i++) {
                 writer.append("Sensation ").append(String.valueOf(i + 1)).append(": ");
@@ -567,6 +568,20 @@ public class DrawFragment extends Fragment {
                         }
                     }
                 }
+                writer.append("\n");
+            }
+            writer.flush();
+            writer.close();
+        } catch (IOException ignored) {
+        }
+        // save colors
+        File colorsFile = new File(directory, "colors.txt");
+        try {
+            FileWriter writer;
+            writer = new FileWriter(colorsFile);
+            for (int i = 0; i < this.colorsList.size(); i++) {
+                writer.append("Color ").append(String.valueOf(i + 1)).append(": ");
+                writer.append(String.valueOf(this.colorsList.get("f" + i)));
                 writer.append("\n");
             }
             writer.flush();
@@ -624,6 +639,33 @@ public class DrawFragment extends Fragment {
             createNewTab();
         }
 
+        File colorsFile = new File(requireActivity().getFilesDir(), "temp/colors.txt");
+        if (colorsFile.exists() && colorsFile.length() > 0) {
+            // read the file and fill the colorsList
+            try {
+                List<String> colors = new ArrayList<>(Files.readAllLines(Paths.get(colorsFile.getAbsolutePath())));
+                for (int i = 0; i < colors.size(); i++) {
+                    if (colors.get(i).split(": ").length > 1 && !colors.get(i).split(": ")[1].isEmpty()
+                            && !colors.get(i).split(": ")[1].equals("null")) {
+                        colorsList.put("f" + i, Integer.parseInt(colors.get(i).split(": ")[1]));
+                    }
+                }
+            } catch (IOException e) {
+                // do nothing
+            }
+        }
+        // update tab colors
+        for (int i = 0; i < colorsList.size(); i++) {
+            if (colorsList.get("f" + i) != null) {
+                try {
+                    //noinspection DataFlowIssue
+                    updateTabColor(i, colorsList.get("f" + i));
+                } catch (NullPointerException e) {
+                    // do nothing
+                }
+            }
+        }
+
         File stepsFolder = new File(requireActivity().getFilesDir(), "temp/steps");
         if (!stepsFolder.exists()) {
             //noinspection ResultOfMethodCallIgnored
@@ -668,9 +710,12 @@ public class DrawFragment extends Fragment {
             // noinspection ResultOfMethodCallIgnored
             file1.delete();
         }
-        File file = new File(context.getFilesDir(), "temp/sensations.txt");
+        File file_sensations = new File(context.getFilesDir(), "temp/sensations.txt");
         // noinspection ResultOfMethodCallIgnored
-        file.delete();
+        file_sensations.delete();
+        File file_colors = new File(context.getFilesDir(), "temp/colors.txt");
+        // noinspection ResultOfMethodCallIgnored
+        file_colors.delete();
     }
 
     public void saveObjectToFile(Serializable object, String filePath) {
