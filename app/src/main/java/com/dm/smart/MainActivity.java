@@ -557,7 +557,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void saveCurrentlySelectedSubjectId() {
+    static void saveCurrentlySelectedSubjectId() {
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putInt("currentlySelectedSubjectId", currentlySelectedSubject.getId());
         editor.apply();

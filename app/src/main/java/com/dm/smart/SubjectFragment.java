@@ -507,4 +507,11 @@ public class SubjectFragment extends Fragment {
         populateListSubjects();
         populateListRecords(false);
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        MainActivity.saveCurrentlySelectedSubjectId();
+    }
+
 }
