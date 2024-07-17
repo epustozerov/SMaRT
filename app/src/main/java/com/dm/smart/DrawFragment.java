@@ -554,6 +554,8 @@ public class DrawFragment extends Fragment {
             //noinspection ResultOfMethodCallIgnored
             directory.mkdirs();
         }
+
+        // Save sensations
         File textFile = new File(directory, "sensations.txt");
         try {
             FileWriter writer;
@@ -574,7 +576,7 @@ public class DrawFragment extends Fragment {
             writer.close();
         } catch (IOException ignored) {
         }
-        // save colors
+        // Save colors
         File colorsFile = new File(directory, "colors.txt");
         try {
             FileWriter writer;
@@ -589,25 +591,37 @@ public class DrawFragment extends Fragment {
         } catch (IOException ignored) {
         }
 
-        for (int i = 0; i < this.stepsList.size(); i++) {
-            if (this.stepsList.get("f" + i) == null) {
-                continue;
-            }
-            for (int j = 0; j < Objects.requireNonNull(this.stepsList.get("f" + i)).size(); j++) {
-                for (int k = 0; k < Objects.requireNonNull(this.stepsList.get("f" + i)).get(j).size(); k++) {
-                    File stepsDirectory = new File(requireActivity().getFilesDir(), "temp/steps");
-                    if (!stepsDirectory.exists()) {
-                        //noinspection ResultOfMethodCallIgnored
-                        stepsDirectory.mkdirs();
-                    }
-                    Step step = Objects.requireNonNull(this.stepsList.get("f" + i)).get(j).get(k);
-                    // create a deep copy of the step
-                    step = new Step(step);
-                    saveObjectToFile(step, stepsDirectory + "/steps_" + i + "_" + j + "_" + k + ".ser");
+        File stepsDirectory = new File(directory, "steps");
+        if (!stepsDirectory.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            stepsDirectory.mkdirs();
+        }
+        // Save steps and collect filenames that should exist
+        List<String> validFilenames = new ArrayList<>();
+        for (Map.Entry<String, List<List<Step>>> entry : this.stepsList.entrySet()) {
+            String fragmentTag = entry.getKey();
+            List<List<Step>> bodyViewsSteps = entry.getValue();
+            for (int j = 0; j < bodyViewsSteps.size(); j++) {
+                List<Step> steps = bodyViewsSteps.get(j);
+                for (int k = 0; k < steps.size(); k++) {
+                    Step step = steps.get(k);
+                    String filename = "steps_" + fragmentTag.substring(1) + "_" + j + "_" + k + ".ser";
+                    validFilenames.add(filename);
+                    saveObjectToFile(step, new File(stepsDirectory, filename).getAbsolutePath());
                 }
             }
         }
 
+        // Delete files not present in validFilenames
+        File[] existingFiles = stepsDirectory.listFiles();
+        if (existingFiles != null) {
+            for (File file : existingFiles) {
+                if (!validFilenames.contains(file.getName())) {
+                    //noinspection ResultOfMethodCallIgnored
+                    file.delete();
+                }
+            }
+        }
     }
 
 
