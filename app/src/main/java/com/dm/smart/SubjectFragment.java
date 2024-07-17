@@ -474,6 +474,9 @@ public class SubjectFragment extends Fragment {
                 imagePaths.add(imageFile.getAbsolutePath());
             }
         }
+        if (imagePaths.isEmpty()) {
+            return;
+        }
 
         // Load the first image
         Bitmap firstImage = BitmapFactory.decodeFile(imagePaths.get(0));
@@ -503,5 +506,13 @@ public class SubjectFragment extends Fragment {
         adapterSubjects.setShowNames(show_names);
         populateListSubjects();
         populateListRecords(false);
+
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        MainActivity.saveCurrentlySelectedSubjectId();
+    }
+
 }

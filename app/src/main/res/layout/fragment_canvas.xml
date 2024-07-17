@@ -152,13 +152,13 @@
 
                             <TextView
                                 android:id="@+id/textview_switch_bodyview"
-                                android:contentDescription="@string/textview_next_view"
-                                android:text="@string/textview_next_view"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center|bottom"
                                 android:clickable="false"
+                                android:contentDescription="@string/textview_next_view"
                                 android:gravity="center"
+                                android:text="@string/textview_next_view"
                                 android:textAllCaps="true"
                                 android:textStyle="bold" />
                         </FrameLayout>

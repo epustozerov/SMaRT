@@ -3,6 +3,7 @@ package com.dm.smart;
 import static com.dm.smart.MainActivity.sharedPref;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -38,6 +39,7 @@ import androidx.navigation.Navigation;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.dm.smart.items.Record;
+import com.dm.smart.items.Step;
 import com.dm.smart.ui.elements.CustomAlertDialogs;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -46,9 +48,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,14 +64,15 @@ import java.util.stream.Collectors;
 
 public class DrawFragment extends Fragment {
 
-    private TabLayout tabLayout;
     final Map<String, ArrayList<String>> sensationsList = new HashMap<>();
-    Map<String, List<List<BodyDrawingView.Step>>> stepsList = new HashMap<>();
+    final Map<String, Integer> colorsList = new HashMap<>();
     public ViewPager2 viewPager;
     public ViewPagerAdapter viewPagerAdapter;
+    Map<String, List<List<Step>>> stepsList = new HashMap<>();
     Configuration configuration;
     List<Integer> colors;
     Lifecycle lifecycle;
+    private TabLayout tabLayout;
 
     public DrawFragment() {
     }
@@ -87,6 +95,27 @@ public class DrawFragment extends Fragment {
         return new int[]{color_max, color_min};
     }
 
+    public static void clearTempData(Activity context) {
+        File stepsFolder = new File(context.getFilesDir(), "temp/steps");
+        if (!stepsFolder.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            stepsFolder.mkdirs();
+        }
+        // check if the folder "steps" is empty, if not show a dialog proposing to proceed from the last step
+        File[] files = stepsFolder.listFiles();
+        assert files != null;
+        for (File file1 : files) {
+            // noinspection ResultOfMethodCallIgnored
+            file1.delete();
+        }
+        File file_sensations = new File(context.getFilesDir(), "temp/sensations.txt");
+        // noinspection ResultOfMethodCallIgnored
+        file_sensations.delete();
+        File file_colors = new File(context.getFilesDir(), "temp/colors.txt");
+        // noinspection ResultOfMethodCallIgnored
+        file_colors.delete();
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,12 +124,11 @@ public class DrawFragment extends Fragment {
         SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
         // Observe the color and active tab index in the SharedViewModel
-        sharedViewModel.getColorAndIndex().observe(this, colorAndIndex -> {
-            updateDrawableColor(colorAndIndex.second, colorAndIndex.first);
-        });
+        sharedViewModel.getColorAndIndex().observe(this,
+                colorAndIndex -> updateTabColor(colorAndIndex.second, colorAndIndex.first));
     }
 
-    private void updateDrawableColor(int index, int color) {
+    private void updateTabColor(int index, int color) {
         // Get a reference to the active tab
         TabLayout.Tab activeTab = tabLayout.getTabAt(index);
         if (activeTab != null && activeTab.getCustomView() != null) {
@@ -202,7 +230,7 @@ public class DrawFragment extends Fragment {
             tab.setCustomView(tab_new_sensation);
         });
         tabLayoutMediator.attach();
-        createNewTab();
+        restoreTempData();
     }
 
     void createNewTab() {
@@ -221,8 +249,13 @@ public class DrawFragment extends Fragment {
             viewPager.post(runnable);
         }
 
-        // Update the color of the newly created tab
-        updateDrawableColor(newPageIndex, color);
+        for (int i = 0; i <= newPageIndex; i++) {
+            Integer tabColor = this.colorsList.get("f" + i); // Attempt to read the color from colorsList
+            if (tabColor == null) {
+                tabColor = colors.get(i % colors.size()); // Use a default color if not found in colorsList
+            }
+            updateTabColor(i, tabColor);
+        }
 
         long endTime = SystemClock.elapsedRealtime();
         long elapsedMilliSeconds = endTime - startTime;
@@ -313,8 +346,6 @@ public class DrawFragment extends Fragment {
         if (createdWindows > 0) {
             CanvasFragment cf_base =
                     (CanvasFragment) viewPagerAdapter.fragmentManager.findFragmentByTag("f" + 0);
-            int height = 1494;
-            int width = 2200;
             Bitmap.Config config = Bitmap.Config.ARGB_8888;
 
             // Create a txt file, put allSteps in it
@@ -335,7 +366,10 @@ public class DrawFragment extends Fragment {
 
                         // Create a merged bitmap for this BodyDrawingView if it doesn't exist
                         if (mergedBitmaps.size() <= j) {
-                            mergedBitmaps.add(Bitmap.createBitmap(width, height, config));
+                            if (cf.bodyViews[j].snapshot != null) {
+                                mergedBitmaps.add(Bitmap.createBitmap(cf.bodyViews[j].snapshot.getWidth(),
+                                        cf.bodyViews[j].snapshot.getHeight(), config));
+                            }
                         }
 
                         // Add this snapshot to the merged bitmap
@@ -356,7 +390,12 @@ public class DrawFragment extends Fragment {
                             // if sensationsStringSingle is not presented in sensationsString, add it
                             if (!sensationsString.contains(sensationsStringSingle.toString())) {
                                 sensationsString.add(sensationsStringSingle.toString());
-                                sensationsColors.add(colors.get(i % colors.size()));
+                                // sensationsColors.add(colors.get(i % colors.size()));
+                                Integer color = colorsList.get("f" + i); // Use colorsList instead of colors object
+                                if (color == null) {
+                                    color = Color.BLACK; // Default color if not found in colorsList
+                                }
+                                sensationsColors.add(color);
                             }
                         }
 
@@ -397,6 +436,24 @@ public class DrawFragment extends Fragment {
             } catch (IOException e) {
                 // do nothing
             }
+        }
+        if (customConfig) {
+            colors = Arrays.stream(configuration.getColorSymptoms()).map(Color::parseColor).collect(Collectors.toList());
+        } else {
+            colors = Arrays.stream(requireActivity().getResources().
+                    getIntArray(R.array.colors_symptoms)).boxed().collect(Collectors.toList());
+        }
+        clearTempData(requireActivity());
+    }
+
+    private Step loadObjectFromFile(String absolutePath) {
+        // load serialized object from file
+        try {
+            return (Step) new ObjectInputStream(Files.newInputStream(Paths.get(absolutePath))).readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            //noinspection CallToPrintStackTrace
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -500,6 +557,184 @@ public class DrawFragment extends Fragment {
     public void onAttach(@NonNull Context context) {
         Log.e("DEBUG", "OnAttach of DrawFragment");
         super.onAttach(context);
+    }
+
+    void saveTempData() {
+        File directory = new File(requireActivity().getFilesDir(), "temp");
+        if (!directory.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            directory.mkdirs();
+        }
+
+        // Save sensations
+        File textFile = new File(directory, "sensations.txt");
+        try {
+            FileWriter writer;
+            writer = new FileWriter(textFile);
+            for (int i = 0; i < this.sensationsList.size(); i++) {
+                writer.append("Sensation ").append(String.valueOf(i + 1)).append(": ");
+                if (this.sensationsList.get("f" + i) != null) {
+                    for (int j = 0; j < Objects.requireNonNull(this.sensationsList.get("f" + i)).size(); j++) {
+                        writer.append(Objects.requireNonNull(this.sensationsList.get("f" + i)).get(j));
+                        if (j < Objects.requireNonNull(this.sensationsList.get("f" + i)).size() - 1) {
+                            writer.append(", ");
+                        }
+                    }
+                }
+                writer.append("\n");
+            }
+            writer.flush();
+            writer.close();
+        } catch (IOException ignored) {
+        }
+        // Save colors
+        File colorsFile = new File(directory, "colors.txt");
+        try {
+            FileWriter writer;
+            writer = new FileWriter(colorsFile);
+            for (int i = 0; i < this.colorsList.size(); i++) {
+                writer.append("Color ").append(String.valueOf(i + 1)).append(": ");
+                writer.append(String.valueOf(this.colorsList.get("f" + i)));
+                writer.append("\n");
+            }
+            writer.flush();
+            writer.close();
+        } catch (IOException ignored) {
+        }
+
+        File stepsDirectory = new File(directory, "steps");
+        if (!stepsDirectory.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            stepsDirectory.mkdirs();
+        }
+        // Save steps and collect filenames that should exist
+        List<String> validFilenames = new ArrayList<>();
+        for (Map.Entry<String, List<List<Step>>> entry : this.stepsList.entrySet()) {
+            String fragmentTag = entry.getKey();
+            List<List<Step>> bodyViewsSteps = entry.getValue();
+            for (int j = 0; j < bodyViewsSteps.size(); j++) {
+                List<Step> steps = bodyViewsSteps.get(j);
+                for (int k = 0; k < steps.size(); k++) {
+                    Step step = steps.get(k);
+                    String filename = "steps_" + fragmentTag.substring(1) + "_" + j + "_" + k + ".ser";
+                    validFilenames.add(filename);
+                    saveObjectToFile(step, new File(stepsDirectory, filename).getAbsolutePath());
+                }
+            }
+        }
+
+        // Delete files not present in validFilenames
+        File[] existingFiles = stepsDirectory.listFiles();
+        if (existingFiles != null) {
+            for (File file : existingFiles) {
+                if (!validFilenames.contains(file.getName())) {
+                    //noinspection ResultOfMethodCallIgnored
+                    file.delete();
+                }
+            }
+        }
+    }
+
+
+    private void restoreTempData() {
+        // Restore sensations from the file
+        File sensationsFile = new File(requireActivity().getFilesDir(), "temp/sensations.txt");
+        if (sensationsFile.exists() && sensationsFile.length() > 0) {
+            // read the file and fill the sensationsList
+            try {
+                List<String> sensations = new ArrayList<>(Files.readAllLines(Paths.get(sensationsFile.getAbsolutePath())));
+                // first open necessary amount of tabs
+                for (int i = 0; i < sensations.size(); i++) {
+                    createNewTab();
+                    // enlarge the sensationsList
+                    sensationsList.put("f" + i, new ArrayList<>());
+                }
+
+                for (int i = 0; i < sensations.size(); i++) {
+                    // check if the line is not empty
+                    if (sensations.get(i).split(": ").length > 1) {
+                        sensationsList.put("f" + i,
+                                new ArrayList<>(Arrays.asList(sensations.get(i).split(": ")[1].split(", "))));
+                    }
+                }
+            } catch (IOException e) {
+                // do nothing
+            }
+        } else {
+            createNewTab();
+        }
+
+        File colorsFile = new File(requireActivity().getFilesDir(), "temp/colors.txt");
+        if (colorsFile.exists() && colorsFile.length() > 0) {
+            // read the file and fill the colorsList
+            try {
+                List<String> colors = new ArrayList<>(Files.readAllLines(Paths.get(colorsFile.getAbsolutePath())));
+                for (int i = 0; i < colors.size(); i++) {
+                    if (colors.get(i).split(": ").length > 1 && !colors.get(i).split(": ")[1].isEmpty()
+                            && !colors.get(i).split(": ")[1].equals("null")) {
+                        colorsList.put("f" + i, Integer.parseInt(colors.get(i).split(": ")[1]));
+                    }
+                }
+            } catch (IOException e) {
+                // do nothing
+            }
+        }
+        // update tab colors
+        for (int i = 0; i < colorsList.size(); i++) {
+            if (colorsList.get("f" + i) != null) {
+                try {
+                    //noinspection DataFlowIssue
+                    updateTabColor(i, colorsList.get("f" + i));
+                } catch (NullPointerException e) {
+                    // do nothing
+                }
+            }
+        }
+
+        File stepsFolder = new File(requireActivity().getFilesDir(), "temp/steps");
+        if (!stepsFolder.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            stepsFolder.mkdirs();
+        }
+        File[] files = stepsFolder.listFiles();
+        //noinspection RedundantLengthCheck
+        if (files != null && files.length > 0) {
+            for (File file : files) {
+                int canvasFragmentIndex = Integer.parseInt(file.getName().split("_")[1]);
+                int bodyViewIndex = Integer.parseInt(file.getName().split("_")[2]);
+                Step step = loadObjectFromFile(file.getAbsolutePath());
+                if (step == null) {
+                    continue;
+                }
+                // step.path.scaleCoordinates(1494f / 1023f, 2200f / 1267f);
+                if (stepsList.containsKey("f" + canvasFragmentIndex)) {
+                    if (Objects.requireNonNull(stepsList.get("f" + canvasFragmentIndex)).size() > bodyViewIndex) {
+                        Objects.requireNonNull(stepsList.get("f" + canvasFragmentIndex)).get(bodyViewIndex).add(step);
+                    } else {
+                        Objects.requireNonNull(stepsList.get("f" + canvasFragmentIndex)).add(
+                                new ArrayList<>(Collections.singletonList(step)));
+                    }
+                } else {
+                    stepsList.put("f" + canvasFragmentIndex,
+                            new ArrayList<>(Collections.singletonList(new ArrayList<>(Collections.singletonList(step)))));
+                }
+            }
+        }
+    }
+
+    public void saveObjectToFile(Serializable object, String filePath) {
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(filePath);
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+
+            objectOutputStream.writeObject(object);
+
+            objectOutputStream.close();
+            fileOutputStream.close();
+        } catch (IOException e) {
+            //noinspection CallToPrintStackTrace
+            e.printStackTrace();
+        }
     }
 
     @SuppressWarnings("deprecation")

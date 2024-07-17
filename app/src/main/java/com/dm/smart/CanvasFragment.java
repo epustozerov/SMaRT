@@ -2,9 +2,9 @@ package com.dm.smart;
 
 import static com.dm.smart.DrawFragment.dampen;
 import static com.dm.smart.DrawFragment.defineMinMaxColors;
+import static com.dm.smart.ui.elements.CustomAlertDialogs.showAddSensationDialog;
 import static com.dm.smart.ui.elements.CustomAlertDialogs.showColorPickerDialog;
 import static com.dm.smart.ui.elements.CustomAlertDialogs.showGeneralView;
-import static com.dm.smart.ui.elements.CustomAlertDialogs.showAddSensationDialog;
 import static com.dm.smart.ui.elements.CustomAlertDialogs.showLineWidthDialog;
 import static com.dm.smart.ui.elements.CustomToasts.showToast;
 
@@ -26,7 +26,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -50,6 +49,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.dm.smart.items.Brush;
+import com.dm.smart.items.SerializablePaint;
+import com.dm.smart.items.Step;
 import com.dm.smart.ui.elements.CustomThumbDrawer;
 import com.rtugeek.android.colorseekbar.ColorSeekBar;
 
@@ -82,6 +84,7 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
     TypedArray bodyImages;
     TypedArray bodyImagesMasks;
     Toast showedToast = null;
+    Button buttonSensationsTool;
     private Brush currentBrush;
     private List<Brush> brushes;
     private int currentIntensity;
@@ -91,11 +94,30 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
     private int currentBrushId, eraserId, lastBrushId;
     private int mShortAnimationDuration;
     private boolean allowOutsideDrawing = false;
-
     private SharedViewModel sharedViewModel;
     private ColorSeekBar intensityScale;
 
     public CanvasFragment() {
+    }
+
+    public CanvasFragment(Bundle b) {
+        color = b.getInt("color");
+        dampenedColor = dampen(color);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_MEDIA_IMAGES);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    READ_MEDIA_IMAGES
+            );
+        }
     }
 
     public int getTabIndex() {
@@ -182,26 +204,6 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
             txt.setPadding(Math.round(dp2px(6)), Math.round(dp2px(6)),
                     Math.round(dp2px(6)), Math.round(dp2px(6)));
             tagContainerSensations.addView(txt);
-        }
-    }
-
-    public CanvasFragment(Bundle b) {
-        color = b.getInt("color");
-        dampenedColor = dampen(color);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-    public static void verifyStoragePermissions(Activity activity) {
-        // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_MEDIA_IMAGES);
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    READ_MEDIA_IMAGES
-            );
         }
     }
 
@@ -320,15 +322,13 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
             bodyViews[1].setMaskImage(setBodyImage(bodyImagesMasks.getResourceId(1, 0), false));
         }
 
-
-        // Init gray overlay
         final LinearLayout viewA = mCanvas.findViewById(R.id.viewA);
         final View grayOverlay = mCanvas.findViewById(R.id.gray_overlay_opened_tab);
         grayOverlay.setClickable(true);
         grayOverlay.setAlpha(.618f);
 
         // Open or close the sensation tab (on the left)
-        final Button buttonSensationsTool = mCanvas.findViewById(R.id.button_sensations_tool);
+        buttonSensationsTool = mCanvas.findViewById(R.id.button_sensations_tool);
         buttonSensationsTool.setOnClickListener(v -> {
             AnimatorSet animSet = new AnimatorSet();
             if (tagsVisible) {
@@ -456,6 +456,12 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
             selectedSensations = new ArrayList<>();
         }
         tagContainerSensations = mCanvas.findViewById(R.id.drawn_sensations);
+
+        Integer savedColor = ((DrawFragment) getParentFragment()).colorsList.get(getTag());
+        if (savedColor != null) {
+            color = savedColor;
+            dampenedColor = dampen(color);
+        }
 
         // Init the list of sensations to select in the top panel
         LinearLayout.LayoutParams lp =
@@ -712,6 +718,7 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
                                 // overwrite the appropriate colors in colors array of the parent DrawFragment
                                 sharedViewModel.setColorAndIndex(selectedColor, getTabIndex());
                                 ((DrawFragment) getParentFragment()).colors.set(getTabIndex(), selectedColor);
+                                ((DrawFragment) getParentFragment()).colorsList.put(getTag(), selectedColor);
                                 toolsBtns.get(currentBrushId).setPressed(true);
                             },
                             (dialog, selectedColor, allColors) -> {
@@ -795,13 +802,11 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
         for (BodyDrawingView bodyView : bodyViews) {
             bodyView.setOnDrawingChangeListener(this);
         }
-
         return mCanvas;
     }
 
     private void onLineWidthChanged(Integer lineWidth) {
         if (lineWidth != null) {
-            // Update the line width of the brush
             currentBrush.paint.setStrokeWidth(lineWidth);
             bodyViews[activeBodyViewIndex].setBrush(currentBrush);
         }
@@ -810,8 +815,11 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
     @Override
     public void onDrawingChange() {
         updateGeneralView(activeBodyViewIndex);
-    }
+        persistStepsDF();
+        assert getParentFragment() != null;
+        ((DrawFragment) getParentFragment()).saveTempData();
 
+    }
 
     private float dp2px(int dp) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
@@ -860,7 +868,7 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
             tempBrush.thickness = (brush_array.getInteger(3, 1));
             tempBrush.type = brush_array.getString(4);
 
-            Paint tempPaint = new Paint();
+            SerializablePaint tempPaint = new SerializablePaint();
             tempPaint.setDither(false);
             tempPaint.setColor(0xFF33B5E5);
             tempPaint.setStrokeJoin(Paint.Join.ROUND);
@@ -914,44 +922,13 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
         buttonBackView.setImageBitmap(Bitmap.createScaledBitmap(fullPicture, 149, 220, true));
     }
 
-    public void restoreSteps() {
-        DrawFragment drawFragment = (DrawFragment) getParentFragment();
-        assert getParentFragment() != null;
-        Map<String, List<List<BodyDrawingView.Step>>> stepsList = drawFragment.stepsList;
-        List<List<BodyDrawingView.Step>> bodyViewStepsList = stepsList.get(getTag());
-        if (bodyViewStepsList != null) {
-            for (int i = 0; i < bodyViewStepsList.size(); i++) {
-                List<BodyDrawingView.Step> savedSteps = bodyViewStepsList.get(i);
-                if (savedSteps != null) {
-                    bodyViews[i].steps = savedSteps;
-                    bodyViews[i].redrawAllSavedSteps();
-                    bodyViews[i].invalidate();
-                }
-            }
-        }
-        Log.e("RESTORE STEPS", "Restoring steps for " + getTag() + ": " + bodyViews[activeBodyViewIndex].steps);
-        int backViewIndex = (activeBodyViewIndex + 1) % bodyViews.length;
-        updateBackView(bodyViews[backViewIndex].snapshot, bodyViews[backViewIndex].backgroundImage);
-        updateGeneralView(activeBodyViewIndex);
-    }
 
     @Override
     public void onPause() {
         Log.e("DEBUG", "OnPause of CanvasFragment " + this.getTag());
-        DrawFragment drawFragment = (DrawFragment) getParentFragment();
-        assert drawFragment != null;
-        drawFragment.sensationsList.put(this.getTag(), selectedSensations);
-        Log.e("SAVING", "Saving sensations for " + this.getTag() + ": " + selectedSensations.size());
-
-        List<List<BodyDrawingView.Step>> bodyViewStepsList = new ArrayList<>();
-        for (BodyDrawingView bodyView : bodyViews) {
-            bodyViewStepsList.add(new ArrayList<>(bodyView.steps));
-            Log.e("SAVING", "Saving steps for " + this.getTag() + ": " +
-                    Objects.requireNonNull(bodyViewStepsList.get(bodyViewStepsList.size() - 1)).size());
-        }
-        drawFragment.stepsList.put(this.getTag(), bodyViewStepsList);
         super.onPause();
     }
+
 
     @Override
     public void onDestroy() {
@@ -982,7 +959,7 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
         Log.e("DEBUG", "OnResume of CanvasFragment " + this.getTag());
         super.onResume();
         sharedViewModel.setActiveCanvasFragmentTag(getTag());
-        restoreSteps();
+        restoreStepsDF();
     }
 
     @Override
@@ -997,28 +974,38 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
         super.onAttach(context);
     }
 
-    public static class Brush {
-
-        public String title;
-        public Drawable icon;
-        public String type;
-        public boolean drawByMove;
-        public boolean drawOutside;
-        public int thickness;
-        public Paint paint;
-
-        public Brush() {
+    public void restoreStepsDF() {
+        DrawFragment drawFragment = (DrawFragment) getParentFragment();
+        assert getParentFragment() != null;
+        Map<String, List<List<Step>>> stepsList = drawFragment.stepsList;
+        List<List<Step>> bodyViewStepsList = stepsList.get(getTag());
+        if (bodyViewStepsList != null) {
+            for (int i = 0; i < bodyViewStepsList.size(); i++) {
+                List<Step> savedSteps = bodyViewStepsList.get(i);
+                if (savedSteps != null) {
+                    bodyViews[i].steps = savedSteps;
+                    bodyViews[i].redrawAllSavedSteps();
+                    bodyViews[i].invalidate();
+                }
+            }
         }
+        Log.e("RESTORE STEPS", "Restoring steps for " + getTag() + ": " + bodyViews[activeBodyViewIndex].steps);
+        int backViewIndex = (activeBodyViewIndex + 1) % bodyViews.length;
+        updateBackView(bodyViews[backViewIndex].snapshot, bodyViews[backViewIndex].backgroundImage);
+        updateGeneralView(activeBodyViewIndex);
+    }
 
-        public Brush(Brush brush) {
-            this.title = brush.title;
-            this.icon = brush.icon;
-            this.type = brush.type;
-            this.drawByMove = brush.drawByMove;
-            this.drawOutside = brush.drawOutside;
-            this.thickness = brush.thickness;
-            this.paint = new Paint(brush.paint);
+
+    private void persistStepsDF() {
+        DrawFragment drawFragment = (DrawFragment) getParentFragment();
+        assert drawFragment != null;
+        drawFragment.sensationsList.put(this.getTag(), selectedSensations);
+        drawFragment.colorsList.put(this.getTag(), color);
+        List<List<Step>> bodyViewStepsList = new ArrayList<>();
+        for (BodyDrawingView bodyView : bodyViews) {
+            bodyViewStepsList.add(new ArrayList<>(bodyView.steps));
         }
+        drawFragment.stepsList.put(this.getTag(), bodyViewStepsList);
     }
 
 }

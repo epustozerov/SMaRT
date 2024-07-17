@@ -1,7 +1,9 @@
 package com.dm.smart;
 
 import static com.dm.smart.CanvasFragment.verifyStoragePermissions;
+import static com.dm.smart.DrawFragment.clearTempData;
 import static com.dm.smart.SubjectFragment.extractSubjectFromTheDB;
+import static com.dm.smart.ui.elements.CustomAlertDialogs.showUnsavedRecordDialog;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -51,6 +53,26 @@ public class MainActivity extends AppCompatActivity {
     static Subject currentlySelectedSubject;
     static SharedPreferences sharedPref;
 
+    private static File[] getBodySchemes(File configFolder, Uri uri) {
+        if (!configFolder.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            configFolder.mkdirs();
+        }
+        String path = Objects.requireNonNull(uri.getPath()).substring(uri.getPath().indexOf(":") + 1);
+        path = Environment.getExternalStorageDirectory() + "/" + path;
+        path = path.substring(0, path.lastIndexOf("/"));
+        path = path + "/body_figures";
+
+        File folder = new File(path);
+        return folder.listFiles();
+    }
+
+    static void saveCurrentlySelectedSubjectId() {
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt("currentlySelectedSubjectId", currentlySelectedSubject.getId());
+        editor.apply();
+    }
+
     @SuppressLint({"NonConstantResourceId"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         formConfigAndSchemes();
+
+        loadCurrentlySelectedSubjectById();
 
         // Check if we have config.ini file in the app files folder
         File file = new File(getFilesDir(), "config.ini");
@@ -84,18 +108,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        // Add a dafault patient if the database is empty
-        DBAdapter db = new DBAdapter(this);
-        db.open();
-        Cursor cursor = db.getAllSubjects();
-        cursor.moveToFirst();
-        if (cursor.getCount() > 0) {
-            currentlySelectedSubject = extractSubjectFromTheDB(cursor);
-        } else {
-            currentlySelectedSubject = new Subject("Default Subject", "Built-in", "neutral");
-        }
-        db.close();
-
         com.dm.smart.databinding.ActivityMainBinding binding =
                 ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -114,9 +126,7 @@ public class MainActivity extends AppCompatActivity {
                     // check if we have the permission to read media images
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         verifyStoragePermissions(this);
-                    }
-                    // if there is still no permission, do not go to the fragment
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        // if there is still no permission, do not go to the fragment
                         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == -1) {
                             // show the short toast message that the permission is needed
                             Toast.makeText(this, R.string.toast_media_permission, Toast.LENGTH_LONG).show();
@@ -151,7 +161,6 @@ public class MainActivity extends AppCompatActivity {
                                         CustomAlertDialogs.showInstructions(this, false, null);
                                 alertDialog.show();
                             } else {
-                                // create a configuration object
                                 AlertDialog alertDialog =
                                         CustomAlertDialogs.showInstructions(this, true,
                                                 new File(getFilesDir(), patientConfiguration.getInstructionsPath()));
@@ -161,7 +170,6 @@ public class MainActivity extends AppCompatActivity {
                         return NavigationUI.onNavDestinationSelected(item, navController);
                     }
                 case R.id.navigation_subject:
-                    // if we are not at th subject fragment, we can go there
                     if (Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.navigation_subject) {
                         AlertDialog.Builder builder = getBuilderSaveRecord(item, navController);
                         builder.setNegativeButton(R.string.dialog_no, (dialog, id) -> {
@@ -182,6 +190,19 @@ public class MainActivity extends AppCompatActivity {
             alertDialog.show();
             Objects.requireNonNull(alertDialog.getWindow()).setLayout(WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT);
+        }
+
+
+        // check if the folder "steps" exists in the app folder
+        File stepsFolder = new File(getFilesDir(), "temp/steps");
+        if (!stepsFolder.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            stepsFolder.mkdirs();
+        }
+        File[] files = stepsFolder.listFiles();
+        @SuppressLint("RestrictedApi") MenuItem item = navigationView.getMenu().getItem(1);
+        if (files != null && files.length > 0) {
+            showUnsavedRecordDialog(this, item).show();
         }
     }
 
@@ -239,6 +260,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setMessage(R.string.dialog_save_images);
         builder.setPositiveButton(R.string.dialog_continue, (dialog, id) -> {
             NavigationUI.onNavDestinationSelected(item, navController);
+            clearTempData(this);
             if (sharedPref.getBoolean(getString(R.string.sp_request_password), false)) {
                 AlertDialog alertDialog = CustomAlertDialogs.requestPassword(
                         MainActivity.this, null, null, null);
@@ -471,32 +493,26 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                // copy the body schemes from body_figures folder in the external storage next to the config file to the app folder
+
+                // Copy the body schemes from body_figures folder in the external storage next to the config file to the app folder
                 File configFolder = new File(getFilesDir(), "body_figures");
-                if (!configFolder.exists()) {
-                    //noinspection ResultOfMethodCallIgnored
-                    configFolder.mkdirs();
-                }
-                // take the path from the uri, extract only part of the path after the Documents folder
-                String config_path_from_uri =
-                        Objects.requireNonNull(uri.getPath()).substring(uri.getPath().indexOf("Documents") + 9);
-                // remove the file name from the path
-                config_path_from_uri = config_path_from_uri.substring(0, config_path_from_uri.lastIndexOf("/"));
-                File configFolderOutBF = new File(
-                        String.valueOf(Paths.get(String.valueOf(Environment.getExternalStoragePublicDirectory(
-                                Environment.DIRECTORY_DOCUMENTS)), config_path_from_uri, "body_figures")));
-                File[] files = configFolderOutBF.listFiles();
-                for (File file : Objects.requireNonNull(files)) {
-                    File outFile = new File(configFolder, file.getName());
-                    try {
-                        in = Files.newInputStream(file.toPath());
-                        out = Files.newOutputStream(outFile.toPath());
-                        copyFile(in, out);
-                        in.close();
-                        out.flush();
-                        out.close();
-                    } catch (IOException e) {
-                        Toast.makeText(this, R.string.toast_body_figures_not_copied, Toast.LENGTH_LONG).show();
+                File[] files = getBodySchemes(configFolder, uri);
+                if (files == null) {
+                    Toast.makeText(this, R.string.toast_body_figures_folder_empty, Toast.LENGTH_LONG).show();
+                    return;
+                } else {
+                    for (File file : files) {
+                        File outFile = new File(configFolder, file.getName());
+                        try {
+                            in = Files.newInputStream(file.toPath());
+                            out = Files.newOutputStream(outFile.toPath());
+                            copyFile(in, out);
+                            in.close();
+                            out.flush();
+                            out.close();
+                        } catch (IOException e) {
+                            Toast.makeText(this, R.string.toast_body_figure_not_copied, Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
 
@@ -511,7 +527,7 @@ public class MainActivity extends AppCompatActivity {
                         File instructionsFile = new File(getFilesDir(), instructionsPath);
                         File configFolderOut = new File(
                                 String.valueOf(Paths.get(String.valueOf(Environment.getExternalStoragePublicDirectory(
-                                        Environment.DIRECTORY_DOCUMENTS)), config_path_from_uri)));
+                                        Environment.DIRECTORY_DOCUMENTS)), "SMaRT/config")));
                         in = Files.newInputStream(new File(configFolderOut, instructionsPath).toPath());
                         out = Files.newOutputStream(instructionsFile.toPath());
                         copyFile(in, out);
@@ -535,12 +551,31 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     private void copyFile(InputStream in, OutputStream out) throws IOException {
         byte[] buffer = new byte[1024];
         int read;
         while ((read = in.read(buffer)) != -1) {
             out.write(buffer, 0, read);
+        }
+    }
+
+    private void loadCurrentlySelectedSubjectById() {
+        int id = sharedPref.getInt("currentlySelectedSubjectId", -1); // Default to -1 if not found
+        if (id != -1) {
+            DBAdapter db = new DBAdapter(this);
+            db.open();
+            Cursor cursor = db.getSubjectById(id); // Assuming getSubjectById(int id) is a method that queries the subject by its ID
+            if (cursor != null && cursor.moveToFirst()) {
+                currentlySelectedSubject = extractSubjectFromTheDB(cursor);
+                cursor.close();
+            } else {
+                // Handle case where there is no subject found with the given id
+                currentlySelectedSubject = new Subject("Default Subject", "Built-in", "neutral");
+            }
+            db.close();
+        } else {
+            // Handle case where there is no saved id, e.g., default or new subject
+            currentlySelectedSubject = new Subject("Default Subject", "Built-in", "neutral");
         }
     }
 
@@ -550,5 +585,11 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             verifyStoragePermissions(this);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        saveCurrentlySelectedSubjectId();
     }
 }
