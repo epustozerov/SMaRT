@@ -64,15 +64,15 @@ import java.util.stream.Collectors;
 
 public class DrawFragment extends Fragment {
 
-    private TabLayout tabLayout;
     final Map<String, ArrayList<String>> sensationsList = new HashMap<>();
     final Map<String, Integer> colorsList = new HashMap<>();
-    Map<String, List<List<Step>>> stepsList = new HashMap<>();
     public ViewPager2 viewPager;
     public ViewPagerAdapter viewPagerAdapter;
+    Map<String, List<List<Step>>> stepsList = new HashMap<>();
     Configuration configuration;
     List<Integer> colors;
     Lifecycle lifecycle;
+    private TabLayout tabLayout;
 
     public DrawFragment() {
     }
@@ -93,6 +93,27 @@ public class DrawFragment extends Fragment {
         hsv[2] = 1f;
         int color_min = Color.HSVToColor(hsv);
         return new int[]{color_max, color_min};
+    }
+
+    public static void clearTempData(Activity context) {
+        File stepsFolder = new File(context.getFilesDir(), "temp/steps");
+        if (!stepsFolder.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            stepsFolder.mkdirs();
+        }
+        // check if the folder "steps" is empty, if not show a dialog proposing to proceed from the last step
+        File[] files = stepsFolder.listFiles();
+        assert files != null;
+        for (File file1 : files) {
+            // noinspection ResultOfMethodCallIgnored
+            file1.delete();
+        }
+        File file_sensations = new File(context.getFilesDir(), "temp/sensations.txt");
+        // noinspection ResultOfMethodCallIgnored
+        file_sensations.delete();
+        File file_colors = new File(context.getFilesDir(), "temp/colors.txt");
+        // noinspection ResultOfMethodCallIgnored
+        file_colors.delete();
     }
 
     @Override
@@ -211,7 +232,6 @@ public class DrawFragment extends Fragment {
         tabLayoutMediator.attach();
         restoreTempData();
     }
-
 
     void createNewTab() {
         long startTime = SystemClock.elapsedRealtime();
@@ -370,7 +390,12 @@ public class DrawFragment extends Fragment {
                             // if sensationsStringSingle is not presented in sensationsString, add it
                             if (!sensationsString.contains(sensationsStringSingle.toString())) {
                                 sensationsString.add(sensationsStringSingle.toString());
-                                sensationsColors.add(colors.get(i % colors.size()));
+                                // sensationsColors.add(colors.get(i % colors.size()));
+                                Integer color = colorsList.get("f" + i); // Use colorsList instead of colors object
+                                if (color == null) {
+                                    color = Color.BLACK; // Default color if not found in colorsList
+                                }
+                                sensationsColors.add(color);
                             }
                         }
 
@@ -412,9 +437,14 @@ public class DrawFragment extends Fragment {
                 // do nothing
             }
         }
+        if (customConfig) {
+            colors = Arrays.stream(configuration.getColorSymptoms()).map(Color::parseColor).collect(Collectors.toList());
+        } else {
+            colors = Arrays.stream(requireActivity().getResources().
+                    getIntArray(R.array.colors_symptoms)).boxed().collect(Collectors.toList());
+        }
         clearTempData(requireActivity());
     }
-
 
     private Step loadObjectFromFile(String absolutePath) {
         // load serialized object from file
@@ -467,7 +497,6 @@ public class DrawFragment extends Fragment {
         }
         super.onPause();
     }
-
 
     @Override
     public void onDestroy() {
@@ -528,29 +557,6 @@ public class DrawFragment extends Fragment {
     public void onAttach(@NonNull Context context) {
         Log.e("DEBUG", "OnAttach of DrawFragment");
         super.onAttach(context);
-    }
-
-    @SuppressWarnings("deprecation")
-    abstract static class SaveSnapshotTask extends AsyncTask<Bitmap, String, Void> {
-        protected static void doInBackground(Bitmap figure, File directory, String name) {
-            File photo = new File(directory, name);
-            try {
-                FileOutputStream fos = new FileOutputStream(photo.getPath());
-                if (figure != null) {
-                    figure.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                    fos.close();
-                    Log.i("SAVE_FILE", "YES");
-                } else {
-                    // Save the empty image
-                    Bitmap empty = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-                    empty.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                    fos.close();
-                    Log.i("SAVE_FILE", "NO");
-                }
-            } catch (java.io.IOException e) {
-                Log.e("ERROR_SAVING", "Exception in SaveSnapshotTask", e);
-            }
-        }
     }
 
     void saveTempData() {
@@ -716,28 +722,6 @@ public class DrawFragment extends Fragment {
         }
     }
 
-
-    public static void clearTempData(Activity context) {
-        File stepsFolder = new File(context.getFilesDir(), "temp/steps");
-        if (!stepsFolder.exists()) {
-            //noinspection ResultOfMethodCallIgnored
-            stepsFolder.mkdirs();
-        }
-        // check if the folder "steps" is empty, if not show a dialog proposing to proceed from the last step
-        File[] files = stepsFolder.listFiles();
-        assert files != null;
-        for (File file1 : files) {
-            // noinspection ResultOfMethodCallIgnored
-            file1.delete();
-        }
-        File file_sensations = new File(context.getFilesDir(), "temp/sensations.txt");
-        // noinspection ResultOfMethodCallIgnored
-        file_sensations.delete();
-        File file_colors = new File(context.getFilesDir(), "temp/colors.txt");
-        // noinspection ResultOfMethodCallIgnored
-        file_colors.delete();
-    }
-
     public void saveObjectToFile(Serializable object, String filePath) {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(filePath);
@@ -750,6 +734,29 @@ public class DrawFragment extends Fragment {
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    abstract static class SaveSnapshotTask extends AsyncTask<Bitmap, String, Void> {
+        protected static void doInBackground(Bitmap figure, File directory, String name) {
+            File photo = new File(directory, name);
+            try {
+                FileOutputStream fos = new FileOutputStream(photo.getPath());
+                if (figure != null) {
+                    figure.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                    fos.close();
+                    Log.i("SAVE_FILE", "YES");
+                } else {
+                    // Save the empty image
+                    Bitmap empty = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+                    empty.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                    fos.close();
+                    Log.i("SAVE_FILE", "NO");
+                }
+            } catch (java.io.IOException e) {
+                Log.e("ERROR_SAVING", "Exception in SaveSnapshotTask", e);
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package com.dm.smart;
 import static com.dm.smart.CanvasFragment.verifyStoragePermissions;
 import static com.dm.smart.DrawFragment.clearTempData;
 import static com.dm.smart.SubjectFragment.extractSubjectFromTheDB;
+import static com.dm.smart.ui.elements.CustomAlertDialogs.showUnsavedRecordDialog;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -47,12 +48,30 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.prefs.BackingStoreException;
 
-import static com.dm.smart.ui.elements.CustomAlertDialogs.showUnsavedRecordDialog;
-
 public class MainActivity extends AppCompatActivity {
 
     static Subject currentlySelectedSubject;
     static SharedPreferences sharedPref;
+
+    private static File[] getBodySchemes(File configFolder, Uri uri) {
+        if (!configFolder.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            configFolder.mkdirs();
+        }
+        String path = Objects.requireNonNull(uri.getPath()).substring(uri.getPath().indexOf(":") + 1);
+        path = Environment.getExternalStorageDirectory() + "/" + path;
+        path = path.substring(0, path.lastIndexOf("/"));
+        path = path + "/body_figures";
+
+        File folder = new File(path);
+        return folder.listFiles();
+    }
+
+    static void saveCurrentlySelectedSubjectId() {
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt("currentlySelectedSubjectId", currentlySelectedSubject.getId());
+        editor.apply();
+    }
 
     @SuppressLint({"NonConstantResourceId"})
     @Override
@@ -186,7 +205,6 @@ public class MainActivity extends AppCompatActivity {
             showUnsavedRecordDialog(this, item).show();
         }
     }
-
 
     private void formConfigAndSchemes() {
         boolean customConfig = sharedPref.getBoolean(getString(R.string.sp_custom_config), false);
@@ -533,34 +551,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private static File[] getBodySchemes(File configFolder, Uri uri) {
-        if (!configFolder.exists()) {
-            //noinspection ResultOfMethodCallIgnored
-            configFolder.mkdirs();
-        }
-        String path = Objects.requireNonNull(uri.getPath()).substring(uri.getPath().indexOf(":") + 1);
-        path = Environment.getExternalStorageDirectory() + "/" + path;
-        path = path.substring(0, path.lastIndexOf("/"));
-        path = path + "/body_figures";
-
-        File folder = new File(path);
-        return folder.listFiles();
-    }
-
-
     private void copyFile(InputStream in, OutputStream out) throws IOException {
         byte[] buffer = new byte[1024];
         int read;
         while ((read = in.read(buffer)) != -1) {
             out.write(buffer, 0, read);
         }
-    }
-
-
-    static void saveCurrentlySelectedSubjectId() {
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt("currentlySelectedSubjectId", currentlySelectedSubject.getId());
-        editor.apply();
     }
 
     private void loadCurrentlySelectedSubjectById() {

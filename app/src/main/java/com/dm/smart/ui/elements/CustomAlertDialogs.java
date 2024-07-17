@@ -181,11 +181,6 @@ public class CustomAlertDialogs {
         return dialog;
     }
 
-
-    public interface OnLineWidthSelectedListener {
-        void onLineWidthSelected(int lineWidth);
-    }
-
     public static AlertDialog showUnsavedRecordDialog(Activity context, MenuItem menuItem) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setMessage(R.string.dialog_continue_last_step);
@@ -195,5 +190,9 @@ public class CustomAlertDialogs {
         });
         builder.setNegativeButton(R.string.dialog_no, (dialog, id) -> clearTempData(context));
         return builder.create();
+    }
+
+    public interface OnLineWidthSelectedListener {
+        void onLineWidthSelected(int lineWidth);
     }
 }

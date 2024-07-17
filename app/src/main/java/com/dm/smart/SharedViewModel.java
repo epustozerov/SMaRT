@@ -8,20 +8,18 @@ import androidx.lifecycle.ViewModel;
 
 public class SharedViewModel extends ViewModel {
 
-    private boolean isSensationAddedFromDialog = false;
-
-    private String activeCanvasFragmentTag;
-
     private final MutableLiveData<Pair<Integer, Integer>> colorAndIndex = new MutableLiveData<>();
-
     private final MutableLiveData<Integer> lineWidth = new MutableLiveData<>(1);
-
-    public void setLineWidth(int lineWidth) {
-        this.lineWidth.setValue(lineWidth);
-    }
+    private final MutableLiveData<String> sensation = new MutableLiveData<>();
+    private boolean isSensationAddedFromDialog = false;
+    private String activeCanvasFragmentTag;
 
     public LiveData<Integer> getLineWidth() {
         return lineWidth;
+    }
+
+    public void setLineWidth(int lineWidth) {
+        this.lineWidth.setValue(lineWidth);
     }
 
     public void setColorAndIndex(int color, int index) {
@@ -31,7 +29,6 @@ public class SharedViewModel extends ViewModel {
     public LiveData<Pair<Integer, Integer>> getColorAndIndex() {
         return colorAndIndex;
     }
-
 
     public boolean isSensationAddedFromDialog() {
         return isSensationAddedFromDialog;
@@ -48,8 +45,6 @@ public class SharedViewModel extends ViewModel {
     public void setActiveCanvasFragmentTag(String activeCanvasFragmentTag) {
         this.activeCanvasFragmentTag = activeCanvasFragmentTag;
     }
-
-    private final MutableLiveData<String> sensation = new MutableLiveData<>();
 
     public void selectSensation(String input) {
         sensation.setValue(input);

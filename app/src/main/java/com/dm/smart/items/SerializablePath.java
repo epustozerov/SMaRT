@@ -18,11 +18,6 @@ public class SerializablePath extends Path implements Serializable {
     public SerializablePath() {
     }
 
-    public SerializablePath(SerializablePath path) {
-        super(path);
-        this.actions.addAll(path.actions);
-    }
-
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
@@ -48,6 +43,38 @@ public class SerializablePath extends Path implements Serializable {
     public void moveTo(float x, float y) {
         actions.add(new Move(x, y));
         super.moveTo(x, y);
+    }
+
+    @Override
+    public void addPath(@NonNull Path src) {
+        super.addPath(src);
+        if (src instanceof SerializablePath) {
+            actions.addAll(((SerializablePath) src).actions);
+        }
+    }
+
+    @Override
+    public void transform(@NonNull Matrix matrix) {
+        List<Action> transformedActions = new LinkedList<>();
+
+        for (Action action : actions) {
+            if (action instanceof Move) {
+                Move moveAction = (Move) action;
+                float[] points = new float[]{moveAction.x, moveAction.y};
+                matrix.mapPoints(points);
+                transformedActions.add(new Move(points[0], points[1]));
+            } else if (action instanceof Line) {
+                Line lineAction = (Line) action;
+                float[] points = new float[]{lineAction.x, lineAction.y};
+                matrix.mapPoints(points);
+                transformedActions.add(new Line(points[0], points[1]));
+            }
+        }
+
+        actions.clear();
+        actions.addAll(transformedActions);
+
+        super.transform(matrix);
     }
 
     public interface Action extends Serializable {
@@ -85,37 +112,5 @@ public class SerializablePath extends Path implements Serializable {
         public void perform(Path path) {
             path.lineTo(x, y);
         }
-    }
-
-    @Override
-    public void addPath(@NonNull Path src) {
-        super.addPath(src);
-        if (src instanceof SerializablePath) {
-            actions.addAll(((SerializablePath) src).actions);
-        }
-    }
-
-    @Override
-    public void transform(@NonNull Matrix matrix) {
-        List<Action> transformedActions = new LinkedList<>();
-
-        for (Action action : actions) {
-            if (action instanceof Move) {
-                Move moveAction = (Move) action;
-                float[] points = new float[]{moveAction.x, moveAction.y};
-                matrix.mapPoints(points);
-                transformedActions.add(new Move(points[0], points[1]));
-            } else if (action instanceof Line) {
-                Line lineAction = (Line) action;
-                float[] points = new float[]{lineAction.x, lineAction.y};
-                matrix.mapPoints(points);
-                transformedActions.add(new Line(points[0], points[1]));
-            }
-        }
-
-        actions.clear();
-        actions.addAll(transformedActions);
-
-        super.transform(matrix);
     }
 }

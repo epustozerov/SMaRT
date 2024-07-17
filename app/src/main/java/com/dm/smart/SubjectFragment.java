@@ -506,6 +506,7 @@ public class SubjectFragment extends Fragment {
         adapterSubjects.setShowNames(show_names);
         populateListSubjects();
         populateListRecords(false);
+
     }
 
     @Override

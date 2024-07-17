@@ -2,9 +2,9 @@ package com.dm.smart;
 
 import static com.dm.smart.DrawFragment.dampen;
 import static com.dm.smart.DrawFragment.defineMinMaxColors;
+import static com.dm.smart.ui.elements.CustomAlertDialogs.showAddSensationDialog;
 import static com.dm.smart.ui.elements.CustomAlertDialogs.showColorPickerDialog;
 import static com.dm.smart.ui.elements.CustomAlertDialogs.showGeneralView;
-import static com.dm.smart.ui.elements.CustomAlertDialogs.showAddSensationDialog;
 import static com.dm.smart.ui.elements.CustomAlertDialogs.showLineWidthDialog;
 import static com.dm.smart.ui.elements.CustomToasts.showToast;
 
@@ -84,6 +84,7 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
     TypedArray bodyImages;
     TypedArray bodyImagesMasks;
     Toast showedToast = null;
+    Button buttonSensationsTool;
     private Brush currentBrush;
     private List<Brush> brushes;
     private int currentIntensity;
@@ -93,12 +94,30 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
     private int currentBrushId, eraserId, lastBrushId;
     private int mShortAnimationDuration;
     private boolean allowOutsideDrawing = false;
-    Button buttonSensationsTool;
-
     private SharedViewModel sharedViewModel;
     private ColorSeekBar intensityScale;
 
     public CanvasFragment() {
+    }
+
+    public CanvasFragment(Bundle b) {
+        color = b.getInt("color");
+        dampenedColor = dampen(color);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_MEDIA_IMAGES);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    READ_MEDIA_IMAGES
+            );
+        }
     }
 
     public int getTabIndex() {
@@ -185,26 +204,6 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
             txt.setPadding(Math.round(dp2px(6)), Math.round(dp2px(6)),
                     Math.round(dp2px(6)), Math.round(dp2px(6)));
             tagContainerSensations.addView(txt);
-        }
-    }
-
-    public CanvasFragment(Bundle b) {
-        color = b.getInt("color");
-        dampenedColor = dampen(color);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-    public static void verifyStoragePermissions(Activity activity) {
-        // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_MEDIA_IMAGES);
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    READ_MEDIA_IMAGES
-            );
         }
     }
 

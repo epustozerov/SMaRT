@@ -45,10 +45,10 @@ public class BodyDrawingView extends View {
     Canvas drawImageCanvas;
     Bitmap backgroundImage = null;
     Toast showedToast = null;
-    private Point mBGSizeZoomed;
     Rect mBGZoomedRect;
     Matrix mZoomingMatrix;
     Matrix mInvertMatrix;
+    private Point mBGSizeZoomed;
     private float mZoomingScale = 1.0f, minZoomingScale = 1.0f, maxZoomingScale = 7.0f;
     private Bitmap freshSnapshot;
     private SerializablePath freshPath = null;
@@ -58,7 +58,7 @@ public class BodyDrawingView extends View {
     private Brush brush = null;
     private boolean allowOutsideDrawing;
     private int intensity_mark = 0;
-
+    private OnDrawingChangeListener onDrawingChangeListener;
 
     public BodyDrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -428,14 +428,12 @@ public class BodyDrawingView extends View {
         this.allowOutsideDrawing = allowOutsideDrawing;
     }
 
-    public interface OnDrawingChangeListener {
-        void onDrawingChange();
-    }
-
-    private OnDrawingChangeListener onDrawingChangeListener;
-
     public void setOnDrawingChangeListener(OnDrawingChangeListener listener) {
         this.onDrawingChangeListener = listener;
+    }
+
+    public interface OnDrawingChangeListener {
+        void onDrawingChange();
     }
 
 }
