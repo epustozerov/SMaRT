@@ -1,22 +1,21 @@
 package com.dm.smart;
 
-import static com.dm.smart.CanvasFragment.verifyStoragePermissions;
 import static com.dm.smart.DrawFragment.clearTempData;
 import static com.dm.smart.SubjectFragment.extractSubjectFromTheDB;
 import static com.dm.smart.ui.elements.CustomAlertDialogs.showUnsavedRecordDialog;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
+import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -25,7 +24,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -73,10 +71,21 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
     }
 
+    public static void requestAllFilesAccessPermission(Activity activity) {
+        if (!Environment.isExternalStorageManager()) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+            Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
+            intent.setData(uri);
+            activity.startActivityForResult(intent, 1);
+        }
+    }
+
     @SuppressLint({"NonConstantResourceId"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        requestAllFilesAccessPermission(this);
 
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         formConfigAndSchemes();
@@ -123,16 +132,6 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setOnItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.navigation_add_sense:
-                    // check if we have the permission to read media images
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        verifyStoragePermissions(this);
-                        // if there is still no permission, do not go to the fragment
-                        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == -1) {
-                            // show the short toast message that the permission is needed
-                            Toast.makeText(this, R.string.toast_media_permission, Toast.LENGTH_LONG).show();
-                            return false;
-                        }
-                    }
 
                     // check if the config of the selected patient matches the selected config in system preferences
                     String selectedConfig = sharedPref.getString(getString(R.string.sp_selected_config), "Built-in");
@@ -284,9 +283,7 @@ public class MainActivity extends AppCompatActivity {
         menu.findItem(R.id.menu_request_password).setChecked(requestPassword);
         menu.findItem(R.id.menu_show_names).setChecked(showNames);
         menu.findItem(R.id.menu_custom_config).setChecked(customConfig);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            menu.setGroupDividerEnabled(true);
-        }
+        menu.setGroupDividerEnabled(true);
         // update the text on the selected config menu item
         String selectedConfig = sharedPref.getString(getString(R.string.sp_selected_config), "");
         if (selectedConfig.isEmpty() || !customConfig) {
@@ -576,14 +573,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             // Handle case where there is no saved id, e.g., default or new subject
             currentlySelectedSubject = new Subject("Default Subject", "Built-in", "neutral");
-        }
-    }
-
-    // run code before activity is created
-    @Override
-    public void onAttachedToWindow() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            verifyStoragePermissions(this);
         }
     }
 

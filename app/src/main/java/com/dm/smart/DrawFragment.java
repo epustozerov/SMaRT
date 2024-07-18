@@ -134,6 +134,7 @@ public class DrawFragment extends Fragment {
         if (activeTab != null && activeTab.getCustomView() != null) {
             Drawable drawable = activeTab.getCustomView().getBackground();
             if (drawable != null) {
+                //noinspection deprecation
                 drawable.setColorFilter(dampen(color), PorterDuff.Mode.SRC_ATOP);
             }
         }
@@ -225,6 +226,7 @@ public class DrawFragment extends Fragment {
                     R.drawable.tab_indicator, null);
             int color = colors.get(position % colors.size());
             assert d != null;
+            //noinspection deprecation
             d.setColorFilter(dampen(color), PorterDuff.Mode.SRC_ATOP);
             tab_new_sensation.setBackground(d);
             tab.setCustomView(tab_new_sensation);

@@ -8,16 +8,13 @@ import static com.dm.smart.ui.elements.CustomAlertDialogs.showGeneralView;
 import static com.dm.smart.ui.elements.CustomAlertDialogs.showLineWidthDialog;
 import static com.dm.smart.ui.elements.CustomToasts.showToast;
 
-import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -26,7 +23,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -44,8 +40,6 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -64,14 +58,8 @@ import java.util.Map;
 import java.util.Objects;
 
 
-@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawingChangeListener {
 
-    // Storage Permissions
-    private static final int READ_MEDIA_IMAGES = 1;
-    private static final String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_MEDIA_IMAGES
-    };
     private final List<String> sortedChoices = new ArrayList<>();
     public ArrayList<String> selectedSensations;
     public int color;
@@ -105,20 +93,6 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
         dampenedColor = dampen(color);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-    public static void verifyStoragePermissions(Activity activity) {
-        // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_MEDIA_IMAGES);
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    READ_MEDIA_IMAGES
-            );
-        }
-    }
 
     public int getTabIndex() {
         DrawFragment parentFragment = (DrawFragment) getParentFragment();
@@ -218,9 +192,6 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.e("DEBUG", "onCreateView of CanvasFragment " + getTag());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            verifyStoragePermissions(requireActivity());
-        }
 
         // Get the SharedViewModel
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
@@ -837,9 +808,6 @@ public class CanvasFragment extends Fragment implements BodyDrawingView.OnDrawin
     }
 
     public Bitmap setBodyImage(String bodyTypeId, boolean thumbed) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            verifyStoragePermissions(requireActivity());
-        }
         // take the body scheme file from inner app store, filder body_figures
         File bitmapFile = new File(requireActivity().getFilesDir(), "body_figures/" + bodyTypeId + ".png");
         Bitmap sensationsFront = BitmapFactory.decodeFile(bitmapFile.getAbsolutePath());
