@@ -5,7 +5,7 @@ Patients or clinical personnel mark the quality, location, extent, and intensity
 
 ## Demo Video
 
-![Demo Video](resources/demo.mp4)
+https://github.com/user-attachments/assets/06bb6db9-8d5a-4401-8da0-1de0ce76a2ac
 
 ## Prerequisites
 - **Android Studio**: Arctic Fox or later
