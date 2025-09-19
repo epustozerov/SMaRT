@@ -1,148 +1,29 @@
-# SMaRT Project Documentation
-
 ## Overview
-SMaRT (Sensation Mapping and Recording Tool) is a comprehensive Android application designed for mapping and recording bodily sensations. The application provides an intuitive interface for users to draw sensations on body diagrams, record intensity levels, and manage multiple subjects and their sensation records. It supports various body schemes, sensation types, and provides tools for both real-time sensation mapping and retrospective analysis of recorded data.
+
+SMaRT (Sensation Mapping and Reporting Tool) is a scientific app for Android-based tablet PCs. It is used for the objective documentation of bodily or somatic sensations, such as tingling, fullness, warmth, etc., with the help of a digitally annotatable human body outline.
+Patients or clinical personnel mark the quality, location, extent, and intensity of the sensation on the body outline. This information is stored locally on the mobile device and can be exported if desired.
 
 ## Demo Video
 
 ![Demo Video](resources/demo.mp4)
 
-## Setup & Installation
-
-### Prerequisites
+## Prerequisites
 - **Android Studio**: Arctic Fox or later
 - **Android SDK**: API Level 33 or later
 - **Java**: JDK 8 or later
 - **Android Device**: Android 13 (API 33) or later for testing
 
-### Installation
-1. Clone the repository
-2. Open the project in Android Studio
-3. Sync the project with Gradle files
-4. Build and run the project on a connected Android device or emulator
-
-
-## System Architecture
-
-### Core Components
-#### Data Model
-- **Subject**: Represents individual subjects with unique identifiers, names, and configuration settings.
-- **Record**: Contains sensation recordings with timestamp, subject association, and drawing data.
-- **Step**: Individual drawing steps with brush properties, paths, and intensity markings.
-
-### Device Support
+## Device Support
 - **Android Devices**: Optimized for tablets and large-screen devices for better drawing experience.
 - **Stylus Support**: Enhanced drawing experience with stylus input detection and pressure sensitivity.
 
-### Data Processing Pipeline
-- Real-time drawing capture and processing
-- Intensity mapping and color coding
-- Multi-layer body view management (front/back views)
-- Persistent data storage using SQLite database
-
 ## User Interface
-
-### Tab-based Navigation System
 - **Subject Management**: Create, select, and manage multiple subjects
 - **Sensation Drawing**: Interactive body diagram drawing with intensity mapping
 
-## Major Features
+## Architecture Documentation
 
-### Subject Management (SubjectFragment)
-The **SubjectFragment** provides comprehensive subject management capabilities:
-- Create new subjects with custom names
-- Select and switch between different subjects
-- View subject-specific records and statistics
-- Manage subject configurations and body schemes
-- Database integration for persistent subject storage
-
-### Sensation Drawing (DrawFragment)
-The **DrawFragment** is the core drawing interface featuring:
-- Multi-tab body view system (front and back views)
-- Real-time drawing with stylus and touch input
-- Intensity scale with color-coded mapping
-- Multiple brush tools (line, region, erase)
-- Sensation tagging and categorization
-- Undo/redo functionality
-- Automatic data persistence
-
-### Canvas Drawing (CanvasFragment)
-The **CanvasFragment** provides the drawing canvas functionality:
-- Interactive body diagram rendering
-- Zoom and pan capabilities for detailed drawing
-- Brush customization (thickness, color, type)
-- Intensity mapping with visual feedback
-- Multi-layer drawing support
-- Real-time drawing preview and validation
-
-### Body Drawing View (BodyDrawingView)
-The **BodyDrawingView** handles the core drawing mechanics:
-- Touch and stylus input processing
-- Path creation and manipulation
-- Matrix transformations for zoom/pan
-- Drawing step management
-- Color intensity mapping
-- Outside drawing boundary controls
-
-## Data Processing Framework
-
-### Drawing Processing
-The application implements sophisticated drawing processing:
-#### Drawing Tools:
-- **Line Brush**: Free-form drawing with customizable thickness
-- **Region Brush**: Area-based drawing for larger sensation areas
-- **Eraser**: Selective removal of drawn elements
-
-#### Intensity Mapping:
-- **Color-coded intensity scale**: Visual representation of sensation intensity
-- **Dynamic color calculation**: Real-time color updates based on intensity
-- **Persistent intensity marking**: Maintains intensity data across drawing sessions
-
-## Technical Implementation
-
-### Framework Usage
-- **Android View Binding**: Type-safe view references
-- **Navigation Components**: Fragment-based navigation system
-- **SQLite Database**: Local data persistence
-- **Material Design**: Modern UI components and theming
-- **Custom Views**: Specialized drawing and UI components
-
-### Data Storage
-The application manages data through multiple storage mechanisms:
-- **SQLite Database**: Core data persistence for subjects and records
-- **SharedPreferences**: User settings and configuration storage
-- **File System**: External storage for configuration files and exports
-- **Serializable Objects**: Drawing data serialization for complex data structures
-
-### User Settings
-The application stores various user preferences:
-- Subject selection and management
-- Body scheme configuration
-- Drawing tool preferences
-- Intensity scale settings
-- UI theme preferences (light/dark mode)
-- Settings stored using **SharedPreferences** for persistence across app launches
-
-### External Configuration Management
-The application supports flexible configuration through external INI files:
-- **Configuration Files**: Uses INI4J library for parsing external configuration files
-- **Default Configuration**: Automatically creates default `config.ini` files in app storage and external Documents/SMaRT folder
-- **Dynamic Loading**: Configuration is loaded at runtime from both internal app storage and external storage locations
-- **Configurable Elements**: Body schemes, sensation types, color mappings, intensity scales, and UI text labels
-- **Hot Reloading**: Configuration changes can be applied without app restart
-- **Fallback System**: Graceful fallback to default values if configuration files are missing or corrupted
-
-### Design Patterns
-- **MVVM**: Clear separation of View and ViewModel components
-- **Repository Pattern**: Data access abstraction
-- **Observer Pattern**: Reactive updates to UI from data changes
-- **Factory Pattern**: Dynamic creation of drawing tools and components
-- **Singleton**: Shared configuration and database management
-
-## Summary
-SMaRT is a highly configurable Android application for mapping and recording bodily sensations. The application provides drawing interfaces for body diagrams, data storage capabilities, and analysis tools. It supports real-time sensation mapping and retrospective data analysis.
-
-The application uses a modular architecture with extensive configuration options through external INI files. It implements touch-based drawing techniques for Android devices and stores sensation data in a local SQLite database.
+For detailed information about the application's architecture, major features, and technical implementation, see [ARCHITECTURE.md](ARCHITECTURE.MD).
 
 ## Dependencies
 
@@ -214,6 +95,10 @@ SMaRT/
 ## Contact / Maintainer
 
 For questions about this project, contact **Evgenii Pustozerov** or the AG Digitale Medizin team.
+
+## User Manual
+
+Detailed instructions and use cases can be found on the official website: [https://www.insula-institut.org/software](https://www.insula-institut.org/software)
 
 ## License
 
